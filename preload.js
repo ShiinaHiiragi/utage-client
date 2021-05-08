@@ -1,1 +1,0 @@
-// The version is {remote.process.version}.

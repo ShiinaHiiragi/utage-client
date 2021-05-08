@@ -18,7 +18,7 @@ function createWindow () {
       webPreferences: {
         nodeIntegration: true,
         enableRemoteModule: true,
-        preload: __dirname + '/preload.js'
+        contextIsolation: false
       }
     }
   })
