@@ -3,6 +3,7 @@ const electron = require('electron');
 const app = electron.app;
 const BrowserWindow = electron.BrowserWindow;
 const Menu = electron.Menu;
+const path = require('path');
 
 let mainWindow;
 // diabled the application menu
@@ -16,7 +17,8 @@ function createWindow () {
       show: false,
       webPreferences: {
         nodeIntegration: true,
-        enableRemoteModule: true
+        enableRemoteModule: true,
+        preload: __dirname + '/preload.js'
       }
     }
   })
@@ -24,10 +26,13 @@ function createWindow () {
   // and load the index.html of the app.
   mainWindow.maximize();
   mainWindow.show();
-  mainWindow.loadURL('http://localhost:3000/')
-
-  // Open the DevTools.
-  // mainWindow.webContents.openDevTools()
+  if (!app.isPackaged)
+  {
+    mainWindow.loadURL('http://localhost:3000/');
+    // Open the DevTools.
+    mainWindow.webContents.openDevTools()
+  }
+  else mainWindow.loadURL(path.join(__dirname, './build/index.html'));
 }
 
 // This method will be called when Electron has finished
