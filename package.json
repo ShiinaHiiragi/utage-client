@@ -18,7 +18,8 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "electron-dev": "electron .",
+    "electron-dev": "electron . --dev",
+    "electron-build": "npm run build && electron . --build",
     "package": "npm run build && electron-packager . UtageClient --electron-version=11.2.0 --icon='public/favicon.ico' --platform=win32"
   },
   "eslintConfig": {

@@ -4,7 +4,6 @@ const electron = require('electron');
 const BrowserWindow = electron.BrowserWindow;
 const Menu = electron.Menu;
 const app = electron.app;
-
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
 let mainWindow;
@@ -24,9 +23,13 @@ function createWindow () {
 
   if (!app.isPackaged)
   {
-    // Open the DevTools and load the index.html of the app.
-    mainWindow.loadURL('http://localhost:3000/');
+    // open DevTools in the dev mode
     mainWindow.webContents.openDevTools();
+    if (process.argv[2] == '--dev')
+      mainWindow.loadURL('http://localhost:3000/');
+    else if (process.argv[2] == '--build')
+      mainWindow.loadURL(path.join(__dirname, './build/index.html'));
+    else console.log("ERR: No descriptor assigned."), process.exit();
   }
   else mainWindow.loadURL(path.join(__dirname, './build/index.html'));
 

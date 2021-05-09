@@ -17,11 +17,20 @@
     # first terminal
     npm start
     # second terminal
-    npm run electron-dev
+    electron . --dev
     ```
 
-3. 打包
+3. 开发测试打包运行：
+
+    ```
+    npm run build
+    electron . -- build
+    ```
+    
+4. 打包，在打包文件中找到 exe 文件并运行。
 
     ```shell
     npm run package
     ```
+
+<p align="right">2021 5/9</p>
