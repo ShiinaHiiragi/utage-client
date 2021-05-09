@@ -5,22 +5,20 @@
   "main": "main.js",
   "homepage": "./",
   "dependencies": {
-    "@material-ui/core": "^4.11.4",
-    "@testing-library/jest-dom": "^5.12.0",
-    "@testing-library/react": "^11.2.6",
-    "@testing-library/user-event": "^12.8.3",
-    "electron": "^12.0.7",
+    "@testing-library/jest-dom": "^5.11.4",
+    "@testing-library/react": "^11.1.0",
+    "@testing-library/user-event": "^12.1.10",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "react-scripts": "4.0.3",
-    "web-vitals": "^1.1.2"
+    "web-vitals": "^1.0.1"
   },
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "electron": "electron .",
+    "electron-dev": "electron .",
     "package": "npm run build && electron-packager . UtageClient --electron-version=11.2.0 --icon='public/favicon.ico' --platform=win32"
   },
   "eslintConfig": {
@@ -40,5 +38,8 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "electron": "^12.0.7"
   }
 }

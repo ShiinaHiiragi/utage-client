@@ -4,7 +4,7 @@
 
 ### NPM 命令
 
-1. 下载
+1. 下载并安装依赖项
 
     ```shell
     cd client
@@ -17,7 +17,7 @@
     # first terminal
     npm start
     # second terminal
-    npm run electron
+    npm run electron-dev
     ```
 
 3. 打包
