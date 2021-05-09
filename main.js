@@ -25,7 +25,7 @@ function createWindow () {
   {
     // open DevTools in the dev mode
     mainWindow.webContents.openDevTools();
-    if (process.argv[2] == '--dev')
+    if (process.argv[2] == '--dev' || process.argv[2] === undefined)
       mainWindow.loadURL('http://localhost:3000/');
     else if (process.argv[2] == '--build')
       mainWindow.loadURL(path.join(__dirname, './build/index.html'));
