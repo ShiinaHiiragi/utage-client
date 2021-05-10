@@ -4,7 +4,7 @@ import './index.css';
 import SignIn from './SignIn';
 import reportWebVitals from './reportWebVitals';
 
-console.log(window.require('electron').remote.process.version);
+// console.log(window.require('electron').remote.process.version);
 ReactDOM.render(
   <React.StrictMode>
     <SignIn />
