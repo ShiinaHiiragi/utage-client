@@ -1,13 +1,12 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
-import SignIn from './SignIn';
+import Dashboard from './Dashboard/Dashboard';
 import reportWebVitals from './reportWebVitals';
 
-// console.log(window.require('electron').remote.process.version);
 ReactDOM.render(
   <React.StrictMode>
-    <SignIn />
+    <Dashboard />
   </React.StrictMode>,
   document.getElementById('root')
 );
@@ -16,3 +15,4 @@ ReactDOM.render(
 // to log results (for example: reportWebVitals(console.log))
 // or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
 reportWebVitals(console.log);
+// console.log(window.require('electron').remote.process.version);
