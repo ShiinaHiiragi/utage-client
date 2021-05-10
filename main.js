@@ -29,7 +29,7 @@ function createWindow () {
       mainWindow.loadURL('http://localhost:3000/');
     else if (process.argv[2] == '--build')
       mainWindow.loadURL(path.join(__dirname, './build/index.html'));
-    else console.log("ERR: No descriptor assigned."), process.exit();
+    else console.log("ERR: Invalid descriptor assigned."), process.exit();
   }
   else mainWindow.loadURL(path.join(__dirname, './build/index.html'));
 
