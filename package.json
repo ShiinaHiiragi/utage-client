@@ -22,7 +22,7 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "package": "npm run build && electron-packager . UtageClient --electron-version=11.2.0 --icon='public/favicon.ico' --platform=win32"
+    "package": "npm run build && electron-packager . UtageClient --electron-version=11.2.0 --icon='public/icon.ico' --platform=win32"
   },
   "eslintConfig": {
     "extends": [
