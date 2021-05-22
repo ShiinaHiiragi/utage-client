@@ -22,7 +22,8 @@ import Snackbar from '@material-ui/core/Snackbar';
 import MuiAlert from '@material-ui/lab/Alert';
 
 const fs = window.require('fs');
-var signInSetting = JSON.parse(fs.readFileSync('./file/SignInSetting.json'));
+const settingPath = './file/setting/SignInSetting.json';
+var signInSetting = JSON.parse(fs.readFileSync(settingPath));
 
 const useStyles = makeStyles((theme) => ({
   noneSelect: {
@@ -62,7 +63,12 @@ function checkURL(stringURL) {
   return true;
 }
 
+function saveSetting(callback) {
+  fs.writeFile(settingPath, JSON.stringify(signInSetting), callback);
+}
+
 export default function SignIn() {
+  // using style defined in the front
   const styleClass = useStyles();
 
   // proxyWindowStatus: is window of setting IP on?
@@ -74,17 +80,20 @@ export default function SignIn() {
   const proxyWindowSubmit = (newValue) => {
     if (checkURL(newValue))
     {
+      var proxyHasChanged = (signInSetting.proxy != newValue);
       setProxyWindow(false);
       signInSetting.proxy = newValue;
-      saveProxySetting();
+      saveProxySetting(proxyHasChanged);
     }
     else snackWindowToggle('error', 'Invalid URL, please recheck your input.');
   };
   const proxyUpdateInput = (event) => { setProxyInput(event.target.value); }
-  const saveProxySetting = () => {
-    fs.writeFile("./file/SignInSetting.json", JSON.stringify(signInSetting), (err) => {
-      if (err) snackWindowToggle('error', 'An error occurred when saving server value. Please try again later.');
-      else snackWindowToggle('success', 'The server domain/IP has been changed successfully.');
+  const saveProxySetting = (changed) => {
+    saveSetting((err) => {
+      if (err) snackWindowToggle('error',
+        'An error occurred when saving server value. Please try again later.');
+      else if (changed) snackWindowToggle('success',
+        'The server domain/IP has been changed successfully.');
     })
   };
 
@@ -104,16 +113,30 @@ export default function SignIn() {
   const rememberAccountChange = (event) => {
     setRememberAccount(event.target.checked);
     signInSetting.remember = event.target.checked;
-    fs.writeFile("./file/SignInSetting.json", JSON.stringify(signInSetting), () => {
-      if (signInSetting.remember)
-        snackWindowToggle('success', 'The account will be remembered. Please do it on private PC.');
-    })
+    saveSetting(() => {
+      if (signInSetting.remember) snackWindowToggle('success',
+        'The account will be remembered. Please do it on private PC.');
+    });
   };
 
   // dialogue of copyright infomation
   const [copyrightInfoWindow, setCopyrightInfoWindow] = React.useState(false);
   const copyrightInfoToggle = () => { setCopyrightInfoWindow(true); };
   const copyrightInfoClose = () => { setCopyrightInfoWindow(false); };
+
+  // when sign in button are pressed
+  const [email, setEmail] = React.useState(signInSetting.remember ? signInSetting.account : '');
+  const [password, setPassword] = React.useState('');
+  const emailInput = (event) => { setEmail(event.target.value); };
+  const passwordInput = (event) => { setPassword(event.target.value); };
+  const signInClick = () => {
+    // TODO: complete sign in behavior here
+    if (signInSetting.remember)
+    {
+      signInSetting.account = email;
+      saveSetting(() => {});
+    }
+  };
 
   return (
     <Container component="main" maxWidth="xs" className={styleClass.noneSelect}>
@@ -122,13 +145,13 @@ export default function SignIn() {
         <Avatar className={styleClass.avatar}><LockOutlinedIcon /></Avatar>
         <Typography component="h1" variant="h5">Sign in to Utage</Typography>
         <form className={styleClass.form} noValidate>
-          <TextField variant="outlined" margin="normal" required fullWidth id="email" label="Email Address" name="email" autoComplete="email" autoFocus defaultValue={signInSetting.remember ? signInSetting.account : ''}/>
-          <TextField variant="outlined" margin="normal" required fullWidth name="password" label="Password" type="password" id="password" autoComplete="current-password"/>
+          <TextField variant="outlined" margin="normal" fullWidth id="email" label="Email Address" name="email" autoComplete="email" autoFocus defaultValue={email} onChange={emailInput}/>
+          <TextField variant="outlined" margin="normal" fullWidth name="password" label="Password" type="password" id="password" autoComplete="current-password" defaultValue={password} onChange={passwordInput}/>
           <FormControlLabel control={<Checkbox checked={rememberAccount} color="primary" onChange={rememberAccountChange} />} label="Remember my Account"/>
           <Grid container>
           <ButtonGroup fullWidth className={styleClass.buttonGroup} variant="contained" color="primary" aria-label="contained primary button group">
             <Button onClick={proxyWindowToggle}>Switch Server</Button>
-            <Button type="submit">Sign In</Button>
+            <Button onClick={signInClick}>Sign In</Button>
           </ButtonGroup>
           <Dialog className={styleClass.noneSelect} open={proxyWindow} onClose={proxyWindowCancel} aria-labelledby="form-dialog-title">
             <DialogTitle id="form-dialog-title">Switch Server</DialogTitle>
