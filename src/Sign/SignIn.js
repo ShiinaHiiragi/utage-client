@@ -98,6 +98,15 @@ export default function SignIn() {
   };
   const snackWindowClose = () => { setSnackWindow(false); };
 
+  const [rememberAccountSwitch, setRememberAccountSwitch] = React.useState(signInSetting.remember);
+  const rememberAccountMemoryChange = (event) => {
+    setRememberAccountSwitch(event.target.checked);
+    signInSetting.remember = event.target.checked;
+    fs.writeFile("./file/SignInSetting.json", JSON.stringify(signInSetting), () => {
+      if (signInSetting.remember) snackWindowToggle('success', 'The account will be remembered. Please do it on private PC.');
+    })
+  };
+
   return (
     <Container component="main" maxWidth="xs" className={styleClass.noneSelect}>
       <CssBaseline />
@@ -105,9 +114,9 @@ export default function SignIn() {
         <Avatar className={styleClass.avatar}><LockOutlinedIcon /></Avatar>
         <Typography component="h1" variant="h5">Sign in to Utage</Typography>
         <form className={styleClass.form} noValidate>
-          <TextField variant="outlined" margin="normal" required fullWidth id="email" label="Email Address" name="email" autoComplete="email" autoFocus/>
+          <TextField variant="outlined" margin="normal" required fullWidth id="email" label="Email Address" name="email" autoComplete="email" autoFocus defaultValue={signInSetting.remember ? signInSetting.account : ''}/>
           <TextField variant="outlined" margin="normal" required fullWidth name="password" label="Password" type="password" id="password" autoComplete="current-password"/>
-          <FormControlLabel control={<Checkbox value="remember" color="primary" />} label="Remember my Account"/>
+          <FormControlLabel control={<Checkbox checked={rememberAccountSwitch} color="primary" onChange={rememberAccountMemoryChange} />} label="Remember my Account"/>
           <Grid container>
           <ButtonGroup fullWidth className={styleClass.buttonGroup} variant="contained" color="primary" aria-label="contained primary button group">
             <Button onClick={proxyWindowOpen}>Switch Server</Button>
