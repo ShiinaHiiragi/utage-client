@@ -88,6 +88,7 @@ export default function SignIn() {
     })
   };
 
+  // snack windows of any hints
   const [snackWindow, setSnackWindow] = React.useState(false);
   const [snackWindowType, setSnackWindowType] = React.useState('');
   const [snackWindowMessage, setSnackWindowMessage] = React.useState('');
@@ -98,6 +99,7 @@ export default function SignIn() {
   };
   const snackWindowClose = () => { setSnackWindow(false); };
 
+  // checkbox of remember account
   const [rememberAccount, setRememberAccount] = React.useState(signInSetting.remember);
   const rememberAccountChange = (event) => {
     setRememberAccount(event.target.checked);
@@ -107,6 +109,11 @@ export default function SignIn() {
         snackWindowToggle('success', 'The account will be remembered. Please do it on private PC.');
     })
   };
+
+  // dialogue of copyright infomation
+  const [copyrightInfoWindow, setCopyrightInfoWindow] = React.useState(false);
+  const copyrightInfoToggle = () => { setCopyrightInfoWindow(true); };
+  const copyrightInfoClose = () => { setCopyrightInfoWindow(false); };
 
   return (
     <Container component="main" maxWidth="xs" className={styleClass.noneSelect}>
@@ -156,9 +163,27 @@ export default function SignIn() {
       <Box mt={8}>
         <Typography variant="body2" color="textSecondary" align="center">
           {'Copyright © '}
-          <Link color="inherit" href="#">Utage</Link>
+          <Link color="inherit" href="#!" onClick={copyrightInfoToggle}>Utage</Link>
           {' ' + new Date().getFullYear() + '.'}
         </Typography>
+
+        <Dialog open={copyrightInfoWindow} onClose={copyrightInfoClose} aria-labelledby="alert-dialog-title" aria-describedby="alert-dialog-description" className={styleClass.noneSelect}>
+          <DialogTitle id="alert-dialog-title">{`MIT License\nCopyright ${new Date().getFullYear()} Utage`}</DialogTitle>
+          <DialogContent>
+            <DialogContentText id="alert-dialog-description">
+              Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+              <br/><br/>
+              The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+              <br/><br/>
+              THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+            </DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={copyrightInfoClose} color="primary">
+              Close
+            </Button>
+          </DialogActions>
+        </Dialog>
       </Box>
     </Container>
   );
