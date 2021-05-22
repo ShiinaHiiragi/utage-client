@@ -1,1 +1,5 @@
-{"account":"","remember":false,"proxy":"http://localhost:8080/"}
+{
+  "account": "",
+  "remember": false,
+  "proxy": "http://localhost:8080/"
+}

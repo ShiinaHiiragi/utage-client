@@ -67,21 +67,21 @@ export default function SignIn() {
 
   // proxyWindowStatus: is window of setting IP on?
   // proxyNow: the value of input in the window of setting IP.
-  const [proxyWindowStatus, setProxyWindowStatus] = React.useState(false);
-  const [proxyNow, setProxyNow] = React.useState(signInSetting.proxy);
-  const proxyWindowOpen = () => { setProxyWindowStatus(true); };
-  const proxyWindowCancel = () => { setProxyWindowStatus(false); };
+  const [proxyWindow, setProxyWindow] = React.useState(false);
+  const [proxyInput, setProxyInput] = React.useState(signInSetting.proxy);
+  const proxyWindowToggle = () => { setProxyWindow(true); };
+  const proxyWindowCancel = () => { setProxyWindow(false); };
   const proxyWindowSubmit = (newValue) => {
     if (checkURL(newValue))
     {
-      setProxyWindowStatus(false);
+      setProxyWindow(false);
       signInSetting.proxy = newValue;
-      saveSetting();
+      saveProxySetting();
     }
     else snackWindowToggle('error', 'Invalid URL, please recheck your input.');
   };
-  const proxyUpdateInputValue = (event) => { setProxyNow(event.target.value); }
-  const saveSetting = () => {
+  const proxyUpdateInput = (event) => { setProxyInput(event.target.value); }
+  const saveProxySetting = () => {
     fs.writeFile("./file/SignInSetting.json", JSON.stringify(signInSetting), (err) => {
       if (err) snackWindowToggle('error', 'An error occurred when saving server value. Please try again later.');
       else snackWindowToggle('success', 'The server domain/IP has been changed successfully.');
@@ -98,12 +98,13 @@ export default function SignIn() {
   };
   const snackWindowClose = () => { setSnackWindow(false); };
 
-  const [rememberAccountSwitch, setRememberAccountSwitch] = React.useState(signInSetting.remember);
-  const rememberAccountMemoryChange = (event) => {
-    setRememberAccountSwitch(event.target.checked);
+  const [rememberAccount, setRememberAccount] = React.useState(signInSetting.remember);
+  const rememberAccountChange = (event) => {
+    setRememberAccount(event.target.checked);
     signInSetting.remember = event.target.checked;
     fs.writeFile("./file/SignInSetting.json", JSON.stringify(signInSetting), () => {
-      if (signInSetting.remember) snackWindowToggle('success', 'The account will be remembered. Please do it on private PC.');
+      if (signInSetting.remember)
+        snackWindowToggle('success', 'The account will be remembered. Please do it on private PC.');
     })
   };
 
@@ -116,24 +117,24 @@ export default function SignIn() {
         <form className={styleClass.form} noValidate>
           <TextField variant="outlined" margin="normal" required fullWidth id="email" label="Email Address" name="email" autoComplete="email" autoFocus defaultValue={signInSetting.remember ? signInSetting.account : ''}/>
           <TextField variant="outlined" margin="normal" required fullWidth name="password" label="Password" type="password" id="password" autoComplete="current-password"/>
-          <FormControlLabel control={<Checkbox checked={rememberAccountSwitch} color="primary" onChange={rememberAccountMemoryChange} />} label="Remember my Account"/>
+          <FormControlLabel control={<Checkbox checked={rememberAccount} color="primary" onChange={rememberAccountChange} />} label="Remember my Account"/>
           <Grid container>
           <ButtonGroup fullWidth className={styleClass.buttonGroup} variant="contained" color="primary" aria-label="contained primary button group">
-            <Button onClick={proxyWindowOpen}>Switch Server</Button>
+            <Button onClick={proxyWindowToggle}>Switch Server</Button>
             <Button type="submit">Sign In</Button>
           </ButtonGroup>
-          <Dialog className={styleClass.noneSelect} open={proxyWindowStatus} onClose={proxyWindowCancel} aria-labelledby="form-dialog-title">
+          <Dialog className={styleClass.noneSelect} open={proxyWindow} onClose={proxyWindowCancel} aria-labelledby="form-dialog-title">
             <DialogTitle id="form-dialog-title">Switch Server</DialogTitle>
             <DialogContent>
               <DialogContentText>
                 To connect to our server, please enter the domain or IP of the server.
                 The defualt value of the IP is http://localhost:8080/.
               </DialogContentText>
-              <TextField autoFocus defaultValue={signInSetting.proxy} onChange={proxyUpdateInputValue} margin="dense" id="name" label="Server Domain/IP" type="url" fullWidth/>
+              <TextField autoFocus defaultValue={signInSetting.proxy} onChange={proxyUpdateInput} margin="dense" id="name" label="Server Domain/IP" type="url" fullWidth/>
             </DialogContent>
             <DialogActions>
               <Button onClick={proxyWindowCancel} color="primary">Cancel</Button>
-              <Button onClick={() => proxyWindowSubmit(proxyNow)} color="primary" type="submit">OK</Button>
+              <Button onClick={() => proxyWindowSubmit(proxyInput)} color="primary" type="submit">OK</Button>
             </DialogActions>
           </Dialog>
           <Snackbar open={snackWindow} anchorOrigin={{vertical: 'bottom', horizontal: 'right'}} autoHideDuration={2000} onClose={snackWindowClose}>
