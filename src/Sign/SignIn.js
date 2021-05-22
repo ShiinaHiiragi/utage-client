@@ -25,6 +25,9 @@ const fs = window.require('fs');
 var signInSetting = JSON.parse(fs.readFileSync('./file/SignInSetting.json'));
 
 const useStyles = makeStyles((theme) => ({
+  noneSelect: {
+    userSelect: 'none',
+  },
   paper: {
     marginTop: theme.spacing(8),
     display: 'flex',
@@ -54,8 +57,13 @@ function Alert(props) {
   return <MuiAlert elevation={6} variant="filled" {...props} />;
 }
 
+// TODO: check the validity of the URL input if possible.
+function checkURL(stringURL) {
+  return true;
+}
+
 export default function SignIn() {
-  const staleClass = useStyles();
+  const styleClass = useStyles();
 
   // proxyWindowStatus: is window of setting IP on?
   // proxyNow: the value of input in the window of setting IP.
@@ -64,14 +72,18 @@ export default function SignIn() {
   const proxyWindowOpen = () => { setProxyWindowStatus(true); };
   const proxyWindowCancel = () => { setProxyWindowStatus(false); };
   const proxyWindowSubmit = (newValue) => {
-    setProxyWindowStatus(false);
-    signInSetting.proxy = newValue;
-    saveSetting();
+    if (checkURL(newValue))
+    {
+      setProxyWindowStatus(false);
+      signInSetting.proxy = newValue;
+      saveSetting();
+    }
+    else snackWindowToggle('error', 'Invalid URL, please recheck your input.');
   };
   const proxyUpdateInputValue = (event) => { setProxyNow(event.target.value); }
   const saveSetting = () => {
     fs.writeFile("./file/SignInSetting.json", JSON.stringify(signInSetting), (err) => {
-      if (!err) snackWindowToggle('error', 'An error occurred when saving server value. Please try again later.');
+      if (err) snackWindowToggle('error', 'An error occurred when saving server value. Please try again later.');
       else snackWindowToggle('success', 'The server domain/IP has been changed successfully.');
     })
   };
@@ -87,21 +99,21 @@ export default function SignIn() {
   const snackWindowClose = () => { setSnackWindow(false); };
 
   return (
-    <Container component="main" maxWidth="xs">
+    <Container component="main" maxWidth="xs" className={styleClass.noneSelect}>
       <CssBaseline />
-      <div className={staleClass.paper}>
-        <Avatar className={staleClass.avatar}><LockOutlinedIcon /></Avatar>
-        <Typography component="h1" variant="h5">Sign in</Typography>
-        <form className={staleClass.form} noValidate>
+      <div className={styleClass.paper}>
+        <Avatar className={styleClass.avatar}><LockOutlinedIcon /></Avatar>
+        <Typography component="h1" variant="h5">Sign in to Utage</Typography>
+        <form className={styleClass.form} noValidate>
           <TextField variant="outlined" margin="normal" required fullWidth id="email" label="Email Address" name="email" autoComplete="email" autoFocus/>
           <TextField variant="outlined" margin="normal" required fullWidth name="password" label="Password" type="password" id="password" autoComplete="current-password"/>
           <FormControlLabel control={<Checkbox value="remember" color="primary" />} label="Remember my Account"/>
           <Grid container>
-          <ButtonGroup fullWidth className={staleClass.buttonGroup} variant="contained" color="primary" aria-label="contained primary button group">
+          <ButtonGroup fullWidth className={styleClass.buttonGroup} variant="contained" color="primary" aria-label="contained primary button group">
             <Button onClick={proxyWindowOpen}>Switch Server</Button>
             <Button type="submit">Sign In</Button>
           </ButtonGroup>
-          <Dialog open={proxyWindowStatus} onClose={proxyWindowCancel} aria-labelledby="form-dialog-title">
+          <Dialog className={styleClass.noneSelect} open={proxyWindowStatus} onClose={proxyWindowCancel} aria-labelledby="form-dialog-title">
             <DialogTitle id="form-dialog-title">Switch Server</DialogTitle>
             <DialogContent>
               <DialogContentText>
@@ -115,7 +127,7 @@ export default function SignIn() {
               <Button onClick={() => proxyWindowSubmit(proxyNow)} color="primary" type="submit">OK</Button>
             </DialogActions>
           </Dialog>
-          <Snackbar open={snackWindow} autoHideDuration={2000} onClose={snackWindowClose}>
+          <Snackbar open={snackWindow} anchorOrigin={{vertical: 'bottom', horizontal: 'right'}} autoHideDuration={2000} onClose={snackWindowClose}>
             <Alert onClose={snackWindowClose} severity={snackWindowType}>
               {snackWindowMessage}
             </Alert>
