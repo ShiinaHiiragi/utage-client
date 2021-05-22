@@ -9,7 +9,7 @@ import Checkbox from '@material-ui/core/Checkbox';
 import Link from '@material-ui/core/Link';
 import Grid from '@material-ui/core/Grid';
 import Box from '@material-ui/core/Box';
-import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
+import DvrIcon from '@material-ui/icons/Dvr';
 import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
@@ -20,6 +20,8 @@ import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import Snackbar from '@material-ui/core/Snackbar';
 import MuiAlert from '@material-ui/lab/Alert';
+import Backdrop from '@material-ui/core/Backdrop';
+import CircularProgress from '@material-ui/core/CircularProgress';
 
 const fs = window.require('fs');
 const settingPath = './file/setting/SignInSetting.json';
@@ -51,6 +53,10 @@ const useStyles = makeStyles((theme) => ({
     '& > * + *': {
       marginTop: theme.spacing(2),
     },
+  },
+  backdrop: {
+    zIndex: theme.zIndex.drawer + 1,
+    color: '#fff',
   },
 }));
 
@@ -130,19 +136,33 @@ export default function SignIn() {
   const emailInput = (event) => { setEmail(event.target.value); };
   const passwordInput = (event) => { setPassword(event.target.value); };
   const signInClick = () => {
-    // TODO: complete sign in behavior here
-    if (signInSetting.remember)
+    if (email == '' || password == '')
+    {
+      snackWindowToggle('error', 'Please enter the account and password.');
+      return;
+    }
+    else if (signInSetting.remember)
     {
       signInSetting.account = email;
       saveSetting(() => {});
     }
+    backdropToggle();
+    // TODO: complete sign in behavior here
+
+    // TEMP: delete setTimeout later
+    setTimeout(backdropClose, 2000);
   };
+
+  // the backdrop when communicate with server
+  const [backdrop, setBackdrop] = React.useState(false);
+  const backdropToggle = () => { setBackdrop(true); };
+  const backdropClose = () => { setBackdrop(false); };
 
   return (
     <Container component="main" maxWidth="xs" className={styleClass.noneSelect}>
       <CssBaseline />
       <div className={styleClass.paper}>
-        <Avatar className={styleClass.avatar}><LockOutlinedIcon /></Avatar>
+        <Avatar className={styleClass.avatar}><DvrIcon /></Avatar>
         <Typography component="h1" variant="h5">Sign in to Utage</Typography>
         <form className={styleClass.form} noValidate>
           <TextField variant="outlined" margin="normal" fullWidth id="email" label="Email Address" name="email" autoComplete="email" autoFocus defaultValue={email} onChange={emailInput}/>
@@ -153,6 +173,9 @@ export default function SignIn() {
             <Button onClick={proxyWindowToggle}>Switch Server</Button>
             <Button onClick={signInClick}>Sign In</Button>
           </ButtonGroup>
+          <Backdrop className={styleClass.backdrop} open={backdrop}>
+            <CircularProgress color="inherit" />
+          </Backdrop>
           <Dialog className={styleClass.noneSelect} open={proxyWindow} onClose={proxyWindowCancel} aria-labelledby="form-dialog-title">
             <DialogTitle id="form-dialog-title">Switch Server</DialogTitle>
             <DialogContent>
