@@ -9,6 +9,8 @@ import Typography from '@material-ui/core/Typography';
 import Divider from '@material-ui/core/Divider';
 import IconButton from '@material-ui/core/IconButton';
 import MenuIcon from '@material-ui/icons/Menu';
+import PersonIcon from '@material-ui/icons/Person';
+import GroupIcon from '@material-ui/icons/Group';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import MoreHorizIcon from '@material-ui/icons/MoreHoriz';
 import Avatar from '@material-ui/core/Avatar';
@@ -182,7 +184,7 @@ export default function Panel() {
         <List>
           <ListItem>
             <ListItemAvatar>
-              <Avatar alt='Alice' src='static/avatar/alice.jpg' />
+              <Avatar alt='Alice' src='static/avatar/alice.jpg'><PersonIcon /></Avatar>
             </ListItemAvatar>
             <ListItemText primary='Alice' secondary="abc@xyz.cn"/>
           </ListItem>
@@ -191,19 +193,19 @@ export default function Panel() {
         <List>
           <ListItem button key={0} selected={selectedIndex === 0} onClick={(event) => handleListItemClick(event, 0)}>
             <ListItemAvatar>
-              <Avatar alt='Miku' src='static/avatar/miku.jpg' />
+              <Avatar alt='Miku' src='static/avatar/miku.jpg'><PersonIcon /></Avatar>
             </ListItemAvatar>
             <ListItemText primary='Miku' secondary="Hello!"/>
           </ListItem>
           <ListItem button key={1} selected={selectedIndex === 1} onClick={(event) => handleListItemClick(event, 1)}>
             <ListItemAvatar>
-              <Avatar alt='Miya' src='static/avatar/miya.jpg' />
+              <Avatar alt='Miya Ouendan' src='static/avatar/miya.jpg'><GroupIcon /></Avatar>
             </ListItemAvatar>
             <ListItemText primary='Miya' secondary="Hi!" />
           </ListItem>
           <ListItem button key={2} selected={selectedIndex === 2} onClick={(event) => handleListItemClick(event, 2)}>
             <ListItemAvatar>
-              <Avatar alt='chocomint' src='static/avatar/chocomint.png' />
+              <Avatar alt='chocomint' src='static/avatar/chocomint.png'><PersonIcon /></Avatar>
             </ListItemAvatar>
             <ListItemText primary='chocomint' secondary="The latest Message."/>
           </ListItem>
@@ -212,6 +214,7 @@ export default function Panel() {
 
       <main className={clsx(classes.content, {[classes.contentShift]: sideListItem,})}>
         <div className={classes.drawerHeader} />
+        
         <Typography paragraph>
           Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt
           ut labore et dolore magna aliqua. Rhoncus dolor purus non enim praesent elementum
@@ -223,17 +226,6 @@ export default function Panel() {
           imperdiet massa tincidunt. Cras tincidunt lobortis feugiat vivamus at augue. At augue eget
           arcu dictum varius duis at consectetur lorem. Velit sed ullamcorper morbi tincidunt. Lorem
           donec massa sapien faucibus et molestie ac.
-        </Typography>
-        <Typography paragraph>
-          Consequat mauris nunc congue nisi vitae suscipit. Fringilla est ullamcorper eget nulla
-          facilisi etiam dignissim diam. Pulvinar elementum integer enim neque volutpat ac
-          tincidunt. Ornare suspendisse sed nisi lacus sed viverra tellus. Purus sit amet volutpat
-          consequat mauris. Elementum eu facilisis sed odio morbi. Euismod lacinia at quis risus sed
-          vulputate odio. Morbi tincidunt ornare massa eget egestas purus viverra accumsan in. In
-          hendrerit gravida rutrum quisque non tellus orci ac. Pellentesque nec nam aliquam sem et
-          tortor. Habitant morbi tristique senectus et. Adipiscing elit duis tristique sollicitudin
-          nibh sit. Ornare aenean euismod elementum nisi quis eleifend. Commodo viverra maecenas
-          accumsan lacus vel facilisis. Nulla posuere sollicitudin aliquam ultrices sagittis orci a.
         </Typography>
       </main>
     </div>
