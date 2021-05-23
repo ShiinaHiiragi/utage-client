@@ -33,47 +33,27 @@ let panelReading = {
   usrInfo: {
     uid: 1024,
     username: 'Alice',
+    email: 'abc@xyz.cn',
     avatar: 'static/avatar/avatar-1024U.jpg'
-  },
-  state: {
-    selectedRecord: '',
   },
   record: [
     {
-      type: 'U',
-      accessInfo: {
-        uid: 2048,
-        username: 'chocomint',
-        avatar: 'static/avatar/avatar-2048U.png',
-      },
-      log: [
-        {
-          rid: 1,
-          text: '<p>Hello!<p>', 
-          time: '2021-05-23T04:20:44.733Z'
-        },
-        {
-          rid: 2,
-          text: '<p>Hi!<p>', 
-          time: '2021-05-23T04:21:25.401Z'
-        }
-      ]
-    },
-    {
       type: 'G',
       accessInfo: {
-        gid: 16384,
-        groupName: 'Miya Ouendan',
-        groupAvatar: 'static/avatar/avatar-16384G.jpg',
+        id: 16384,
+        name: 'Miya Ouendan',
+        avatar: 'static/avatar/avatar-16384G.jpg',
       },
       log: [
         {
           rid: 3,
+          sender: 'Saki',
           text: '<p>Hello everyone.<p>', 
           time: '2021-05-23T04:25:41.181Z'
         },
         {
           rid: 4,
+          sender: 'Alice',
           text: '<p>Have a good day!<p>', 
           time: '2021-05-23T04:28:46.995Z'
         },
@@ -82,14 +62,41 @@ let panelReading = {
     {
       type: 'U',
       accessInfo: {
-        uid: 4096,
-        username: 'Miku',
+        id: 2048,
+        name: 'chocomint',
+        avatar: 'static/avatar/avatar-2048U.png',
+      },
+      log: [
+        {
+          rid: 1,
+          sender: 'chocomint',
+          text: '<p>Hello!<p>', 
+          time: '2021-05-23T04:20:44.733Z'
+        },
+        {
+          rid: 2,
+          sender: 'Alice',
+          text: '<p>Hi!<p>', 
+          time: '2021-05-23T04:21:25.401Z'
+        }
+      ]
+    },
+    {
+      type: 'U',
+      accessInfo: {
+        id: 4096,
+        name: 'Miku',
         avatar: 'static/avatar/avatar-4096U.jpg',
       },
       log: [
       ]
-    }
+    },
   ],
+  state: {
+    selectedRecord: '16384G',
+    selectedName: 'Miya Ouendan',
+    sideListItem: true,
+  },
 };
 
 const drawerWidth = 300;
@@ -177,34 +184,78 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
+Date.prototype.format = function(formatString){
+  var formatComponent = {
+    "M+" : this.getMonth() + 1,
+    "d+" : this.getDate(),
+    "h+" : this.getHours(),
+    "m+" : this.getMinutes(),
+    "s+" : this.getSeconds(),
+    "q+" : Math.floor((this.getMonth()+3)/3),
+    "S"  : this.getMilliseconds()
+  };
+
+  if(/(y+)/.test(formatString))
+    formatString = formatString.replace(RegExp.$1, (this.getFullYear()+"").substr(4 - RegExp.$1.length));
+
+  for(var index in formatComponent)
+    if(new RegExp(`(${index})`).test(formatString))
+      formatString = formatString.replace(
+        RegExp.$1, (RegExp.$1.length==1) ? (formatComponent[index]) : (("00"+ formatComponent[index])
+        .substr((""+ formatComponent[index]).length)));
+  return formatString;
+}
+
+const formatSideTime = (timeString) => {
+  let timeThen = new Date(timeString), timeNow = new Date();
+  let sameYear = (timeThen.getFullYear() == timeNow.getFullYear()),
+      sameMonth = sameYear && (timeThen.getMonth() == timeNow.getMonth()),
+      sameDay = sameMonth && (timeThen.getDay() == timeNow.getDay());
+  let formatString = (sameYear ? '' : 'yyyy-') + (sameDay ? '' : 'MM-dd ') + 'hh:mm:ss';
+  return timeThen.format(formatString);
+}
+
 export default function Panel() {
   const classes = useStyles();
-  const theme = useTheme();
+  // const theme = useTheme();
 
   // the info need by user interface
   const [panelInfo, setPanelInfo] = React.useState(panelReading);
-
-  // the sidebar and the selected index
-  const [sideListItem, setSideListItem] = React.useState(true);
-  const [selectedIndex, setSelectedIndex] = React.useState(0);
-  const handleToggleSideListItem = () => { setSideListItem(true); };
-  const handleCloseSideListItem = () => { setSideListItem(false); };
-  const handleListItemClick = (event, index) => {
-    setSelectedIndex(index);
+  const handleToggleSideListItem = () => {
+    setPanelInfo(panelInfo => ({
+      ...panelInfo,
+      state: { ...panelInfo.state, sideListItem: true, }
+    }));
   };
+  const handleCloseSideListItem = () => {
+    setPanelInfo(panelInfo => ({
+      ...panelInfo,
+      state: { ...panelInfo.state, sideListItem: false, }
+    }));
+  };
+  const handleListItemClick = (event, comb, name) => {
+    setPanelInfo(panelInfo => ({
+      ...panelInfo,
+      state: {
+        ...panelInfo.state,
+        selectedRecord: comb,
+        selectedName: name,
+      }
+    }));
+  };
+  
 
   return (
     <div className={classes.root}>
       <CssBaseline />
-
-      <AppBar position="fixed" className={clsx(classes.appBar, {[classes.appBarShift]: sideListItem,})}>
+      <AppBar position="fixed" className={clsx(classes.appBar, {[classes.appBarShift]: panelInfo.state.sideListItem,})}>
         <Toolbar>
           <IconButton color="inherit" aria-label="open drawer" edge="start" className={classes.menuButton}
-                      onClick={sideListItem ? handleCloseSideListItem : handleToggleSideListItem}>
-            {sideListItem ? <ChevronLeftIcon /> : <MenuIcon />}
+                      onClick={panelInfo.state.sideListItem ? handleCloseSideListItem : handleToggleSideListItem}>
+            {panelInfo.state.sideListItem ? <ChevronLeftIcon /> : <MenuIcon />}
           </IconButton>
           <Typography className={classes.title} variant="h6" noWrap>
-            Miku
+            {panelInfo.state.selectedName}
           </Typography>
           <IconButton color="inherit" edge="end">
             <MoreHorizIcon />
@@ -212,43 +263,37 @@ export default function Panel() {
         </Toolbar>
       </AppBar>
 
-      <Drawer className={classes.drawer} variant="persistent" anchor="left" open={sideListItem} classes={{paper: classes.drawerPaper}}>
+      <Drawer className={classes.drawer} variant="persistent" anchor="left" open={panelInfo.state.sideListItem} classes={{paper: classes.drawerPaper}}>
         <List>
           <ListItem>
             <ListItemAvatar>
-              <Avatar alt='Alice' src='static/avatar/alice.jpg'><PersonIcon /></Avatar>
+              <Avatar src={panelInfo.usrInfo.avatar}><PersonIcon /></Avatar>
             </ListItemAvatar>
-            <ListItemText primary='Alice' secondary="abc@xyz.cn"/>
+            <ListItemText primary={panelInfo.usrInfo.username} secondary={panelInfo.usrInfo.email}/>
           </ListItem>
         </List>
         <Divider />
+
         <List>
-          <ListItem button key={0} selected={selectedIndex === 0} onClick={(event) => handleListItemClick(event, 0)}>
-            <ListItemAvatar>
-              <Avatar alt='Miku' src='static/avatar/miku.jpg'><PersonIcon /></Avatar>
-            </ListItemAvatar>
-            <ListItemText primary='Miku' secondary="Hello!"/>
-          </ListItem>
-          <ListItem button key={1} selected={selectedIndex === 1} onClick={(event) => handleListItemClick(event, 1)}>
-            <ListItemAvatar>
-              <Avatar alt='Miya Ouendan' src='static/avatar/miya.jpg'><GroupIcon /></Avatar>
-            </ListItemAvatar>
-            <ListItemText primary='Miya' secondary="Hi!" />
-          </ListItem>
-          <ListItem button key={2} selected={selectedIndex === 2} onClick={(event) => handleListItemClick(event, 2)}>
-            <ListItemAvatar>
-              <Avatar alt='chocomint' src='static/avatar/chocomint.png'><PersonIcon /></Avatar>
-            </ListItemAvatar>
-            <ListItemText primary='chocomint' secondary="The latest Message."/>
-          </ListItem>
+          {panelInfo.record.map((value, index) => {
+            let keyComb = `${value.accessInfo.id}${value.type}`;
+            return(
+              <ListItem button key={keyComb} selected={panelInfo.state.selectedRecord === keyComb}
+                        onClick={(event) => handleListItemClick(event, keyComb, value.accessInfo.name)}>
+                <ListItemAvatar>
+                  <Avatar src={value.accessInfo.avatar}>{value.type === 'U' ? <PersonIcon /> : <GroupIcon/>}</Avatar>
+                </ListItemAvatar>
+                <ListItemText primary={value.accessInfo.name}
+                              secondary={value.log.length > 0 ? formatSideTime(value.log[value.log.length - 1].time) : '(No Message Yet)'}/>
+              </ListItem>
+            )})}
         </List>
       </Drawer>
 
-      <main className={clsx(classes.content, {[classes.contentShift]: sideListItem,})}>
+      <main className={clsx(classes.content, {[classes.contentShift]: panelInfo.state.sideListItem,})}>
         <div className={classes.drawerHeader} />
 
-        <div className={classes.recordField} variant="outlined" square>
-
+        <div className={classes.recordField} variant="outlined">
           <Card className={classes.cardRoot}>
             <CardContent>
               <Typography color="textSecondary" gutterBottom>
@@ -302,7 +347,7 @@ export default function Panel() {
         </div>
 
         <div className={classes.textField}>
-          <TextField id="outlined-multiline-static" label="Leave a Message in Markdown" multiline rows={4} variant="outlined" square/>
+          <TextField id="outlined-multiline-static" label="Leave a Message in Markdown" multiline rows={4} variant="outlined"/>
           <Toolbar className={classes.textButton}>
             <IconButton><InsertEmoticonIcon /></IconButton>
             <IconButton><FormatBoldIcon /></IconButton>
