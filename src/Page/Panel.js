@@ -10,7 +10,7 @@ import Divider from '@material-ui/core/Divider';
 import IconButton from '@material-ui/core/IconButton';
 import MenuIcon from '@material-ui/icons/Menu';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
-import ChevronRightIcon from '@material-ui/icons/ChevronRight';
+import MoreHorizIcon from '@material-ui/icons/MoreHoriz';
 import Avatar from '@material-ui/core/Avatar';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
@@ -21,15 +21,18 @@ let panelReading = {
   usrInfo: {
     uid: 1024,
     username: 'Alice',
-    avatar: 'static/avatar/avatar-1024U.jpg',
+    avatar: 'static/avatar/avatar-1024U.jpg'
+  },
+  state: {
+    selectedRecord: '',
   },
   record: [
     {
       type: 'U',
       accessInfo: {
         uid: 2048,
-        username: 'Yuki',
-        avatar: 'static/avatar/avatar-2048U.jpg',
+        username: 'chocomint',
+        avatar: 'static/avatar/avatar-2048U.png',
       },
       log: [
         {
@@ -48,7 +51,7 @@ let panelReading = {
       type: 'G',
       accessInfo: {
         gid: 16384,
-        groupName: 'TMA',
+        groupName: 'Miya Ouendan',
         groupAvatar: 'static/avatar/avatar-16384G.jpg',
       },
       log: [
@@ -63,6 +66,16 @@ let panelReading = {
           time: '2021-05-23T04:28:46.995Z'
         },
       ]
+    },
+    {
+      type: 'U',
+      accessInfo: {
+        uid: 4096,
+        username: 'Miku',
+        avatar: 'static/avatar/avatar-4096U.jpg',
+      },
+      log: [
+      ]
     }
   ],
 };
@@ -73,6 +86,7 @@ const useStyles = makeStyles((theme) => ({
     display: 'flex',
   },
   appBar: {
+    userSelect: 'none',
     transition: theme.transitions.create(['margin', 'width'], {
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.leavingScreen,
@@ -93,8 +107,12 @@ const useStyles = makeStyles((theme) => ({
     display: 'none',
   },
   drawer: {
+    userSelect: 'none',
     width: drawerWidth,
     flexShrink: 0,
+  },
+  title: {
+    flexGrow: 1,
   },
   drawerPaper: {
     width: drawerWidth,
@@ -147,21 +165,28 @@ export default function Panel() {
 
       <AppBar position="fixed" className={clsx(classes.appBar, {[classes.appBarShift]: sideListItem,})}>
         <Toolbar>
-          <IconButton color="inherit" aria-label="open drawer" onClick={handleToggleSideListItem} edge="start" className={clsx(classes.menuButton, sideListItem && classes.hide)}>
-            <MenuIcon />
+          <IconButton color="inherit" aria-label="open drawer" edge="start" className={classes.menuButton}
+                      onClick={sideListItem ? handleCloseSideListItem : handleToggleSideListItem}>
+            {sideListItem ? <ChevronLeftIcon /> : <MenuIcon />}
           </IconButton>
-          <Typography variant="h6" noWrap>
-            Persistent drawer
+          <Typography className={classes.title} variant="h6" noWrap>
+            Miku
           </Typography>
+          <IconButton color="inherit" edge="end">
+            <MoreHorizIcon />
+          </IconButton>
         </Toolbar>
       </AppBar>
 
       <Drawer className={classes.drawer} variant="persistent" anchor="left" open={sideListItem} classes={{paper: classes.drawerPaper,}}>
-        <div className={classes.drawerHeader}>
-          <IconButton onClick={handleCloseSideListItem}>
-            {theme.direction === 'ltr' ? <ChevronLeftIcon /> : <ChevronRightIcon />}
-          </IconButton>
-        </div>
+        <List>
+          <ListItem>
+            <ListItemAvatar>
+              <Avatar alt='Alice' src='static/avatar/alice.jpg' />
+            </ListItemAvatar>
+            <ListItemText primary='Alice' secondary="abc@xyz.cn"/>
+          </ListItem>
+        </List>
         <Divider />
         <List>
           <ListItem button key={0} selected={selectedIndex === 0} onClick={(event) => handleListItemClick(event, 0)}>
@@ -170,14 +195,12 @@ export default function Panel() {
             </ListItemAvatar>
             <ListItemText primary='Miku' secondary="Hello!"/>
           </ListItem>
-
           <ListItem button key={1} selected={selectedIndex === 1} onClick={(event) => handleListItemClick(event, 1)}>
             <ListItemAvatar>
               <Avatar alt='Miya' src='static/avatar/miya.jpg' />
             </ListItemAvatar>
             <ListItemText primary='Miya' secondary="Hi!" />
           </ListItem>
-
           <ListItem button key={2} selected={selectedIndex === 2} onClick={(event) => handleListItemClick(event, 2)}>
             <ListItemAvatar>
               <Avatar alt='chocomint' src='static/avatar/chocomint.png' />
@@ -187,11 +210,7 @@ export default function Panel() {
         </List>
       </Drawer>
 
-      <main
-        className={clsx(classes.content, {
-          [classes.contentShift]: sideListItem,
-        })}
-      >
+      <main className={clsx(classes.content, {[classes.contentShift]: sideListItem,})}>
         <div className={classes.drawerHeader} />
         <Typography paragraph>
           Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt

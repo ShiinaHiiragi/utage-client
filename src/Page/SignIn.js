@@ -174,7 +174,7 @@ export default function SignIn() {
             <Button onClick={signInClick}>Sign In</Button>
           </ButtonGroup>
           <Backdrop className={styleClass.backdrop} open={backdrop}>
-            <CircularProgress color="inherit" />
+            <CircularProgress color="inherit" size={56} />
           </Backdrop>
           <Dialog className={styleClass.noneSelect} open={proxyWindow} onClose={proxyWindowCancel} aria-labelledby="form-dialog-title">
             <DialogTitle id="form-dialog-title">Switch Server</DialogTitle>
