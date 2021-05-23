@@ -17,7 +17,11 @@ import Avatar from '@material-ui/core/Avatar';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 import ListItemAvatar from '@material-ui/core/ListItemAvatar'
+import TextField from '@material-ui/core/TextField';
+import Paper from '@material-ui/core/Paper';
 import { makeStyles, useTheme } from '@material-ui/core/styles';
+
+import SimpleCard from './SimpleCard';
 
 let panelReading = {
   usrInfo: {
@@ -105,9 +109,6 @@ const useStyles = makeStyles((theme) => ({
   menuButton: {
     marginRight: theme.spacing(2),
   },
-  hide: {
-    display: 'none',
-  },
   drawer: {
     userSelect: 'none',
     width: drawerWidth,
@@ -120,16 +121,18 @@ const useStyles = makeStyles((theme) => ({
     width: drawerWidth,
   },
   drawerHeader: {
-    display: 'flex',
     alignItems: 'center',
-    padding: theme.spacing(0, 1),
+    padding: theme.spacing(0, 0),
     // necessary for content to be below app bar
     ...theme.mixins.toolbar,
     justifyContent: 'flex-end',
   },
   content: {
+    height: '100vh',
     flexGrow: 1,
-    padding: theme.spacing(3),
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'flex-start',
     transition: theme.transitions.create('margin', {
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.leavingScreen,
@@ -142,6 +145,15 @@ const useStyles = makeStyles((theme) => ({
       duration: theme.transitions.duration.enteringScreen,
     }),
     marginLeft: 0,
+  },
+  recordField: {
+    overflowX: 'auto',
+  },
+  textField: {
+    '& .MuiTextField-root': {
+      width: 'calc(100% - 16px)',
+    },
+    margin: theme.spacing(0, 0, 2, 2),
   },
 }));
 
@@ -180,7 +192,7 @@ export default function Panel() {
         </Toolbar>
       </AppBar>
 
-      <Drawer className={classes.drawer} variant="persistent" anchor="left" open={sideListItem} classes={{paper: classes.drawerPaper,}}>
+      <Drawer className={classes.drawer} variant="persistent" anchor="left" open={sideListItem} classes={{paper: classes.drawerPaper}}>
         <List>
           <ListItem>
             <ListItemAvatar>
@@ -214,19 +226,19 @@ export default function Panel() {
 
       <main className={clsx(classes.content, {[classes.contentShift]: sideListItem,})}>
         <div className={classes.drawerHeader} />
-        
-        <Typography paragraph>
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt
-          ut labore et dolore magna aliqua. Rhoncus dolor purus non enim praesent elementum
-          facilisis leo vel. Risus at ultrices mi tempus imperdiet. Semper risus in hendrerit
-          gravida rutrum quisque non tellus. Convallis convallis tellus id interdum velit laoreet id
-          donec ultrices. Odio morbi quis commodo odio aenean sed adipiscing. Amet nisl suscipit
-          adipiscing bibendum est ultricies integer quis. Cursus euismod quis viverra nibh cras.
-          Metus vulputate eu scelerisque felis imperdiet proin fermentum leo. Mauris commodo quis
-          imperdiet massa tincidunt. Cras tincidunt lobortis feugiat vivamus at augue. At augue eget
-          arcu dictum varius duis at consectetur lorem. Velit sed ullamcorper morbi tincidunt. Lorem
-          donec massa sapien faucibus et molestie ac.
-        </Typography>
+
+        <div className={classes.recordField} variant="outlined" square>
+          <SimpleCard />
+          <SimpleCard />
+          <SimpleCard />
+          <SimpleCard />
+          <SimpleCard />
+          <SimpleCard />
+        </div>
+
+        <div className={classes.textField}>
+          <TextField id="outlined-multiline-static" label="Leave a Message in Markdown" multiline rows={5} variant="outlined" square/>
+        </div>
       </main>
     </div>
   );
