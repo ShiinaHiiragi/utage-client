@@ -24,7 +24,7 @@ import CircularProgress from '@material-ui/core/CircularProgress';
 import { makeStyles } from '@material-ui/core/styles';
 
 const fs = window.require('fs');
-const settingPath = './file/setting/SignInSetting.json';
+const settingPath = './data/setting/SignInSetting.json';
 var signInSetting = JSON.parse(fs.readFileSync(settingPath));
 
 const useStyles = makeStyles((theme) => ({

@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import Panel from './Dashboard/Dashboard';
+import Panel from './Page/Panel';
 
 ReactDOM.render(
   <Panel />,

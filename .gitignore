@@ -10,6 +10,8 @@
 
 # production
 /build
+/static
+/data/database
 /*-win32-x64
 
 # misc
