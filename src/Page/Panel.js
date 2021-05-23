@@ -21,11 +21,7 @@ let panelReading = {
   usrInfo: {
     uid: 1024,
     username: 'Alice',
-    email: 'abc@xyz.cn',
-    tel: null,
-    city: 'Shanghai',
-    gender: 'F',
-    avatar: 'src/graphic/1.jpg',
+    avatar: 'static/avatar/avatar-1024U.jpg',
   },
   record: [
     {
@@ -33,11 +29,7 @@ let panelReading = {
       accessInfo: {
         uid: 2048,
         username: 'Yuki',
-        email: 'd.ts@outlook.com',
-        tel: '1234567890',
-        city: 'Beijing',
-        gender: 'M',
-        avatar: 'src/graphic/2.jpg',
+        avatar: 'static/avatar/avatar-2048U.jpg',
       },
       log: [
         {
@@ -57,14 +49,7 @@ let panelReading = {
       accessInfo: {
         gid: 16384,
         groupName: 'TMA',
-        groupAvatar: 'src/graphic/3.jpg',
-        groupHolder: 2048,
-        groupMember: [
-          1024,
-          2048,
-          4096,
-          8192
-        ]
+        groupAvatar: 'static/avatar/avatar-16384G.jpg',
       },
       log: [
         {
