@@ -18,10 +18,16 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 import ListItemAvatar from '@material-ui/core/ListItemAvatar'
 import TextField from '@material-ui/core/TextField';
-import Paper from '@material-ui/core/Paper';
+import Card from '@material-ui/core/Card';
+import CardContent from '@material-ui/core/CardContent';
+import InsertEmoticonIcon from '@material-ui/icons/InsertEmoticon';
+import FormatBoldIcon from '@material-ui/icons/FormatBold';
+import FormatItalicIcon from '@material-ui/icons/FormatItalic';
+import CodeIcon from '@material-ui/icons/Code';
+import LinkIcon from '@material-ui/icons/Link';
+import SendIcon from '@material-ui/icons/Send';
+import StrikethroughSIcon from '@material-ui/icons/StrikethroughS';
 import { makeStyles, useTheme } from '@material-ui/core/styles';
-
-import SimpleCard from './SimpleCard';
 
 let panelReading = {
   usrInfo: {
@@ -148,12 +154,26 @@ const useStyles = makeStyles((theme) => ({
   },
   recordField: {
     overflowX: 'auto',
+    flexGrow: 1,
   },
   textField: {
     '& .MuiTextField-root': {
-      width: 'calc(100% - 16px)',
+      width: 'calc(100% - 24px)',
     },
-    margin: theme.spacing(0, 0, 2, 2),
+    margin: theme.spacing(1, 0, 0, 2),
+  },
+  cardRoot: {
+    minWidth: 275,
+    width: 'calc(100% - 32px)',
+    margin: theme.spacing(1, 2),
+  },
+  textButton: {
+    display: 'flex',
+    width: 'calc(100% - 32px)',
+    padding: 0,
+  },
+  textSpan: {
+    flexGrow: 1,
   },
 }));
 
@@ -228,16 +248,71 @@ export default function Panel() {
         <div className={classes.drawerHeader} />
 
         <div className={classes.recordField} variant="outlined" square>
-          <SimpleCard />
-          <SimpleCard />
-          <SimpleCard />
-          <SimpleCard />
-          <SimpleCard />
-          <SimpleCard />
+
+          <Card className={classes.cardRoot}>
+            <CardContent>
+              <Typography color="textSecondary" gutterBottom>
+                Lorem ipsum dolor sit amet consectetur adipisicing elit. Reprehenderit commodi officiis placeat voluptatum tenetur, amet dolores voluptates incidunt reiciendis maiores sequi labore tempore recusandae beatae. Expedita ut ea enim voluptatum! Lorem ipsum dolor sit, amet consectetur adipisicing elit. Odio doloribus delectus pariatur exercitationem mollitia. Tenetur placeat molestiae cumque temporibus asperiores, nam doloremque mollitia itaque? Odit aperiam molestiae unde quibusdam rerum.
+              </Typography>
+            </CardContent>
+          </Card>
+          <Card className={classes.cardRoot}>
+            <CardContent>
+              <Typography color="textSecondary" gutterBottom>
+                Lorem ipsum dolor sit amet consectetur adipisicing elit. Reprehenderit commodi officiis placeat voluptatum tenetur, amet dolores voluptates incidunt reiciendis maiores sequi labore tempore recusandae beatae. Expedita ut ea enim voluptatum! Lorem ipsum dolor sit, amet consectetur adipisicing elit. Odio doloribus delectus pariatur exercitationem mollitia. Tenetur placeat molestiae cumque temporibus asperiores, nam doloremque mollitia itaque? Odit aperiam molestiae unde quibusdam rerum.
+              </Typography>
+            </CardContent>
+          </Card>
+          <Card className={classes.cardRoot}>
+            <CardContent>
+              <Typography color="textSecondary" gutterBottom>
+                Lorem ipsum dolor sit amet consectetur adipisicing elit. Reprehenderit commodi officiis placeat voluptatum tenetur, amet dolores voluptates incidunt reiciendis maiores sequi labore tempore recusandae beatae. Expedita ut ea enim voluptatum! Lorem ipsum dolor sit, amet consectetur adipisicing elit. Odio doloribus delectus pariatur exercitationem mollitia. Tenetur placeat molestiae cumque temporibus asperiores, nam doloremque mollitia itaque? Odit aperiam molestiae unde quibusdam rerum.
+              </Typography>
+            </CardContent>
+          </Card>
+          <Card className={classes.cardRoot}>
+            <CardContent>
+              <Typography color="textSecondary" gutterBottom>
+                Lorem ipsum dolor sit amet consectetur adipisicing elit. Reprehenderit commodi officiis placeat voluptatum tenetur, amet dolores voluptates incidunt reiciendis maiores sequi labore tempore recusandae beatae. Expedita ut ea enim voluptatum! Lorem ipsum dolor sit, amet consectetur adipisicing elit. Odio doloribus delectus pariatur exercitationem mollitia. Tenetur placeat molestiae cumque temporibus asperiores, nam doloremque mollitia itaque? Odit aperiam molestiae unde quibusdam rerum.
+              </Typography>
+            </CardContent>
+          </Card>
+          <Card className={classes.cardRoot}>
+            <CardContent>
+              <Typography color="textSecondary" gutterBottom>
+                Lorem ipsum dolor sit amet consectetur adipisicing elit. Reprehenderit commodi officiis placeat voluptatum tenetur, amet dolores voluptates incidunt reiciendis maiores sequi labore tempore recusandae beatae. Expedita ut ea enim voluptatum! Lorem ipsum dolor sit, amet consectetur adipisicing elit. Odio doloribus delectus pariatur exercitationem mollitia. Tenetur placeat molestiae cumque temporibus asperiores, nam doloremque mollitia itaque? Odit aperiam molestiae unde quibusdam rerum.
+              </Typography>
+            </CardContent>
+          </Card>
+          <Card className={classes.cardRoot}>
+            <CardContent>
+              <Typography color="textSecondary" gutterBottom>
+                Lorem ipsum dolor sit amet consectetur adipisicing elit. Reprehenderit commodi officiis placeat voluptatum tenetur, amet dolores voluptates incidunt reiciendis maiores sequi labore tempore recusandae beatae. Expedita ut ea enim voluptatum! Lorem ipsum dolor sit, amet consectetur adipisicing elit. Odio doloribus delectus pariatur exercitationem mollitia. Tenetur placeat molestiae cumque temporibus asperiores, nam doloremque mollitia itaque? Odit aperiam molestiae unde quibusdam rerum.
+              </Typography>
+            </CardContent>
+          </Card>
+          <Card className={classes.cardRoot}>
+            <CardContent>
+              <Typography color="textSecondary" gutterBottom>
+                Lorem ipsum dolor sit amet consectetur adipisicing elit. Reprehenderit commodi officiis placeat voluptatum tenetur, amet dolores voluptates incidunt reiciendis maiores sequi labore tempore recusandae beatae. Expedita ut ea enim voluptatum! Lorem ipsum dolor sit, amet consectetur adipisicing elit. Odio doloribus delectus pariatur exercitationem mollitia. Tenetur placeat molestiae cumque temporibus asperiores, nam doloremque mollitia itaque? Odit aperiam molestiae unde quibusdam rerum.
+              </Typography>
+            </CardContent>
+          </Card>
+
         </div>
 
         <div className={classes.textField}>
-          <TextField id="outlined-multiline-static" label="Leave a Message in Markdown" multiline rows={5} variant="outlined" square/>
+          <TextField id="outlined-multiline-static" label="Leave a Message in Markdown" multiline rows={4} variant="outlined" square/>
+          <Toolbar className={classes.textButton}>
+            <IconButton><InsertEmoticonIcon /></IconButton>
+            <IconButton><FormatBoldIcon /></IconButton>
+            <IconButton><FormatItalicIcon /></IconButton>
+            <IconButton><StrikethroughSIcon /></IconButton>
+            <IconButton><LinkIcon /></IconButton>
+            <IconButton><CodeIcon /></IconButton>
+            <div className={classes.textSpan}></div>
+            <IconButton><SendIcon /></IconButton>
+          </Toolbar>
         </div>
       </main>
     </div>
