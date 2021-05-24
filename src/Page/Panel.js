@@ -32,9 +32,9 @@ import { makeStyles, useTheme } from '@material-ui/core/styles';
 let panelReading = {
   usrInfo: {
     uid: 1024,
-    username: 'Alice',
-    email: 'abc@xyz.cn',
-    avatar: 'static/avatar/avatar-1024U.jpg'
+    username: 'Koishi',
+    email: 'abc@xyz.com',
+    avatar: 'static/avatar/avatar-1024U.png'
   },
   record: [
     {
