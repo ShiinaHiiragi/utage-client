@@ -49,7 +49,7 @@ let panelReading = {
           sender: 'Saki',
           senderID: '32768U',
           senderAvatar: 'jpg',
-          text: 'Hello everyone.',
+          text: 'Lorem ipsum dolor, sit amet consectetur adipisicing elit. Fugiat ipsam, temporibus tempora corporis quod vero eligendi odio accusamus porro! Repudiandae iusto quam molestias, doloremque fugiat aliquam beatae similique! Beatae, corporis.',
           time: '2021-05-23T04:25:41.181Z'
         },
         {
@@ -57,7 +57,7 @@ let panelReading = {
           sender: 'Alice',
           senderID: '1024U',
           senderAvatar: 'png',
-          text: 'Good Morning! Have a good day.',
+          text: 'Lorem ipsum dolor sit amet',
           time: '2021-05-23T04:28:46.995Z'
         },
       ]
@@ -74,7 +74,7 @@ let panelReading = {
           sender: 'chocomint',
           senderID: '2048U',
           senderAvatar: 'png',
-          text: 'Hello!',
+          text: 'Lorem ipsum dolor sit amet consectetur adipisicing elit.',
           time: '2021-05-23T04:20:44.733Z'
         },
         {
@@ -82,7 +82,7 @@ let panelReading = {
           sender: 'Alice',
           senderID: '1024U',
           senderAvatar: 'png',
-          text: 'Hi!',
+          text: 'Nobis qui esse a distinctio rem sed vero quae repudiandae dolores, dolorem nostrum excepturi inventore consequuntur quo quisquam officiis, expedita hic sit.',
           time: '2021-05-23T04:21:25.401Z'
         }
       ]
