@@ -12,9 +12,10 @@ import Divider from '@material-ui/core/Divider';
 import Typography from '@material-ui/core/Typography';
 import TextField from '@material-ui/core/TextField';
 import Card from '@material-ui/core/Card';
+import Markdown from 'markdown-to-jsx';
 import Avatar from '@material-ui/core/Avatar';
 import IconButton from '@material-ui/core/IconButton';
-import { makeStyles, useTheme } from '@material-ui/core/styles';
+import { makeStyles } from '@material-ui/core/styles';
 import MenuIcon from '@material-ui/icons/Menu';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import MoreVertIcon from '@material-ui/icons/MoreVert';
@@ -56,7 +57,7 @@ let panelReading = {
           sender: 'Alice',
           senderID: '1024U',
           senderAvatar: 'png',
-          text: 'Have a good day!',
+          text: 'Good Morning! Have a good day.',
           time: '2021-05-23T04:28:46.995Z'
         },
       ]
@@ -195,6 +196,7 @@ const useStyles = makeStyles((theme) => ({
   },
   cardText: {
     padding: theme.spacing(0, 2, 1, 2),
+    fontSize: '16px',
   },
   textField: {
     '& .MuiTextField-root': {
@@ -229,7 +231,7 @@ Date.prototype.format = function(formatString){
   for(var index in formatComponent)
     if(new RegExp(`(${index})`).test(formatString))
       formatString = formatString.replace(
-        RegExp.$1, (RegExp.$1.length==1) ? (formatComponent[index]) : (("00"+ formatComponent[index])
+        RegExp.$1, (RegExp.$1.length == 1) ? (formatComponent[index]) : (("00"+ formatComponent[index])
         .substr((""+ formatComponent[index]).length)));
   return formatString;
 }
@@ -323,7 +325,7 @@ export default function Panel() {
         <div className={classes.recordField} variant="outlined">
           {panelInfo.record.find(value => (value.accessInfo.id == panelInfo.state.selectedRecord))
             .log.map(value => (
-              <div className={value.senderID == panelInfo.usrInfo.uid ? classes.recordItemRight : classes.recordItemLeft}>
+              <div key={value.rid} className={value.senderID == panelInfo.usrInfo.uid ? classes.recordItemRight : classes.recordItemLeft}>
                 <div className={classes.recordOffset}>
                   <Avatar className={classes.recordAvatar} src={`static/avatar/avatar-${value.senderID}.${value.senderAvatar}`}><PersonIcon /></Avatar>
                 </div>
@@ -334,9 +336,7 @@ export default function Panel() {
                     </Typography>
                   </div>
                   <div className={classes.cardText}>
-                    <Typography color="textPrimary">
-                      {value.text}
-                    </Typography>
+                    <Markdown>{value.text}</Markdown>
                   </div>
                 </Card>
               </div>
