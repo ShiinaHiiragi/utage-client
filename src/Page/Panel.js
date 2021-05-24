@@ -19,7 +19,15 @@ import Card from '@material-ui/core/Card';
 import Tooltip from '@material-ui/core/Tooltip';
 import Avatar from '@material-ui/core/Avatar';
 import Badge from '@material-ui/core/Badge';
+import Button from '@material-ui/core/Button';
 import IconButton from '@material-ui/core/IconButton';
+import Dialog from '@material-ui/core/Dialog';
+import DialogActions from '@material-ui/core/DialogActions';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogContentText from '@material-ui/core/DialogContentText';
+import DialogTitle from '@material-ui/core/DialogTitle';
+import Backdrop from '@material-ui/core/Backdrop';
+import CircularProgress from '@material-ui/core/CircularProgress';
 import { makeStyles } from '@material-ui/core/styles';
 import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
 import MenuIcon from '@material-ui/icons/Menu';
@@ -141,8 +149,6 @@ let panelReading = {
   state: {
     selectedRecord: '2048U',
     selectedName: 'chocomint',
-    sideListItem: true,
-    moreAnchor: null,
   },
 };
 
@@ -150,6 +156,9 @@ const drawerWidth = 300;
 const useStyles = makeStyles((theme) => ({
   root: {
     display: 'flex',
+  },
+  noneSelect: {
+    userSelect: 'none',
   },
   appBar: {
     userSelect: 'none',
@@ -254,6 +263,10 @@ const useStyles = makeStyles((theme) => ({
   textSpan: {
     flexGrow: 1,
   },
+  backdrop: {
+    zIndex: theme.zIndex.drawer + 1,
+    color: '#fff',
+  },
 }));
 
 // eslint-disable-next-line
@@ -294,17 +307,25 @@ export default function Panel() {
 
   // the info need by user interface
   const [panelInfo, setPanelInfo] = React.useState(panelReading);
+  const [panelPopup, setPanelPopup] = React.useState({
+    sideListItem: true,
+    moreAnchor: null,
+    menuLogOut: false,
+    backdrop: false,
+  });
+
+  // about list item
   const handleToggleSideListItem = () => {
-    setPanelInfo(panelInfo => ({
-      ...panelInfo,
-      state: { ...panelInfo.state, sideListItem: true, }
-    }));
+    setPanelPopup(panelPopup => ({
+      ...panelPopup,
+      sideListItem: true,
+    }))
   };
   const handleCloseSideListItem = () => {
-    setPanelInfo(panelInfo => ({
-      ...panelInfo,
-      state: { ...panelInfo.state, sideListItem: false, }
-    }));
+    setPanelPopup(panelPopup => ({
+      ...panelPopup,
+      sideListItem: false,
+    }))
   };
   const handleListItemClick = (event, comb, name) => {
     setPanelInfo(panelInfo => ({
@@ -319,16 +340,17 @@ export default function Panel() {
     }));
   };
 
+  // about more button
   const handleMoreClick = (event) => {
-    setPanelInfo(panelInfo => ({
-      ...panelInfo,
-      state: { ...panelInfo.state, moreAnchor: event.currentTarget, }
+    setPanelPopup(panelPopup => ({
+      ...panelPopup,
+      moreAnchor: event.currentTarget,
     }));
   };
   const handleMoreClose = () => {
-    setPanelInfo(panelInfo => ({
-      ...panelInfo,
-      state: { ...panelInfo.state, moreAnchor: null, }
+    setPanelPopup(panelPopup => ({
+      ...panelPopup,
+      moreAnchor: null,
     }));
   };
   const handleMenuProfileClick = () => {
@@ -341,37 +363,66 @@ export default function Panel() {
   };
   const handleMenuLogOutClick = () => {
     handleMoreClose();
-    // TODO: complete the functions
-    ReactDOM.render(
-      <SignIn />,
-      document.getElementById('root')
-    );
+    setPanelPopup(panelPopup => ({
+      ...panelPopup,
+      menuLogOut: true,
+    }))
   };
+  const handleMenuLogOutCalcelClick = () => {
+    setPanelPopup(panelPopup => ({
+      ...panelPopup,
+      menuLogOut: false,
+    }))
+  };
+  const handleMenuLogOutOKClick = () => {
+    handleMenuLogOutCalcelClick();
+    toggleBackdrop(() => {
+      ReactDOM.render(<SignIn />, document.getElementById('root'));
+    }, 1000);
+  };
+
+  // about info button
   const handleMoreInfoClick = () => {
     // TODO: complete the functions
   };
 
+  // about backdrop
+  const toggleBackdrop = (callback, timeSpan) => {
+    setPanelPopup(panelPopup => ({
+      ...panelPopup, backdrop: true,
+    }));
+    setTimeout(() => {
+      setPanelPopup(panelPopup => ({
+        ...panelPopup, backdrop: false,
+      }));
+      callback();
+    }, timeSpan);
+  };
+
+  // TEMP: no function should point to this in the end
+  const nilFunction = () => {};
+
   return (
     <div className={classes.root}>
       <CssBaseline />
-      <AppBar position="fixed" className={clsx(classes.appBar, {[classes.appBarShift]: panelInfo.state.sideListItem,})}>
+      <AppBar position="fixed" className={clsx(classes.appBar, {[classes.appBarShift]: panelPopup.sideListItem,})}>
         <Toolbar>
           <IconButton color="inherit" aria-label="open drawer" edge="start" className={classes.menuButton}
-                      onClick={panelInfo.state.sideListItem ? handleCloseSideListItem : handleToggleSideListItem}>
-            {panelInfo.state.sideListItem ?
+                      onClick={panelPopup.sideListItem ? handleCloseSideListItem : handleToggleSideListItem}>
+            {panelPopup.sideListItem ?
               <Tooltip title="Fold" placement="bottom"><ChevronLeftIcon /></Tooltip> :
               <Tooltip title="Unfold" placement="bottom"><MenuIcon /></Tooltip>}
           </IconButton>
           <Typography className={classes.textSpan} variant="h6" noWrap>
             {panelInfo.state.selectedName}
           </Typography>
-          <IconButton color="inherit" edge="end" onclick={handleMoreInfoClick}>
+          <IconButton color="inherit" edge="end" onClick={handleMoreInfoClick}>
             <Tooltip title="Info" placement="bottom"><InfoOutlinedIcon /></Tooltip>
           </IconButton>
         </Toolbar>
       </AppBar>
 
-      <Drawer className={classes.drawer} variant="persistent" anchor="left" open={panelInfo.state.sideListItem} classes={{paper: classes.drawerPaper}}>
+      <Drawer className={classes.drawer} variant="persistent" anchor="left" open={panelPopup.sideListItem} classes={{paper: classes.drawerPaper}}>
         <List>
           <ListItem>
             <ListItemAvatar>
@@ -381,10 +432,22 @@ export default function Panel() {
             <Tooltip title="More" placement="top">
               <IconButton onClick={handleMoreClick}><MoreVertIcon /></IconButton> 
             </Tooltip>
-            <Menu anchorEl={panelInfo.state.moreAnchor} keepMounted open={Boolean(panelInfo.state.moreAnchor)} onClose={handleMoreClose}>
+            <Menu anchorEl={panelPopup.moreAnchor} keepMounted open={Boolean(panelPopup.moreAnchor)} onClose={handleMoreClose}>
               <MenuItem onClick={handleMenuProfileClick}>My Profile</MenuItem>
               <MenuItem onClick={handleMenuAddClick}>Add Friends/Groups</MenuItem>
               <MenuItem onClick={handleMenuLogOutClick}>Log Out</MenuItem>
+              <Dialog open={panelPopup.menuLogOut} onClose={handleMenuLogOutCalcelClick} className={classes.noneSelect}>
+                <DialogTitle id="alert-dialog-title">{"WARNING"}</DialogTitle>
+                <DialogContent>
+                  <DialogContentText id="alert-dialog-description">
+                    Do you really want to quit your Utage account? Click OK to log out.
+                  </DialogContentText>
+                </DialogContent>
+                <DialogActions>
+                  <Button onClick={handleMenuLogOutCalcelClick} color="primary" autoFocus>Cancel</Button>
+                  <Button onClick={handleMenuLogOutOKClick} color="secondary">Yes</Button>
+                </DialogActions>
+              </Dialog>
             </Menu>
           </ListItem>
         </List>
@@ -409,7 +472,7 @@ export default function Panel() {
         </List>
       </Drawer>
 
-      <main className={clsx(classes.content, {[classes.contentShift]: panelInfo.state.sideListItem,})}>
+      <main className={clsx(classes.content, {[classes.contentShift]: panelPopup.sideListItem,})}>
         <div className={classes.drawerHeader} />
         <div className={classes.recordField} variant="outlined">
           {panelInfo.record.find(value => (value.accessInfo.id === panelInfo.state.selectedRecord))
@@ -435,37 +498,30 @@ export default function Panel() {
         <div className={classes.textField}>
           <TextField id="outlined-multiline-static" label="Leave a Message in Markdown" multiline rows={4} variant="outlined"/>
           <Toolbar className={classes.textButton}>
-            <Tooltip title="Emoji" placement="top">
-              <IconButton><InsertEmoticonIcon /></IconButton>
-            </Tooltip>
-            <Tooltip title="Insert Image" placement="top">
-              <IconButton><ImageIcon /></IconButton>
-            </Tooltip>
-            <Tooltip title="Bold" placement="top">
-              <IconButton><FormatBoldIcon /></IconButton>
-            </Tooltip>
-            <Tooltip title="Italic" placement="top">
-              <IconButton><FormatItalicIcon /></IconButton>
-            </Tooltip>
-            <Tooltip title="Strikethrough" placement="top">
-              <IconButton><StrikethroughSIcon /></IconButton>
-            </Tooltip>
-            <Tooltip title="Link" placement="top">
-              <IconButton><LinkIcon /></IconButton>
-            </Tooltip>
-            <Tooltip title="Code Line" placement="top">
-              <IconButton><CodeIcon /></IconButton>
-            </Tooltip>
-            <div className={classes.textSpan}></div>
-            <Tooltip title="Preview" placement="top">
-              <IconButton><AirplayIcon /></IconButton>
-            </Tooltip>
-            <Tooltip title="Send" placement="top">
-              <IconButton><SendIcon /></IconButton>
-            </Tooltip>
+            {[["Emoji", <InsertEmoticonIcon />, nilFunction],
+              ["Insert Image", <ImageIcon />, nilFunction],
+              ["Bold", <FormatBoldIcon />, nilFunction],
+              ["Italic", <FormatItalicIcon />, nilFunction],
+              ["Strikethrough", <StrikethroughSIcon />, nilFunction],
+              ["Link", <LinkIcon />, nilFunction],
+              ["Code Line", <CodeIcon />, nilFunction],
+              <div key="span" className={classes.textSpan}></div>,
+              ["Preview", <AirplayIcon />, nilFunction],
+              ["Send", <SendIcon />, nilFunction]].map(
+                value => {
+                  if (value instanceof Array)
+                    return (
+                      <Tooltip key={value[0]} title={value[0]} placement="top" onClick={value[2]}>
+                        <IconButton>{value[1]}</IconButton>
+                      </Tooltip>);
+                  else return value;
+                })}
           </Toolbar>
         </div>
       </main>
+      <Backdrop className={classes.backdrop} open={panelPopup.backdrop}>
+        <CircularProgress color="inherit" size={56} />
+      </Backdrop>
     </div>
   );
 }
