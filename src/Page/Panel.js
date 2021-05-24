@@ -12,8 +12,6 @@ import Divider from '@material-ui/core/Divider';
 import Typography from '@material-ui/core/Typography';
 import TextField from '@material-ui/core/TextField';
 import Card from '@material-ui/core/Card';
-import CardContent from '@material-ui/core/CardContent';
-import Paper from '@material-ui/core/Paper';
 import Avatar from '@material-ui/core/Avatar';
 import IconButton from '@material-ui/core/IconButton';
 import { makeStyles, useTheme } from '@material-ui/core/styles';
@@ -48,13 +46,17 @@ let panelReading = {
         {
           rid: 3,
           sender: 'Saki',
-          text: '<p>Hello everyone.<p>',
+          senderID: '32768U',
+          senderAvatar: 'jpg',
+          text: 'Hello everyone.',
           time: '2021-05-23T04:25:41.181Z'
         },
         {
           rid: 4,
           sender: 'Alice',
-          text: '<p>Have a good day!<p>',
+          senderID: '1024U',
+          senderAvatar: 'png',
+          text: 'Have a good day!',
           time: '2021-05-23T04:28:46.995Z'
         },
       ]
@@ -70,14 +72,16 @@ let panelReading = {
           rid: 1,
           sender: 'chocomint',
           senderID: '2048U',
-          text: '<p>Hello!<p>',
+          senderAvatar: 'png',
+          text: 'Hello!',
           time: '2021-05-23T04:20:44.733Z'
         },
         {
           rid: 2,
           sender: 'Alice',
           senderID: '1024U',
-          text: '<p>Hi!<p>',
+          senderAvatar: 'png',
+          text: 'Hi!',
           time: '2021-05-23T04:21:25.401Z'
         }
       ]
@@ -317,64 +321,26 @@ export default function Panel() {
       <main className={clsx(classes.content, {[classes.contentShift]: panelInfo.state.sideListItem,})}>
         <div className={classes.drawerHeader} />
         <div className={classes.recordField} variant="outlined">
-
-
-          <div className={classes.recordItemLeft}>
-            <div className={classes.recordOffset}>
-              <Avatar className={classes.recordAvatar} src={'static/avatar/avatar-1024U.png'}><PersonIcon /></Avatar>
-            </div>
-            <Card className={classes.card}>
-              <div className={classes.cardTitle}>
-                <Typography color="textSecondary">
-                  <b>saki</b> 2021-05-23 12:21:30
-                </Typography>
+          {panelInfo.record.find(value => (value.accessInfo.id == panelInfo.state.selectedRecord))
+            .log.map(value => (
+              <div className={value.senderID == panelInfo.usrInfo.uid ? classes.recordItemRight : classes.recordItemLeft}>
+                <div className={classes.recordOffset}>
+                  <Avatar className={classes.recordAvatar} src={`static/avatar/avatar-${value.senderID}.${value.senderAvatar}`}><PersonIcon /></Avatar>
+                </div>
+                <Card className={classes.card}>
+                  <div className={classes.cardTitle}>
+                    <Typography color="textSecondary">
+                      <b>{value.sender}</b> {formatSideTime(value.time)}
+                    </Typography>
+                  </div>
+                  <div className={classes.cardText}>
+                    <Typography color="textPrimary">
+                      {value.text}
+                    </Typography>
+                  </div>
+                </Card>
               </div>
-              <div className={classes.cardText}>
-                <Typography color="textPrimary">
-                  Lorem ipsum dolor sit amet consectetur adipisicing elit. Tenetur neque ipsam consequuntur nostrum aut accusamus, cum fuga! Eveniet quasi exercitationem corporis dolor itaque nesciunt, doloribus ut minus accusantium voluptate velit!
-                </Typography>
-              </div>
-            </Card>
-          </div>
-
-          <div className={classes.recordItemRight}>
-            <div className={classes.recordOffset}>
-              <Avatar className={classes.recordAvatar} src={'static/avatar/avatar-1024U.png'}><PersonIcon /></Avatar>
-            </div>
-            <Card className={classes.card}>
-              <div className={classes.cardTitle}>
-                <Typography color="textSecondary">
-                  <b>Alice</b> 2021-05-23 12:24:02
-                </Typography>
-              </div>
-              <div className={classes.cardText}>
-                <Typography color="textPrimary">
-                  Lorem ipsum dolor sit amet consectetur adipisicing elit.
-                </Typography>
-              </div>
-            </Card>
-          </div>
-
-
-
-          <div className={classes.recordItemLeft}>
-            <div className={classes.recordOffset}>
-              <Avatar className={classes.recordAvatar} src={'static/avatar/avatar-1024U.png'}><PersonIcon /></Avatar>
-            </div>
-            <Card className={classes.card}>
-              <div className={classes.cardTitle}>
-                <Typography color="textSecondary">
-                  <b>chocomint</b> 2021-05-23 12:28:46
-                </Typography>
-              </div>
-              <div className={classes.cardText}>
-                <Typography color="textPrimary">
-                  Lorem ipsum dolor.
-                </Typography>
-              </div>
-            </Card>
-          </div>
-
+            ))}
         </div>
 
         <div className={classes.textField}>
