@@ -9,12 +9,15 @@ import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 import ListItemAvatar from '@material-ui/core/ListItemAvatar'
+import Menu from '@material-ui/core/Menu';
+import MenuItem from '@material-ui/core/MenuItem';
 import Divider from '@material-ui/core/Divider';
 import Typography from '@material-ui/core/Typography';
 import TextField from '@material-ui/core/TextField';
 import Card from '@material-ui/core/Card';
 import Tooltip from '@material-ui/core/Tooltip';
 import Avatar from '@material-ui/core/Avatar';
+import Badge from '@material-ui/core/Badge';
 import IconButton from '@material-ui/core/IconButton';
 import { makeStyles } from '@material-ui/core/styles';
 import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
@@ -33,6 +36,10 @@ import SendIcon from '@material-ui/icons/Send';
 import AirplayIcon from '@material-ui/icons/Airplay';
 import StrikethroughSIcon from '@material-ui/icons/StrikethroughS';
 
+// panelReading should:
+// 1. record and log are sorted chronologically
+// 2. selectedName and selectedRecord are the first record
+// 3. the first record's unread count should be 0
 let panelReading = {
   usrInfo: {
     uid: '1024U',
@@ -46,6 +53,10 @@ let panelReading = {
         id: '2048U',
         name: 'chocomint',
         avatar: 'png',
+      },
+      status: {
+        unread: 0,
+        all: true,
       },
       log: [
         {
@@ -88,6 +99,10 @@ let panelReading = {
         name: 'Miya Ouendan',
         avatar: 'jpg',
       },
+      status: {
+        unread: 1,
+        all: true,
+      },
       log: [
         {
           rid: 3,
@@ -107,12 +122,15 @@ let panelReading = {
         },
       ]
     },
-
     {
       accessInfo: {
         id: '4096U',
         name: 'Miku',
         avatar: 'jpg',
+      },
+      status: {
+        unread: 0,
+        all: true,
       },
       log: [
       ]
@@ -122,6 +140,7 @@ let panelReading = {
     selectedRecord: '2048U',
     selectedName: 'chocomint',
     sideListItem: true,
+    moreAnchor: null,
   },
 };
 
@@ -292,8 +311,38 @@ export default function Panel() {
         ...panelInfo.state,
         selectedRecord: comb,
         selectedName: name,
-      }
+      },
+      record: panelInfo.record.map(value => (value.accessInfo.id === comb ?
+        {...value, status: {...value.status, unread: 0}} : value)),
     }));
+  };
+
+  const handleMoreClick = (event) => {
+    setPanelInfo(panelInfo => ({
+      ...panelInfo,
+      state: { ...panelInfo.state, moreAnchor: event.currentTarget, }
+    }));
+  };
+  const handleMoreClose = () => {
+    setPanelInfo(panelInfo => ({
+      ...panelInfo,
+      state: { ...panelInfo.state, moreAnchor: null, }
+    }));
+  };
+  const handleMenuProfileClick = () => {
+    handleMoreClose();
+    // TODO: complete the functions
+  };
+  const handleMenuAddClick = () => {
+    handleMoreClose();
+    // TODO: complete the functions
+  };
+  const handleMenuLogOutClick = () => {
+    handleMoreClose();
+    // TODO: complete the functions
+  };
+  const handleMoreInfoClick = () => {
+    // TODO: complete the functions
   };
 
   return (
@@ -310,8 +359,8 @@ export default function Panel() {
           <Typography className={classes.textSpan} variant="h6" noWrap>
             {panelInfo.state.selectedName}
           </Typography>
-          <IconButton color="inherit" edge="end">
-            <Tooltip title="More" placement="bottom"><MoreVertIcon /></Tooltip>
+          <IconButton color="inherit" edge="end" onclick={handleMoreInfoClick}>
+            <Tooltip title="Info" placement="bottom"><InfoOutlinedIcon /></Tooltip>
           </IconButton>
         </Toolbar>
       </AppBar>
@@ -323,9 +372,14 @@ export default function Panel() {
               <Avatar src={`static/avatar/avatar-${panelInfo.usrInfo.uid}.${panelInfo.usrInfo.avatar}`}><PersonIcon /></Avatar>
             </ListItemAvatar>
             <ListItemText primary={panelInfo.usrInfo.username} secondary={panelInfo.usrInfo.email}/>
-            <Tooltip title="ME" placement="top">
-              <IconButton><InfoOutlinedIcon /></IconButton> 
+            <Tooltip title="More" placement="top">
+              <IconButton onClick={handleMoreClick}><MoreVertIcon /></IconButton> 
             </Tooltip>
+            <Menu anchorEl={panelInfo.state.moreAnchor} keepMounted open={Boolean(panelInfo.state.moreAnchor)} onClose={handleMoreClose}>
+              <MenuItem onClick={handleMenuProfileClick}>My Profile</MenuItem>
+              <MenuItem onClick={handleMenuAddClick}>Add Friends/Groups</MenuItem>
+              <MenuItem onClick={handleMenuLogOutClick}>Log Out</MenuItem>
+            </Menu>
           </ListItem>
         </List>
         <Divider />
@@ -335,9 +389,12 @@ export default function Panel() {
               <ListItem button key={value.accessInfo.id} selected={panelInfo.state.selectedRecord === value.accessInfo.id}
                         onClick={(event) => handleListItemClick(event, value.accessInfo.id, value.accessInfo.name)}>
                 <ListItemAvatar>
-                  <Avatar src={`static/avatar/avatar-${value.accessInfo.id}.${value.accessInfo.avatar}`}>
-                    {value.accessInfo.id.charAt(value.accessInfo.id.length - 1) === 'U' ? <PersonIcon /> : <GroupIcon/>}
-                  </Avatar>
+                  <Badge badgeContent={value.status.unread} color="secondary">
+                    <Avatar src={`static/avatar/avatar-${value.accessInfo.id}.${value.accessInfo.avatar}`}>
+                      {value.accessInfo.id.charAt(value.accessInfo.id.length - 1) === 'U' ? <PersonIcon /> : <GroupIcon/>}
+                    </Avatar>
+                  </Badge>
+
                 </ListItemAvatar>
                 <ListItemText primary={value.accessInfo.name}
                   secondary={value.log.length > 0 ? formatSideTime(value.log[value.log.length - 1].time) : '(No Message Yet)'}/>
