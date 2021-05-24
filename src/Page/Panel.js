@@ -1,5 +1,6 @@
 import React from 'react';
 import clsx from 'clsx';
+import Markdown from 'markdown-to-jsx';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import Drawer from '@material-ui/core/Drawer';
 import AppBar from '@material-ui/core/AppBar';
@@ -12,21 +13,24 @@ import Divider from '@material-ui/core/Divider';
 import Typography from '@material-ui/core/Typography';
 import TextField from '@material-ui/core/TextField';
 import Card from '@material-ui/core/Card';
-import Markdown from 'markdown-to-jsx';
+import Tooltip from '@material-ui/core/Tooltip';
 import Avatar from '@material-ui/core/Avatar';
 import IconButton from '@material-ui/core/IconButton';
 import { makeStyles } from '@material-ui/core/styles';
+import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
 import MenuIcon from '@material-ui/icons/Menu';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import MoreVertIcon from '@material-ui/icons/MoreVert';
 import PersonIcon from '@material-ui/icons/Person';
 import GroupIcon from '@material-ui/icons/Group';
 import InsertEmoticonIcon from '@material-ui/icons/InsertEmoticon';
+import ImageIcon from '@material-ui/icons/Image';
 import FormatBoldIcon from '@material-ui/icons/FormatBold';
 import FormatItalicIcon from '@material-ui/icons/FormatItalic';
 import CodeIcon from '@material-ui/icons/Code';
 import LinkIcon from '@material-ui/icons/Link';
 import SendIcon from '@material-ui/icons/Send';
+import AirplayIcon from '@material-ui/icons/Airplay';
 import StrikethroughSIcon from '@material-ui/icons/StrikethroughS';
 
 let panelReading = {
@@ -37,31 +41,6 @@ let panelReading = {
     avatar: 'png'
   },
   record: [
-    {
-      accessInfo: {
-        id: '16384G',
-        name: 'Miya Ouendan',
-        avatar: 'jpg',
-      },
-      log: [
-        {
-          rid: 3,
-          sender: 'Saki',
-          senderID: '32768U',
-          senderAvatar: 'jpg',
-          text: 'Lorem ipsum dolor, sit amet consectetur adipisicing elit. Fugiat ipsam, temporibus tempora corporis quod vero eligendi odio accusamus porro! Repudiandae iusto quam molestias, doloremque fugiat aliquam beatae similique! Beatae, corporis.',
-          time: '2021-05-23T04:25:41.181Z'
-        },
-        {
-          rid: 4,
-          sender: 'Alice',
-          senderID: '1024U',
-          senderAvatar: 'png',
-          text: 'Lorem ipsum dolor sit amet',
-          time: '2021-05-23T04:28:46.995Z'
-        },
-      ]
-    },
     {
       accessInfo: {
         id: '2048U',
@@ -79,14 +58,56 @@ let panelReading = {
         },
         {
           rid: 2,
-          sender: 'Alice',
+          sender: 'Koishi',
           senderID: '1024U',
           senderAvatar: 'png',
           text: 'Nobis qui esse a distinctio rem sed vero quae repudiandae dolores, dolorem nostrum excepturi inventore consequuntur quo quisquam officiis, expedita hic sit.',
           time: '2021-05-23T04:21:25.401Z'
-        }
+        },
+        {
+          rid: 5,
+          sender: 'chocomint',
+          senderID: '2048U',
+          senderAvatar: 'png',
+          text: 'Lorem ipsum dolor sit, amet consectetur adipisicing elit. Nulla, exercitationem obcaecati? Accusantium voluptatem, dolores voluptatum voluptate tempora impedit aliquam labore doloribus nisi fugit sapiente. Libero consectetur quam corporis ducimus pariatur.',
+          time: '2021-05-24T11:14:31.271Z'
+        },
+        {
+          rid: 6,
+          sender: 'Koishi',
+          senderID: '1024U',
+          senderAvatar: 'png',
+          text: 'Lorem ipsum dolor sit amet consectetur, adipisicing elit. Atque, ducimus. Sit error, repudiandae exercitationem alias asperiores odit officia possimus ducimus, esse amet praesentium, commodi quam aperiam quae maiores suscipit ipsa.',
+          time: '2021-05-24T11:14:41.634Z'
+        },
       ]
     },
+    {
+      accessInfo: {
+        id: '16384G',
+        name: 'Miya Ouendan',
+        avatar: 'jpg',
+      },
+      log: [
+        {
+          rid: 3,
+          sender: 'Saki',
+          senderID: '32768U',
+          senderAvatar: 'jpg',
+          text: 'Lorem ipsum dolor, sit amet consectetur adipisicing elit. Fugiat ipsam, temporibus tempora corporis quod vero eligendi odio accusamus porro! Repudiandae iusto quam molestias, doloremque fugiat aliquam beatae similique! Beatae, corporis.',
+          time: '2021-05-23T04:25:41.181Z'
+        },
+        {
+          rid: 4,
+          sender: 'Koishi',
+          senderID: '1024U',
+          senderAvatar: 'png',
+          text: 'Lorem ipsum dolor sit amet',
+          time: '2021-05-23T04:28:46.995Z'
+        },
+      ]
+    },
+
     {
       accessInfo: {
         id: '4096U',
@@ -98,8 +119,8 @@ let panelReading = {
     },
   ],
   state: {
-    selectedRecord: '16384G',
-    selectedName: 'Miya Ouendan',
+    selectedRecord: '2048U',
+    selectedName: 'chocomint',
     sideListItem: true,
   },
 };
@@ -214,6 +235,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
+// eslint-disable-next-line
 Date.prototype.format = function(formatString){
   var formatComponent = {
     "M+" : this.getMonth() + 1,
@@ -231,16 +253,16 @@ Date.prototype.format = function(formatString){
   for(var index in formatComponent)
     if(new RegExp(`(${index})`).test(formatString))
       formatString = formatString.replace(
-        RegExp.$1, (RegExp.$1.length == 1) ? (formatComponent[index]) : (("00"+ formatComponent[index])
+        RegExp.$1, (RegExp.$1.length === 1) ? (formatComponent[index]) : (("00"+ formatComponent[index])
         .substr((""+ formatComponent[index]).length)));
   return formatString;
 }
 
 const formatSideTime = (timeString) => {
   let timeThen = new Date(timeString), timeNow = new Date();
-  let sameYear = (timeThen.getFullYear() == timeNow.getFullYear()),
-      sameMonth = sameYear && (timeThen.getMonth() == timeNow.getMonth()),
-      sameDay = sameMonth && (timeThen.getDay() == timeNow.getDay());
+  let sameYear = (timeThen.getFullYear() === timeNow.getFullYear()),
+      sameMonth = sameYear && (timeThen.getMonth() === timeNow.getMonth()),
+      sameDay = sameMonth && (timeThen.getDay() === timeNow.getDay());
   let formatString = (sameYear ? '' : 'yyyy-') + (sameDay ? '' : 'MM-dd ') + 'hh:mm:ss';
   return timeThen.format(formatString);
 }
@@ -281,13 +303,15 @@ export default function Panel() {
         <Toolbar>
           <IconButton color="inherit" aria-label="open drawer" edge="start" className={classes.menuButton}
                       onClick={panelInfo.state.sideListItem ? handleCloseSideListItem : handleToggleSideListItem}>
-            {panelInfo.state.sideListItem ? <ChevronLeftIcon /> : <MenuIcon />}
+            {panelInfo.state.sideListItem ?
+              <Tooltip title="Fold" placement="bottom"><ChevronLeftIcon /></Tooltip> :
+              <Tooltip title="Unfold" placement="bottom"><MenuIcon /></Tooltip>}
           </IconButton>
           <Typography className={classes.textSpan} variant="h6" noWrap>
             {panelInfo.state.selectedName}
           </Typography>
           <IconButton color="inherit" edge="end">
-            <MoreVertIcon />
+            <Tooltip title="More" placement="bottom"><MoreVertIcon /></Tooltip>
           </IconButton>
         </Toolbar>
       </AppBar>
@@ -299,10 +323,12 @@ export default function Panel() {
               <Avatar src={`static/avatar/avatar-${panelInfo.usrInfo.uid}.${panelInfo.usrInfo.avatar}`}><PersonIcon /></Avatar>
             </ListItemAvatar>
             <ListItemText primary={panelInfo.usrInfo.username} secondary={panelInfo.usrInfo.email}/>
+            <Tooltip title="ME" placement="top">
+              <IconButton><InfoOutlinedIcon /></IconButton> 
+            </Tooltip>
           </ListItem>
         </List>
         <Divider />
-
         <List>
           {panelInfo.record.map((value) => {
             return(
@@ -323,9 +349,9 @@ export default function Panel() {
       <main className={clsx(classes.content, {[classes.contentShift]: panelInfo.state.sideListItem,})}>
         <div className={classes.drawerHeader} />
         <div className={classes.recordField} variant="outlined">
-          {panelInfo.record.find(value => (value.accessInfo.id == panelInfo.state.selectedRecord))
+          {panelInfo.record.find(value => (value.accessInfo.id === panelInfo.state.selectedRecord))
             .log.map(value => (
-              <div key={value.rid} className={value.senderID == panelInfo.usrInfo.uid ? classes.recordItemRight : classes.recordItemLeft}>
+              <div key={value.rid} className={value.senderID === panelInfo.usrInfo.uid ? classes.recordItemRight : classes.recordItemLeft}>
                 <div className={classes.recordOffset}>
                   <Avatar className={classes.recordAvatar} src={`static/avatar/avatar-${value.senderID}.${value.senderAvatar}`}><PersonIcon /></Avatar>
                 </div>
@@ -346,14 +372,34 @@ export default function Panel() {
         <div className={classes.textField}>
           <TextField id="outlined-multiline-static" label="Leave a Message in Markdown" multiline rows={4} variant="outlined"/>
           <Toolbar className={classes.textButton}>
-            <IconButton><InsertEmoticonIcon /></IconButton>
-            <IconButton><FormatBoldIcon /></IconButton>
-            <IconButton><FormatItalicIcon /></IconButton>
-            <IconButton><StrikethroughSIcon /></IconButton>
-            <IconButton><LinkIcon /></IconButton>
-            <IconButton><CodeIcon /></IconButton>
+            <Tooltip title="Emoji" placement="top">
+              <IconButton><InsertEmoticonIcon /></IconButton>
+            </Tooltip>
+            <Tooltip title="Insert Image" placement="top">
+              <IconButton><ImageIcon /></IconButton>
+            </Tooltip>
+            <Tooltip title="Bold" placement="top">
+              <IconButton><FormatBoldIcon /></IconButton>
+            </Tooltip>
+            <Tooltip title="Italic" placement="top">
+              <IconButton><FormatItalicIcon /></IconButton>
+            </Tooltip>
+            <Tooltip title="Strikethrough" placement="top">
+              <IconButton><StrikethroughSIcon /></IconButton>
+            </Tooltip>
+            <Tooltip title="Link" placement="top">
+              <IconButton><LinkIcon /></IconButton>
+            </Tooltip>
+            <Tooltip title="Code Line" placement="top">
+              <IconButton><CodeIcon /></IconButton>
+            </Tooltip>
             <div className={classes.textSpan}></div>
-            <IconButton><SendIcon /></IconButton>
+            <Tooltip title="Preview" placement="top">
+              <IconButton><AirplayIcon /></IconButton>
+            </Tooltip>
+            <Tooltip title="Send" placement="top">
+              <IconButton><SendIcon /></IconButton>
+            </Tooltip>
           </Toolbar>
         </div>
       </main>
