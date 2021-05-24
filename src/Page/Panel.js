@@ -46,10 +46,7 @@ import AirplayIcon from '@material-ui/icons/Airplay';
 import StrikethroughSIcon from '@material-ui/icons/StrikethroughS';
 import SignIn from './SignIn';
 
-// panelReading should:
-// 1. record and log are sorted chronologically
-// 2. selectedName and selectedRecord are the first record
-// 3. the first record's unread count should be 0
+// panelReading's record and log should be sorted chronologically
 let panelReading = {
   usrInfo: {
     uid: '1024U',
@@ -65,7 +62,7 @@ let panelReading = {
         avatar: 'png',
       },
       status: {
-        unread: 0,
+        unread: 2,
         all: true,
       },
       log: [
@@ -110,7 +107,7 @@ let panelReading = {
         avatar: 'jpg',
       },
       status: {
-        unread: 1,
+        unread: 0,
         all: true,
       },
       log: [
@@ -147,8 +144,9 @@ let panelReading = {
     },
   ],
   state: {
-    selectedRecord: '2048U',
-    selectedName: 'chocomint',
+    justSignIn: true,
+    selectedRecord: '',
+    selectedName: 'Utage',
   },
 };
 
@@ -277,12 +275,12 @@ Date.prototype.format = function(formatString){
     "h+" : this.getHours(),
     "m+" : this.getMinutes(),
     "s+" : this.getSeconds(),
-    "q+" : Math.floor((this.getMonth()+3)/3),
+    "q+" : Math.floor((this.getMonth() + 3) / 3),
     "S"  : this.getMilliseconds()
   };
 
   if(/(y+)/.test(formatString))
-    formatString = formatString.replace(RegExp.$1, (this.getFullYear()+"").substr(4 - RegExp.$1.length));
+    formatString = formatString.replace(RegExp.$1, (this.getFullYear() + "").substr(4 - RegExp.$1.length));
 
   for(var index in formatComponent)
     if(new RegExp(`(${index})`).test(formatString))
@@ -301,6 +299,10 @@ const formatSideTime = (timeString) => {
   return timeThen.format(formatString);
 }
 
+let emojiList = new Array(80).fill().map((item, index) =>
+  (String.fromCodePoint(`0x${(128512 + index).toString(16)}`))
+);
+
 export default function Panel() {
   const classes = useStyles();
   // const theme = useTheme();
@@ -312,6 +314,7 @@ export default function Panel() {
     moreAnchor: null,
     menuLogOut: false,
     backdrop: false,
+    textEmoji: false,
   });
 
   // about list item
@@ -334,6 +337,7 @@ export default function Panel() {
         ...panelInfo.state,
         selectedRecord: comb,
         selectedName: name,
+        justSignIn: false,
       },
       record: panelInfo.record.map(value => (value.accessInfo.id === comb ?
         {...value, status: {...value.status, unread: 0}} : value)),
@@ -399,6 +403,20 @@ export default function Panel() {
     }, timeSpan);
   };
 
+  // about textEmoji
+  const handleToggleTextEmoji = () => {
+    setPanelPopup(panelPopup => ({
+      ...panelPopup, textEmoji: true,
+    }));
+  }
+  const handleCloseTextEmoji = () => {
+    setPanelPopup(panelPopup => ({
+      ...panelPopup, textEmoji: false,
+    }));
+  }
+  const handleTextEmojiSelect = () => {
+  };
+
   // TEMP: no function should point to this in the end
   const nilFunction = () => {};
 
@@ -416,9 +434,10 @@ export default function Panel() {
           <Typography className={classes.textSpan} variant="h6" noWrap>
             {panelInfo.state.selectedName}
           </Typography>
-          <IconButton color="inherit" edge="end" onClick={handleMoreInfoClick}>
-            <Tooltip title="Info" placement="bottom"><InfoOutlinedIcon /></Tooltip>
-          </IconButton>
+          {!panelInfo.state.justSignIn &&
+            <IconButton color="inherit" edge="end" onClick={handleMoreInfoClick}>
+                <Tooltip title="Info" placement="bottom"><InfoOutlinedIcon /></Tooltip>
+            </IconButton>}
         </Toolbar>
       </AppBar>
 
@@ -475,7 +494,8 @@ export default function Panel() {
       <main className={clsx(classes.content, {[classes.contentShift]: panelPopup.sideListItem,})}>
         <div className={classes.drawerHeader} />
         <div className={classes.recordField} variant="outlined">
-          {panelInfo.record.find(value => (value.accessInfo.id === panelInfo.state.selectedRecord))
+          {!panelInfo.state.justSignIn &&
+            panelInfo.record.find(value => (value.accessInfo.id === panelInfo.state.selectedRecord))
             .log.map(value => (
               <div key={value.rid} className={value.senderID === panelInfo.usrInfo.uid ? classes.recordItemRight : classes.recordItemLeft}>
                 <div className={classes.recordOffset}>
@@ -495,29 +515,46 @@ export default function Panel() {
             ))}
         </div>
 
-        <div className={classes.textField}>
-          <TextField id="outlined-multiline-static" label="Leave a Message in Markdown" multiline rows={4} variant="outlined"/>
-          <Toolbar className={classes.textButton}>
-            {[["Emoji", <InsertEmoticonIcon />, nilFunction],
-              ["Insert Image", <ImageIcon />, nilFunction],
-              ["Bold", <FormatBoldIcon />, nilFunction],
-              ["Italic", <FormatItalicIcon />, nilFunction],
-              ["Strikethrough", <StrikethroughSIcon />, nilFunction],
-              ["Link", <LinkIcon />, nilFunction],
-              ["Code Line", <CodeIcon />, nilFunction],
-              <div key="span" className={classes.textSpan}></div>,
-              ["Preview", <AirplayIcon />, nilFunction],
-              ["Send", <SendIcon />, nilFunction]].map(
-                value => {
-                  if (value instanceof Array)
-                    return (
-                      <Tooltip key={value[0]} title={value[0]} placement="top" onClick={value[2]}>
-                        <IconButton>{value[1]}</IconButton>
-                      </Tooltip>);
-                  else return value;
-                })}
-          </Toolbar>
-        </div>
+        {!panelInfo.state.justSignIn && 
+          <div className={classes.textField}>
+            <TextField id="outlined-multiline-static" label="Leave a Message in Markdown" multiline rows={4} variant="outlined"/>
+            <Toolbar className={classes.textButton}>
+              {[["Emoji", <InsertEmoticonIcon />, handleToggleTextEmoji],
+                ["Insert Image", <ImageIcon />, nilFunction],
+                ["Bold", <FormatBoldIcon />, nilFunction],
+                ["Italic", <FormatItalicIcon />, nilFunction],
+                ["Strikethrough", <StrikethroughSIcon />, nilFunction],
+                ["Link", <LinkIcon />, nilFunction],
+                ["Code Line", <CodeIcon />, nilFunction],
+                <div key="span" className={classes.textSpan}></div>,
+                ["Preview", <AirplayIcon />, nilFunction],
+                ["Send", <SendIcon />, nilFunction]].map(
+                  value => {
+                    if (value instanceof Array)
+                      return (
+                        <Tooltip key={value[0]} title={value[0]} placement="top" onClick={value[2]}>
+                          <IconButton>{value[1]}</IconButton>
+                        </Tooltip>);
+                    else return value;
+                  })}
+            </Toolbar>
+            <Dialog open={panelPopup.textEmoji} onClose={handleCloseTextEmoji} className={classes.noneSelect}>
+              <DialogTitle id="alert-dialog-title">{"Select a Emoji"}</DialogTitle>
+              <DialogContent>
+                {emojiList.map((value, index) => (
+                  <IconButton key={index} onClick={handleTextEmojiSelect} color='inherit'>
+                    {` ${value} `}
+                  </IconButton>
+                ))}
+                <IconButton onClick={handleTextEmojiSelect}>{'\u1F419'}</IconButton>
+              </DialogContent>
+              <DialogActions>
+                <Button onClick={handleCloseTextEmoji} color="primary" autoFocus>Cancel</Button>
+              </DialogActions>
+            </Dialog>
+          </div>
+        }
+
       </main>
       <Backdrop className={classes.backdrop} open={panelPopup.backdrop}>
         <CircularProgress color="inherit" size={56} />
