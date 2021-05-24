@@ -191,6 +191,7 @@ const useStyles = makeStyles((theme) => ({
   },
   cardTitle: {
     padding: theme.spacing(1, 2, 0, 2),
+    userSelect: 'none',
   },
   cardText: {
     padding: theme.spacing(0, 2, 1, 2),
@@ -270,7 +271,6 @@ export default function Panel() {
       }
     }));
   };
-  
 
   return (
     <div className={classes.root}>
@@ -307,7 +307,7 @@ export default function Panel() {
               <ListItem button key={value.accessInfo.id} selected={panelInfo.state.selectedRecord === value.accessInfo.id}
                         onClick={(event) => handleListItemClick(event, value.accessInfo.id, value.accessInfo.name)}>
                 <ListItemAvatar>
-                  <Avatar src={value.accessInfo.avatar}>
+                  <Avatar src={`static/avatar/avatar-${value.accessInfo.id}.${value.accessInfo.avatar}`}>
                     {value.accessInfo.id.charAt(value.accessInfo.id.length - 1) === 'U' ? <PersonIcon /> : <GroupIcon/>}
                   </Avatar>
                 </ListItemAvatar>
