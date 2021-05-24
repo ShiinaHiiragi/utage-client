@@ -1,4 +1,5 @@
 import React from 'react';
+import ReactDOM from 'react-dom';
 import Avatar from '@material-ui/core/Avatar';
 import Button from '@material-ui/core/Button';
 import ButtonGroup from '@material-ui/core/ButtonGroup';
@@ -22,6 +23,7 @@ import MuiAlert from '@material-ui/lab/Alert';
 import Backdrop from '@material-ui/core/Backdrop';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import { makeStyles } from '@material-ui/core/styles';
+import Panel from './Panel';
 
 const fs = window.require('fs');
 const settingPath = './data/setting/SignInSetting.json';
@@ -86,7 +88,7 @@ export default function SignIn() {
   const proxyWindowSubmit = (newValue) => {
     if (checkURL(newValue))
     {
-      var proxyHasChanged = (signInSetting.proxy != newValue);
+      var proxyHasChanged = (signInSetting.proxy !== newValue);
       setProxyWindow(false);
       signInSetting.proxy = newValue;
       saveProxySetting(proxyHasChanged);
@@ -136,7 +138,7 @@ export default function SignIn() {
   const emailInput = (event) => { setEmail(event.target.value); };
   const passwordInput = (event) => { setPassword(event.target.value); };
   const signInClick = () => {
-    if (email == '' || password == '')
+    if (email === '' || password === '')
     {
       snackWindowToggle('error', 'Please enter the account and password.');
       return;
@@ -156,7 +158,14 @@ export default function SignIn() {
   // the backdrop when communicate with server
   const [backdrop, setBackdrop] = React.useState(false);
   const backdropToggle = () => { setBackdrop(true); };
-  const backdropClose = () => { setBackdrop(false); };
+  const backdropClose = () => {
+    setBackdrop(false);
+    // TEMP: change logic later
+    ReactDOM.render(
+      <Panel />,
+      document.getElementById('root')
+    );
+  };
 
   return (
     <Container component="main" maxWidth="xs" className={styleClass.noneSelect}>
@@ -165,9 +174,9 @@ export default function SignIn() {
         <Avatar className={styleClass.avatar}><DvrIcon /></Avatar>
         <Typography component="h1" variant="h5">Sign in to Utage</Typography>
         <form className={styleClass.form} noValidate>
-          <TextField variant="outlined" margin="normal" fullWidth id="email" label="Email Address" name="email" autoComplete="email" autoFocus defaultValue={email} onChange={emailInput}/>
+          <TextField variant="outlined" margin="normal" fullWidth id="email" label="E-mail Address" name="email" autoComplete="email" autoFocus defaultValue={email} onChange={emailInput}/>
           <TextField variant="outlined" margin="normal" fullWidth name="password" label="Password" type="password" id="password" autoComplete="current-password" defaultValue={password} onChange={passwordInput}/>
-          <FormControlLabel control={<Checkbox checked={rememberAccount} color="primary" onChange={rememberAccountChange} />} label="Remember my Account"/>
+          <FormControlLabel control={<Checkbox checked={rememberAccount} color="primary" onChange={rememberAccountChange} />} label="Remember my E-mail Address"/>
           <Grid container>
           <ButtonGroup fullWidth className={styleClass.buttonGroup} variant="contained" color="primary" aria-label="contained primary button group">
             <Button onClick={proxyWindowToggle}>Switch Server</Button>

@@ -1,4 +1,5 @@
 import React from 'react';
+import ReactDOM from 'react-dom';
 import clsx from 'clsx';
 import Markdown from 'markdown-to-jsx';
 import CssBaseline from '@material-ui/core/CssBaseline';
@@ -35,6 +36,7 @@ import LinkIcon from '@material-ui/icons/Link';
 import SendIcon from '@material-ui/icons/Send';
 import AirplayIcon from '@material-ui/icons/Airplay';
 import StrikethroughSIcon from '@material-ui/icons/StrikethroughS';
+import SignIn from './SignIn';
 
 // panelReading should:
 // 1. record and log are sorted chronologically
@@ -340,6 +342,10 @@ export default function Panel() {
   const handleMenuLogOutClick = () => {
     handleMoreClose();
     // TODO: complete the functions
+    ReactDOM.render(
+      <SignIn />,
+      document.getElementById('root')
+    );
   };
   const handleMoreInfoClick = () => {
     // TODO: complete the functions

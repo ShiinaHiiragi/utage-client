@@ -1,9 +1,9 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import Panel from './Page/Panel';
+import SignIn from './Page/SignIn';
 
 ReactDOM.render(
-  <Panel />,
+  <SignIn />,
   document.getElementById('root')
 );
 
