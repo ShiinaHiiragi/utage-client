@@ -1,25 +1,27 @@
 import React from 'react';
 import clsx from 'clsx';
-import Drawer from '@material-ui/core/Drawer';
 import CssBaseline from '@material-ui/core/CssBaseline';
+import Drawer from '@material-ui/core/Drawer';
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import List from '@material-ui/core/List';
-import Typography from '@material-ui/core/Typography';
-import Divider from '@material-ui/core/Divider';
-import IconButton from '@material-ui/core/IconButton';
-import MenuIcon from '@material-ui/icons/Menu';
-import PersonIcon from '@material-ui/icons/Person';
-import GroupIcon from '@material-ui/icons/Group';
-import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
-import MoreHorizIcon from '@material-ui/icons/MoreHoriz';
-import Avatar from '@material-ui/core/Avatar';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 import ListItemAvatar from '@material-ui/core/ListItemAvatar'
+import Divider from '@material-ui/core/Divider';
+import Typography from '@material-ui/core/Typography';
 import TextField from '@material-ui/core/TextField';
 import Card from '@material-ui/core/Card';
 import CardContent from '@material-ui/core/CardContent';
+import Paper from '@material-ui/core/Paper';
+import Avatar from '@material-ui/core/Avatar';
+import IconButton from '@material-ui/core/IconButton';
+import { makeStyles, useTheme } from '@material-ui/core/styles';
+import MenuIcon from '@material-ui/icons/Menu';
+import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
+import MoreVertIcon from '@material-ui/icons/MoreVert';
+import PersonIcon from '@material-ui/icons/Person';
+import GroupIcon from '@material-ui/icons/Group';
 import InsertEmoticonIcon from '@material-ui/icons/InsertEmoticon';
 import FormatBoldIcon from '@material-ui/icons/FormatBold';
 import FormatItalicIcon from '@material-ui/icons/FormatItalic';
@@ -27,66 +29,64 @@ import CodeIcon from '@material-ui/icons/Code';
 import LinkIcon from '@material-ui/icons/Link';
 import SendIcon from '@material-ui/icons/Send';
 import StrikethroughSIcon from '@material-ui/icons/StrikethroughS';
-import { makeStyles, useTheme } from '@material-ui/core/styles';
 
 let panelReading = {
   usrInfo: {
-    uid: 1024,
+    uid: '1024U',
     username: 'Koishi',
     email: 'abc@xyz.com',
-    avatar: 'static/avatar/avatar-1024U.png'
+    avatar: 'png'
   },
   record: [
     {
-      type: 'G',
       accessInfo: {
-        id: 16384,
+        id: '16384G',
         name: 'Miya Ouendan',
-        avatar: 'static/avatar/avatar-16384G.jpg',
+        avatar: 'jpg',
       },
       log: [
         {
           rid: 3,
           sender: 'Saki',
-          text: '<p>Hello everyone.<p>', 
+          text: '<p>Hello everyone.<p>',
           time: '2021-05-23T04:25:41.181Z'
         },
         {
           rid: 4,
           sender: 'Alice',
-          text: '<p>Have a good day!<p>', 
+          text: '<p>Have a good day!<p>',
           time: '2021-05-23T04:28:46.995Z'
         },
       ]
     },
     {
-      type: 'U',
       accessInfo: {
-        id: 2048,
+        id: '2048U',
         name: 'chocomint',
-        avatar: 'static/avatar/avatar-2048U.png',
+        avatar: 'png',
       },
       log: [
         {
           rid: 1,
           sender: 'chocomint',
-          text: '<p>Hello!<p>', 
+          senderID: '2048U',
+          text: '<p>Hello!<p>',
           time: '2021-05-23T04:20:44.733Z'
         },
         {
           rid: 2,
           sender: 'Alice',
-          text: '<p>Hi!<p>', 
+          senderID: '1024U',
+          text: '<p>Hi!<p>',
           time: '2021-05-23T04:21:25.401Z'
         }
       ]
     },
     {
-      type: 'U',
       accessInfo: {
-        id: 4096,
+        id: '4096U',
         name: 'Miku',
-        avatar: 'static/avatar/avatar-4096U.jpg',
+        avatar: 'jpg',
       },
       log: [
       ]
@@ -127,16 +127,12 @@ const useStyles = makeStyles((theme) => ({
     width: drawerWidth,
     flexShrink: 0,
   },
-  title: {
-    flexGrow: 1,
-  },
   drawerPaper: {
     width: drawerWidth,
   },
   drawerHeader: {
     alignItems: 'center',
     padding: theme.spacing(0, 0),
-    // necessary for content to be below app bar
     ...theme.mixins.toolbar,
     justifyContent: 'flex-end',
   },
@@ -163,16 +159,43 @@ const useStyles = makeStyles((theme) => ({
     overflowX: 'auto',
     flexGrow: 1,
   },
+  card: {
+    maxWidth: '64%',
+    margin: theme.spacing(0, 2),
+    display: 'flex',
+    flexDirection: 'column',
+    flexWrap: 'nowrap',
+    justifyContent: 'flex-start',
+    alignItems: 'flex-start',
+  },
+  recordItemLeft: {
+    display: 'flex',
+    padding: theme.spacing(1, 2),
+    flexFlow: 'row nowrap',
+  },
+  recordItemRight: {
+    display: 'flex',
+    padding: theme.spacing(1, 2),
+    flexFlow: 'row-reverse nowrap',
+  },
+  recordAvatar: {
+    width: theme.spacing(6),
+    height: theme.spacing(6),
+  },
+  recordOffset: {
+    paddingTop: theme.spacing(1),
+  },
+  cardTitle: {
+    padding: theme.spacing(1, 2, 0, 2),
+  },
+  cardText: {
+    padding: theme.spacing(0, 2, 1, 2),
+  },
   textField: {
     '& .MuiTextField-root': {
       width: 'calc(100% - 24px)',
     },
     margin: theme.spacing(1, 0, 0, 2),
-  },
-  cardRoot: {
-    minWidth: 275,
-    width: 'calc(100% - 32px)',
-    margin: theme.spacing(1, 2),
   },
   textButton: {
     display: 'flex',
@@ -254,11 +277,11 @@ export default function Panel() {
                       onClick={panelInfo.state.sideListItem ? handleCloseSideListItem : handleToggleSideListItem}>
             {panelInfo.state.sideListItem ? <ChevronLeftIcon /> : <MenuIcon />}
           </IconButton>
-          <Typography className={classes.title} variant="h6" noWrap>
+          <Typography className={classes.textSpan} variant="h6" noWrap>
             {panelInfo.state.selectedName}
           </Typography>
           <IconButton color="inherit" edge="end">
-            <MoreHorizIcon />
+            <MoreVertIcon />
           </IconButton>
         </Toolbar>
       </AppBar>
@@ -267,7 +290,7 @@ export default function Panel() {
         <List>
           <ListItem>
             <ListItemAvatar>
-              <Avatar src={panelInfo.usrInfo.avatar}><PersonIcon /></Avatar>
+              <Avatar src={`static/avatar/avatar-${panelInfo.usrInfo.uid}.${panelInfo.usrInfo.avatar}`}><PersonIcon /></Avatar>
             </ListItemAvatar>
             <ListItemText primary={panelInfo.usrInfo.username} secondary={panelInfo.usrInfo.email}/>
           </ListItem>
@@ -275,16 +298,17 @@ export default function Panel() {
         <Divider />
 
         <List>
-          {panelInfo.record.map((value, index) => {
-            let keyComb = `${value.accessInfo.id}${value.type}`;
+          {panelInfo.record.map((value) => {
             return(
-              <ListItem button key={keyComb} selected={panelInfo.state.selectedRecord === keyComb}
-                        onClick={(event) => handleListItemClick(event, keyComb, value.accessInfo.name)}>
+              <ListItem button key={value.accessInfo.id} selected={panelInfo.state.selectedRecord === value.accessInfo.id}
+                        onClick={(event) => handleListItemClick(event, value.accessInfo.id, value.accessInfo.name)}>
                 <ListItemAvatar>
-                  <Avatar src={value.accessInfo.avatar}>{value.type === 'U' ? <PersonIcon /> : <GroupIcon/>}</Avatar>
+                  <Avatar src={value.accessInfo.avatar}>
+                    {value.accessInfo.id.charAt(value.accessInfo.id.length - 1) === 'U' ? <PersonIcon /> : <GroupIcon/>}
+                  </Avatar>
                 </ListItemAvatar>
                 <ListItemText primary={value.accessInfo.name}
-                              secondary={value.log.length > 0 ? formatSideTime(value.log[value.log.length - 1].time) : '(No Message Yet)'}/>
+                  secondary={value.log.length > 0 ? formatSideTime(value.log[value.log.length - 1].time) : '(No Message Yet)'}/>
               </ListItem>
             )})}
         </List>
@@ -292,57 +316,64 @@ export default function Panel() {
 
       <main className={clsx(classes.content, {[classes.contentShift]: panelInfo.state.sideListItem,})}>
         <div className={classes.drawerHeader} />
-
         <div className={classes.recordField} variant="outlined">
-          <Card className={classes.cardRoot}>
-            <CardContent>
-              <Typography color="textSecondary" gutterBottom>
-                Lorem ipsum dolor sit amet consectetur adipisicing elit. Reprehenderit commodi officiis placeat voluptatum tenetur, amet dolores voluptates incidunt reiciendis maiores sequi labore tempore recusandae beatae. Expedita ut ea enim voluptatum! Lorem ipsum dolor sit, amet consectetur adipisicing elit. Odio doloribus delectus pariatur exercitationem mollitia. Tenetur placeat molestiae cumque temporibus asperiores, nam doloremque mollitia itaque? Odit aperiam molestiae unde quibusdam rerum.
-              </Typography>
-            </CardContent>
-          </Card>
-          <Card className={classes.cardRoot}>
-            <CardContent>
-              <Typography color="textSecondary" gutterBottom>
-                Lorem ipsum dolor sit amet consectetur adipisicing elit. Reprehenderit commodi officiis placeat voluptatum tenetur, amet dolores voluptates incidunt reiciendis maiores sequi labore tempore recusandae beatae. Expedita ut ea enim voluptatum! Lorem ipsum dolor sit, amet consectetur adipisicing elit. Odio doloribus delectus pariatur exercitationem mollitia. Tenetur placeat molestiae cumque temporibus asperiores, nam doloremque mollitia itaque? Odit aperiam molestiae unde quibusdam rerum.
-              </Typography>
-            </CardContent>
-          </Card>
-          <Card className={classes.cardRoot}>
-            <CardContent>
-              <Typography color="textSecondary" gutterBottom>
-                Lorem ipsum dolor sit amet consectetur adipisicing elit. Reprehenderit commodi officiis placeat voluptatum tenetur, amet dolores voluptates incidunt reiciendis maiores sequi labore tempore recusandae beatae. Expedita ut ea enim voluptatum! Lorem ipsum dolor sit, amet consectetur adipisicing elit. Odio doloribus delectus pariatur exercitationem mollitia. Tenetur placeat molestiae cumque temporibus asperiores, nam doloremque mollitia itaque? Odit aperiam molestiae unde quibusdam rerum.
-              </Typography>
-            </CardContent>
-          </Card>
-          <Card className={classes.cardRoot}>
-            <CardContent>
-              <Typography color="textSecondary" gutterBottom>
-                Lorem ipsum dolor sit amet consectetur adipisicing elit. Reprehenderit commodi officiis placeat voluptatum tenetur, amet dolores voluptates incidunt reiciendis maiores sequi labore tempore recusandae beatae. Expedita ut ea enim voluptatum! Lorem ipsum dolor sit, amet consectetur adipisicing elit. Odio doloribus delectus pariatur exercitationem mollitia. Tenetur placeat molestiae cumque temporibus asperiores, nam doloremque mollitia itaque? Odit aperiam molestiae unde quibusdam rerum.
-              </Typography>
-            </CardContent>
-          </Card>
-          <Card className={classes.cardRoot}>
-            <CardContent>
-              <Typography color="textSecondary" gutterBottom>
-                Lorem ipsum dolor sit amet consectetur adipisicing elit. Reprehenderit commodi officiis placeat voluptatum tenetur, amet dolores voluptates incidunt reiciendis maiores sequi labore tempore recusandae beatae. Expedita ut ea enim voluptatum! Lorem ipsum dolor sit, amet consectetur adipisicing elit. Odio doloribus delectus pariatur exercitationem mollitia. Tenetur placeat molestiae cumque temporibus asperiores, nam doloremque mollitia itaque? Odit aperiam molestiae unde quibusdam rerum.
-              </Typography>
-            </CardContent>
-          </Card>
-          <Card className={classes.cardRoot}>
-            <CardContent>
-              <Typography color="textSecondary" gutterBottom>
-                Lorem ipsum dolor sit amet consectetur adipisicing elit. Reprehenderit commodi officiis placeat voluptatum tenetur, amet dolores voluptates incidunt reiciendis maiores sequi labore tempore recusandae beatae. Expedita ut ea enim voluptatum! Lorem ipsum dolor sit, amet consectetur adipisicing elit. Odio doloribus delectus pariatur exercitationem mollitia. Tenetur placeat molestiae cumque temporibus asperiores, nam doloremque mollitia itaque? Odit aperiam molestiae unde quibusdam rerum.
-              </Typography>
-            </CardContent>
-          </Card>
-          <Card className={classes.cardRoot}>
-            <CardContent>
-              <Typography color="textSecondary" gutterBottom>
-                Lorem ipsum dolor sit amet consectetur adipisicing elit. Reprehenderit commodi officiis placeat voluptatum tenetur, amet dolores voluptates incidunt reiciendis maiores sequi labore tempore recusandae beatae. Expedita ut ea enim voluptatum! Lorem ipsum dolor sit, amet consectetur adipisicing elit. Odio doloribus delectus pariatur exercitationem mollitia. Tenetur placeat molestiae cumque temporibus asperiores, nam doloremque mollitia itaque? Odit aperiam molestiae unde quibusdam rerum.
-              </Typography>
-            </CardContent>
-          </Card>
+
+
+          <div className={classes.recordItemLeft}>
+            <div className={classes.recordOffset}>
+              <Avatar className={classes.recordAvatar} src={'static/avatar/avatar-1024U.png'}><PersonIcon /></Avatar>
+            </div>
+            <Card className={classes.card}>
+              <div className={classes.cardTitle}>
+                <Typography color="textSecondary">
+                  <b>saki</b> 2021-05-23 12:21:30
+                </Typography>
+              </div>
+              <div className={classes.cardText}>
+                <Typography color="textPrimary">
+                  Lorem ipsum dolor sit amet consectetur adipisicing elit. Tenetur neque ipsam consequuntur nostrum aut accusamus, cum fuga! Eveniet quasi exercitationem corporis dolor itaque nesciunt, doloribus ut minus accusantium voluptate velit!
+                </Typography>
+              </div>
+            </Card>
+          </div>
+
+          <div className={classes.recordItemRight}>
+            <div className={classes.recordOffset}>
+              <Avatar className={classes.recordAvatar} src={'static/avatar/avatar-1024U.png'}><PersonIcon /></Avatar>
+            </div>
+            <Card className={classes.card}>
+              <div className={classes.cardTitle}>
+                <Typography color="textSecondary">
+                  <b>Alice</b> 2021-05-23 12:24:02
+                </Typography>
+              </div>
+              <div className={classes.cardText}>
+                <Typography color="textPrimary">
+                  Lorem ipsum dolor sit amet consectetur adipisicing elit.
+                </Typography>
+              </div>
+            </Card>
+          </div>
+
+
+
+          <div className={classes.recordItemLeft}>
+            <div className={classes.recordOffset}>
+              <Avatar className={classes.recordAvatar} src={'static/avatar/avatar-1024U.png'}><PersonIcon /></Avatar>
+            </div>
+            <Card className={classes.card}>
+              <div className={classes.cardTitle}>
+                <Typography color="textSecondary">
+                  <b>chocomint</b> 2021-05-23 12:28:46
+                </Typography>
+              </div>
+              <div className={classes.cardText}>
+                <Typography color="textPrimary">
+                  Lorem ipsum dolor.
+                </Typography>
+              </div>
+            </Card>
+          </div>
 
         </div>
 
