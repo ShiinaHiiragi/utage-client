@@ -64,6 +64,7 @@ let panelReading = {
       status: {
         unread: 2,
         all: true,
+        textInput: '',
       },
       log: [
         {
@@ -109,6 +110,7 @@ let panelReading = {
       status: {
         unread: 0,
         all: true,
+        textInput: '',
       },
       log: [
         {
@@ -138,6 +140,7 @@ let panelReading = {
       status: {
         unread: 0,
         all: true,
+        textInput: '',
       },
       log: [
       ]
@@ -417,6 +420,21 @@ export default function Panel() {
   const handleTextEmojiSelect = () => {
   };
 
+  // about rich text button
+  const handleTextInput = (event) => {
+    setPanelInfo(panelInfo => ({
+      ...panelInfo,
+      record: panelInfo.record.map(value => (value.accessInfo.id === panelInfo.state.selectedRecord ?
+        {...value, status: {...value.status, textInput: event.target.value}} : value)),
+    }));
+    console.log(panelInfo);
+  };
+  const handleRichTextMark = (left, right, middle) => {
+
+  };
+  const handleTextBold = () => {
+  };
+
   // TEMP: no function should point to this in the end
   const nilFunction = () => {};
 
@@ -459,7 +477,13 @@ export default function Panel() {
                 <DialogTitle id="alert-dialog-title">{"WARNING"}</DialogTitle>
                 <DialogContent>
                   <DialogContentText id="alert-dialog-description">
-                    Do you really want to quit your Utage account? Click OK to log out.
+                    Do you really want to quit your Utage account? {function() {
+                      let size = panelInfo.record.length;
+                      for (let index = 0; index < size; index += 1)
+                        if (panelInfo.record[index].status.textInput !== '')
+                          return 'The system will not save your input on the text field.';
+                      return 'Click OK to log out.';
+                    }()}
                   </DialogContentText>
                 </DialogContent>
                 <DialogActions>
@@ -517,11 +541,17 @@ export default function Panel() {
 
         {!panelInfo.state.justSignIn && 
           <div className={classes.textField}>
-            <TextField id="outlined-multiline-static" label="Leave a Message in Markdown" multiline rows={4} variant="outlined"/>
+            <TextField
+              id="outlined-multiline-static"
+              label="Leave a Message in Markdown"
+              multiline rows={4}
+              variant="outlined"
+              onChange={handleTextInput}
+              value={panelInfo.record.find(value => (value.accessInfo.id === panelInfo.state.selectedRecord)).status.textInput}/>
             <Toolbar className={classes.textButton}>
               {[["Emoji", <InsertEmoticonIcon />, handleToggleTextEmoji],
                 ["Insert Image", <ImageIcon />, nilFunction],
-                ["Bold", <FormatBoldIcon />, nilFunction],
+                ["Bold", <FormatBoldIcon />, handleTextBold],
                 ["Italic", <FormatItalicIcon />, nilFunction],
                 ["Strikethrough", <StrikethroughSIcon />, nilFunction],
                 ["Link", <LinkIcon />, nilFunction],
@@ -543,7 +573,7 @@ export default function Panel() {
               <DialogContent>
                 {emojiList.map((value, index) => (
                   <IconButton key={index} onClick={handleTextEmojiSelect} color='inherit'>
-                    {` ${value} `}
+                    {`${value}`}
                   </IconButton>
                 ))}
                 <IconButton onClick={handleTextEmojiSelect}>{'\u1F419'}</IconButton>
