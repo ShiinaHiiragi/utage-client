@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 import ReactDOM from "react-dom";
 import clsx from "clsx";
 import Markdown from "markdown-to-jsx";
@@ -327,7 +327,7 @@ export default function Panel() {
   const classes = useStyles();
   // const theme = useTheme();
 
-  // the info need by user interface
+  // the state info need by user interface
   const [panelInfo, setPanelInfo] = React.useState(panelReading);
   const [panelPopup, setPanelPopup] = React.useState({
     sideListItem: true,
@@ -337,7 +337,7 @@ export default function Panel() {
     textEmoji: false
   });
 
-  // about list item
+  // about list item and info in app bar
   const handleToggleSideListItem = () => {
     setPanelPopup((panelPopup) => ({
       ...panelPopup,
@@ -350,6 +350,12 @@ export default function Panel() {
       sideListItem: false
     }));
   };
+  const handleMoreInfoClick = () => {
+    // TODO: complete the functions
+  };
+
+
+  // about list item and more menu
   const handleListItemClick = (event, comb, name) => {
     setPanelInfo((panelInfo) => ({
       ...panelInfo,
@@ -367,8 +373,6 @@ export default function Panel() {
       )
     }));
   };
-
-  // about more button
   const handleMoreClick = (event) => {
     setPanelPopup((panelPopup) => ({
       ...panelPopup,
@@ -411,44 +415,7 @@ export default function Panel() {
     }, 1000);
   };
 
-  // about info button
-  const handleMoreInfoClick = () => {
-    // TODO: complete the functions
-  };
-
-  // about backdrop
-  const toggleBackdrop = (callback, timeSpan) => {
-    setPanelPopup((panelPopup) => ({
-      ...panelPopup,
-      backdrop: true
-    }));
-    setTimeout(() => {
-      setPanelPopup((panelPopup) => ({
-        ...panelPopup,
-        backdrop: false
-      }));
-      callback();
-    }, timeSpan);
-  };
-
-  // about textEmoji and picture
-  const handleToggleTextEmoji = () => {
-    setPanelPopup((panelPopup) => ({
-      ...panelPopup,
-      textEmoji: true
-    }));
-  };
-  const handleCloseTextEmoji = () => {
-    setPanelPopup((panelPopup) => ({
-      ...panelPopup,
-      textEmoji: false
-    }));
-  };
-  const handleTextEmojiSelect = () => {};
-  // TEMP: no function should point to this in the end
-  const nilFunction = () => {};
-
-  // about rich text button
+  // about text input
   const handleTextInput = (event) => {
     setPanelInfo((panelInfo) => ({
       ...panelInfo,
@@ -462,8 +429,6 @@ export default function Panel() {
       )
     }));
   };
-
-  // about text input itself
   const handleTextSelect = () => {
     setPanelInfo((panelInfo) => ({
       ...panelInfo,
@@ -476,15 +441,6 @@ export default function Panel() {
       }
     }));
   };
-  const handleTextBlur = () => {
-    setPanelInfo((panelInfo) => ({
-      ...panelInfo,
-      state: {
-        ...panelInfo.state,
-        focus: false
-      }
-    }));
-  };
   const handleTextFocus = () => {
     setPanelInfo((panelInfo) => ({
       ...panelInfo,
@@ -494,6 +450,37 @@ export default function Panel() {
       }
     }));
   };
+  const handleTextBlur = () => {
+    setPanelInfo((panelInfo) => ({
+      ...panelInfo,
+      state: {
+        ...panelInfo.state,
+        focus: false
+      }
+    }));
+  };
+
+  // about emoji and image
+  const handleToggleTextEmoji = () => {
+    setPanelPopup((panelPopup) => ({
+      ...panelPopup,
+      textEmoji: true
+    }));
+  };
+  const handleCloseTextEmoji = () => {
+    setPanelPopup((panelPopup) => ({
+      ...panelPopup,
+      textEmoji: false
+    }));
+  };
+  const handleTextEmojiSelect = () => {
+    // TODO: complete this function
+  };
+  const handleToggleImage = () => {
+    // TODO: complete this function
+  };
+
+  // about text modifying buttons
   const handleRichTextMark = (left, right, middle) => {
     let { textInput } = panelInfo.record.find(
       (value) => value.accessInfo.id === panelInfo.state.selectedRecord
@@ -524,6 +511,9 @@ export default function Panel() {
       )
     }));
   };
+  const handlePreventBlur = (event) => {
+    event.preventDefault();
+  };
   const handleTextBold = () => {
     if (panelInfo.state.focus) handleRichTextMark("*", "*");
   };
@@ -539,8 +529,28 @@ export default function Panel() {
   const handleTextCode = () => {
     if (panelInfo.state.focus) handleRichTextMark("`", "`");
   };
-  const handlePreventBlur = (event) => {
-    event.preventDefault();
+
+  // about preview and send
+  const handleTogglePreview = () => {
+    // TODO: complete this function
+  };
+  const handleSend = () => {
+    // TODO: complete this function
+  };
+
+  // about backdrop
+  const toggleBackdrop = (callback, timeSpan) => {
+    setPanelPopup((panelPopup) => ({
+      ...panelPopup,
+      backdrop: true
+    }));
+    setTimeout(() => {
+      setPanelPopup((panelPopup) => ({
+        ...panelPopup,
+        backdrop: false
+      }));
+      callback();
+    }, timeSpan);
   };
 
   return (
@@ -774,7 +784,7 @@ export default function Panel() {
             <Toolbar className={classes.textButton}>
               {[
                 ["Emoji", <InsertEmoticonIcon />, handleToggleTextEmoji],
-                ["Insert Image", <ImageIcon />, nilFunction],
+                ["Insert Image", <ImageIcon />, handleToggleImage],
                 ["Bold", <FormatBoldIcon />, handleTextBold],
                 ["Italic", <FormatItalicIcon />, handleTextItalic],
                 [
@@ -785,8 +795,8 @@ export default function Panel() {
                 ["Link", <LinkIcon />, handleTextLink],
                 ["Code Line", <CodeIcon />, handleTextCode],
                 <div key="span" className={classes.textSpan}></div>,
-                ["Preview", <AirplayIcon />, nilFunction],
-                ["Send", <SendIcon />, nilFunction]
+                ["Preview", <AirplayIcon />, handleTogglePreview],
+                ["Send", <SendIcon />, handleSend]
               ].map((value) => {
                 if (value instanceof Array)
                   return (
