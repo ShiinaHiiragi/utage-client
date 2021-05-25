@@ -154,7 +154,7 @@ let panelReading = {
     selectedRecord: "",
     selectedName: "Utage",
     focus: false,
-    textIndex: [0, 0],
+    textIndex: [0, 0]
   }
 };
 
@@ -358,7 +358,7 @@ export default function Panel() {
         selectedRecord: comb,
         selectedName: name,
         justSignIn: false,
-        focus: false,
+        focus: false
       },
       record: panelInfo.record.map((value) =>
         value.accessInfo.id === comb
@@ -471,18 +471,18 @@ export default function Panel() {
         ...panelInfo.state,
         textIndex: [
           document.activeElement.selectionStart,
-          document.activeElement.selectionEnd,
-        ],
-      },
+          document.activeElement.selectionEnd
+        ]
+      }
     }));
-  }
+  };
   const handleTextBlur = () => {
     setPanelInfo((panelInfo) => ({
       ...panelInfo,
       state: {
         ...panelInfo.state,
-        focus: false,
-      },
+        focus: false
+      }
     }));
   };
   const handleTextFocus = () => {
@@ -490,17 +490,23 @@ export default function Panel() {
       ...panelInfo,
       state: {
         ...panelInfo.state,
-        focus: true,
-      },
+        focus: true
+      }
     }));
   };
   const handleRichTextMark = (left, right, middle) => {
-    let {textInput} = panelInfo.record.find((value) =>
-      value.accessInfo.id === panelInfo.state.selectedRecord).status;
-    let {textIndex} = panelInfo.state;
-    let newTextInput = textInput.slice(0, textIndex[0]) + left
-                     + (middle === undefined ? textInput.slice(textIndex[0], textIndex[1]) : middle)
-                     + right + textInput.slice(textIndex[1])
+    let { textInput } = panelInfo.record.find(
+      (value) => value.accessInfo.id === panelInfo.state.selectedRecord
+    ).status;
+    let { textIndex } = panelInfo.state;
+    let newTextInput =
+      textInput.slice(0, textIndex[0]) +
+      left +
+      (middle === undefined
+        ? textInput.slice(textIndex[0], textIndex[1])
+        : middle) +
+      right +
+      textInput.slice(textIndex[1]);
     let newTextIndex = [textIndex[0] + left.length, textIndex[1] + left.length];
     setPanelInfo((panelInfo) => ({
       ...panelInfo,
@@ -511,18 +517,28 @@ export default function Panel() {
               status: {
                 ...value.status,
                 textInput: newTextInput,
-                textIndex: newTextIndex,
+                textIndex: newTextIndex
               }
             }
           : value
       )
     }));
   };
-  const handleTextBold = () => { if (panelInfo.state.focus) handleRichTextMark("*", "*"); };
-  const handleTextItalic = () => { if (panelInfo.state.focus) handleRichTextMark("**", "**"); };
-  const handleTextStrikethrough = () => { if (panelInfo.state.focus) handleRichTextMark("~~", "~~"); };
-  const handleTextLink = () => { if (panelInfo.state.focus) handleRichTextMark("[", "]()"); };
-  const handleTextCode = () => { if (panelInfo.state.focus) handleRichTextMark("`", "`"); };
+  const handleTextBold = () => {
+    if (panelInfo.state.focus) handleRichTextMark("*", "*");
+  };
+  const handleTextItalic = () => {
+    if (panelInfo.state.focus) handleRichTextMark("**", "**");
+  };
+  const handleTextStrikethrough = () => {
+    if (panelInfo.state.focus) handleRichTextMark("~~", "~~");
+  };
+  const handleTextLink = () => {
+    if (panelInfo.state.focus) handleRichTextMark("[", "]()");
+  };
+  const handleTextCode = () => {
+    if (panelInfo.state.focus) handleRichTextMark("`", "`");
+  };
   const handlePreventBlur = (event) => {
     event.preventDefault();
   };
@@ -761,7 +777,11 @@ export default function Panel() {
                 ["Insert Image", <ImageIcon />, nilFunction],
                 ["Bold", <FormatBoldIcon />, handleTextBold],
                 ["Italic", <FormatItalicIcon />, handleTextItalic],
-                ["Strikethrough", <StrikethroughSIcon />, handleTextStrikethrough],
+                [
+                  "Strikethrough",
+                  <StrikethroughSIcon />,
+                  handleTextStrikethrough
+                ],
                 ["Link", <LinkIcon />, handleTextLink],
                 ["Code Line", <CodeIcon />, handleTextCode],
                 <div key="span" className={classes.textSpan}></div>,
