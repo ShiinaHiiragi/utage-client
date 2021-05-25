@@ -1,11 +1,9 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
-import SignIn from './Page/SignIn';
+import React from "react";
+import ReactDOM from "react-dom";
+import SignIn from "./Page/SignIn";
 
-ReactDOM.render(
-  <SignIn />,
-  document.getElementById('root')
-);
+ReactDOM.render(<SignIn />, document.getElementById("root"));
+
 
 // import reportWebVitals from './reportWebVitals';
 // If you want to start measuring performance in your app, pass a function
