@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import ReactDOM from "react-dom";
 import clsx from "clsx";
 import Markdown from "markdown-to-jsx";
@@ -152,7 +152,9 @@ let panelReading = {
   state: {
     justSignIn: true,
     selectedRecord: "",
-    selectedName: "Utage"
+    selectedName: "Utage",
+    focus: false,
+    textIndex: [0, 0],
   }
 };
 
@@ -355,7 +357,8 @@ export default function Panel() {
         ...panelInfo.state,
         selectedRecord: comb,
         selectedName: name,
-        justSignIn: false
+        justSignIn: false,
+        focus: false,
       },
       record: panelInfo.record.map((value) =>
         value.accessInfo.id === comb
@@ -428,7 +431,7 @@ export default function Panel() {
     }, timeSpan);
   };
 
-  // about textEmoji
+  // about textEmoji and picture
   const handleToggleTextEmoji = () => {
     setPanelPopup((panelPopup) => ({
       ...panelPopup,
@@ -442,6 +445,8 @@ export default function Panel() {
     }));
   };
   const handleTextEmojiSelect = () => {};
+  // TEMP: no function should point to this in the end
+  const nilFunction = () => {};
 
   // about rich text button
   const handleTextInput = (event) => {
@@ -456,13 +461,71 @@ export default function Panel() {
           : value
       )
     }));
-    console.log(panelInfo);
   };
-  const handleRichTextMark = (left, right, middle) => {};
-  const handleTextBold = () => {};
 
-  // TEMP: no function should point to this in the end
-  const nilFunction = () => {};
+  // about text input itself
+  const handleTextSelect = () => {
+    setPanelInfo((panelInfo) => ({
+      ...panelInfo,
+      state: {
+        ...panelInfo.state,
+        textIndex: [
+          document.activeElement.selectionStart,
+          document.activeElement.selectionEnd,
+        ],
+      },
+    }));
+  }
+  const handleTextBlur = () => {
+    setPanelInfo((panelInfo) => ({
+      ...panelInfo,
+      state: {
+        ...panelInfo.state,
+        focus: false,
+      },
+    }));
+  };
+  const handleTextFocus = () => {
+    setPanelInfo((panelInfo) => ({
+      ...panelInfo,
+      state: {
+        ...panelInfo.state,
+        focus: true,
+      },
+    }));
+  };
+  const handleRichTextMark = (left, right, middle) => {
+    let {textInput} = panelInfo.record.find((value) =>
+      value.accessInfo.id === panelInfo.state.selectedRecord).status;
+    let {textIndex} = panelInfo.state;
+    let newTextInput = textInput.slice(0, textIndex[0]) + left
+                     + (middle === undefined ? textInput.slice(textIndex[0], textIndex[1]) : middle)
+                     + right + textInput.slice(textIndex[1])
+    let newTextIndex = [textIndex[0] + left.length, textIndex[1] + left.length];
+    setPanelInfo((panelInfo) => ({
+      ...panelInfo,
+      record: panelInfo.record.map((value) =>
+        value.accessInfo.id === panelInfo.state.selectedRecord
+          ? {
+              ...value,
+              status: {
+                ...value.status,
+                textInput: newTextInput,
+                textIndex: newTextIndex,
+              }
+            }
+          : value
+      )
+    }));
+  };
+  const handleTextBold = () => { if (panelInfo.state.focus) handleRichTextMark("*", "*"); };
+  const handleTextItalic = () => { if (panelInfo.state.focus) handleRichTextMark("**", "**"); };
+  const handleTextStrikethrough = () => { if (panelInfo.state.focus) handleRichTextMark("~~", "~~"); };
+  const handleTextLink = () => { if (panelInfo.state.focus) handleRichTextMark("[", "]()"); };
+  const handleTextCode = () => { if (panelInfo.state.focus) handleRichTextMark("`", "`"); };
+  const handlePreventBlur = (event) => {
+    event.preventDefault();
+  };
 
   return (
     <div className={classes.root}>
@@ -682,6 +745,9 @@ export default function Panel() {
               rows={4}
               variant="outlined"
               onChange={handleTextInput}
+              onSelect={handleTextSelect}
+              onFocus={handleTextFocus}
+              onBlur={handleTextBlur}
               value={
                 panelInfo.record.find(
                   (value) =>
@@ -694,10 +760,10 @@ export default function Panel() {
                 ["Emoji", <InsertEmoticonIcon />, handleToggleTextEmoji],
                 ["Insert Image", <ImageIcon />, nilFunction],
                 ["Bold", <FormatBoldIcon />, handleTextBold],
-                ["Italic", <FormatItalicIcon />, nilFunction],
-                ["Strikethrough", <StrikethroughSIcon />, nilFunction],
-                ["Link", <LinkIcon />, nilFunction],
-                ["Code Line", <CodeIcon />, nilFunction],
+                ["Italic", <FormatItalicIcon />, handleTextItalic],
+                ["Strikethrough", <StrikethroughSIcon />, handleTextStrikethrough],
+                ["Link", <LinkIcon />, handleTextLink],
+                ["Code Line", <CodeIcon />, handleTextCode],
                 <div key="span" className={classes.textSpan}></div>,
                 ["Preview", <AirplayIcon />, nilFunction],
                 ["Send", <SendIcon />, nilFunction]
@@ -708,6 +774,7 @@ export default function Panel() {
                       key={value[0]}
                       title={value[0]}
                       placement="top"
+                      onMouseDown={handlePreventBlur}
                       onClick={value[2]}
                     >
                       <IconButton>{value[1]}</IconButton>
