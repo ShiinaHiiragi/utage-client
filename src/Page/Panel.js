@@ -315,7 +315,7 @@ const formatSideTime = (timeString) => {
   return timeThen.format(formatString);
 };
 
-let emojiList = new Array(80)
+let emojiList = new Array(69)
   .fill()
   .map((item, index) =>
     String.fromCodePoint(`0x${(128512 + index).toString(16)}`)
@@ -378,6 +378,8 @@ export default function Panel() {
       moreAnchor: null
     }));
   };
+
+  // menu of the more button
   const handleMenuProfileClick = () => {
     handleMoreClose();
     // TODO: complete the functions
@@ -732,9 +734,6 @@ export default function Panel() {
                     {`${value}`}
                   </IconButton>
                 ))}
-                <IconButton onClick={handleTextEmojiSelect}>
-                  {"\u1F419"}
-                </IconButton>
               </DialogContent>
               <DialogActions>
                 <Button
