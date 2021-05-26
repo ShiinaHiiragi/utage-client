@@ -325,7 +325,6 @@ let emojiList = new Array(69)
 
 export default function Panel() {
   const classes = useStyles();
-  // const theme = useTheme();
 
   // the state info need by user interface
   const [panelInfo, setPanelInfo] = React.useState(panelReading);
@@ -334,7 +333,8 @@ export default function Panel() {
     moreAnchor: null,
     menuLogOut: false,
     backdrop: false,
-    textEmoji: false
+    textEmoji: false,
+    stillFocus: false,
   });
 
   // about list item and info in app bar
@@ -410,7 +410,7 @@ export default function Panel() {
   };
   const handleMenuLogOutOKClick = () => {
     handleMenuLogOutCalcelClick();
-    toggleBackdrop(() => {
+    toggleBackdropTime(() => {
       ReactDOM.render(<SignIn />, document.getElementById("root"));
     }, 1000);
   };
@@ -464,7 +464,8 @@ export default function Panel() {
   const handleToggleTextEmoji = () => {
     setPanelPopup((panelPopup) => ({
       ...panelPopup,
-      textEmoji: true
+      textEmoji: true,
+      stillFocus: panelInfo.state.focus,
     }));
   };
   const handleCloseTextEmoji = () => {
@@ -473,8 +474,10 @@ export default function Panel() {
       textEmoji: false
     }));
   };
-  const handleTextEmojiSelect = () => {
-    // TODO: complete this function
+  const handleTextEmojiSelect = (event, index) => {
+    handleCloseTextEmoji();
+    if (panelPopup.stillFocus)
+      handleRichTextMark("", "", String.fromCodePoint(`0x${(128512 + index).toString(16)}`));
   };
   const handleToggleImage = () => {
     // TODO: complete this function
@@ -539,7 +542,7 @@ export default function Panel() {
   };
 
   // about backdrop
-  const toggleBackdrop = (callback, timeSpan) => {
+  const toggleBackdropTime = (callback, timeSpan) => {
     setPanelPopup((panelPopup) => ({
       ...panelPopup,
       backdrop: true
@@ -825,7 +828,7 @@ export default function Panel() {
                 {emojiList.map((value, index) => (
                   <IconButton
                     key={index}
-                    onClick={handleTextEmojiSelect}
+                    onClick={(event) => { handleTextEmojiSelect(event, index) }}
                     color="inherit"
                   >
                     {`${value}`}
