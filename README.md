@@ -49,7 +49,6 @@ Electron 和 React 混用时，其文件结构相差很大
 
 1. Electron 的 Node.js 环境下，当前文件 `.` 即为  `UtageClient-win32-x64`，`data` 文件的内容只有 Node.js 环境会访问，路径为 `./data`
 2. 在 React 环境下， `import` 依赖会被自动整合，不需要额外关注。 React 经过 `npm run build` 后得到的文件夹 `build` 作为打包后 `main.js` 的入口，可以将图片放在 React 路径下的 `static/img`，这在 Electron 下环境是 `./resources/app/build/static/img`
-3. 打包时，将 `data` 和 `static` 复制到 `UtageClient-win32-x64` 中的不同位置，删除 `UtageClient-win32-x64/resources/app/data` 
+3. 打包时，将 `data`复制到 `UtageClient-win32-x64`，删除 `UtageClient-win32-x64/resources/app/` 下的 `src`，`data`，和 `static`（如果有的话）
 
 <p align="right">2021 5/9</p>
-

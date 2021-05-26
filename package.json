@@ -8,10 +8,10 @@
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
-    "build-copy": "ROBOCOPY ./static/avatar ./build/static/avatar && ROBOCOPY ./static/img ./build/static/img",
+    "build-copy": "ROBOCOPY ./static/avatar ./build/static/avatar /s /e && ROBOCOPY ./static/img ./build/static/img /s /e",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "package": "npm run build && electron-packager . UtageClient --electron-version=11.2.0 --icon='public/icon.ico' --platform=win32 --overwrite --ignore='./data'"
+    "package": "npm run build && electron-packager . UtageClient --electron-version=11.2.0 --icon='public/icon.ico' --platform=win32 --overwrite --ignore='\\.gitignore' --ignore='README.md'"
   },
   "eslintConfig": {
     "extends": [
