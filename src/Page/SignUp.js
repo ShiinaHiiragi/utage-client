@@ -118,10 +118,10 @@ export default function SignUp() {
     ) {
       snackWindowToggle("error", "Please enter all the information needed.");
       return;
-    } else if (!/^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(formContent.email)) {
+    } else if (!/^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(formContent.email)) {
       snackWindowToggle("error", "Unsupported E-mail Address.");
       return;
-    } else if (!/^[\x00-\x7F]*$/.test(formContent.username)) {
+    } else if (!/^[\x0-\x7F]*$/.test(formContent.username)) {
       snackWindowToggle("error", "Your username contains illegal characters.");
       return;
     } else if (formContent.password.length < 8) {

@@ -184,15 +184,15 @@ export default function SignIn(props) {
       signInSetting.account = email;
       saveSetting(() => {});
     }
-    console.log(password);
+    backdropToggle();
 
-    // backdropToggle();
     // TODO: complete sign in behavior here
     // TEMP: delete setTimeout later
-    // setTimeout(() => {
-    //   backdropClose();
-    //   ReactDOM.render(<Panel />, document.getElementById("root"));
-    // }, 2000);
+    console.log(password);
+    setTimeout(() => {
+      backdropClose();
+      ReactDOM.render(<Panel />, document.getElementById("root"));
+    }, 2000);
   };
 
   // the backdrop when communicate with server
