@@ -26,6 +26,8 @@ import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
+import Snackbar from "@material-ui/core/Snackbar";
+import MuiAlert from "@material-ui/lab/Alert";
 import Backdrop from "@material-ui/core/Backdrop";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import { makeStyles } from "@material-ui/core/styles";
@@ -45,6 +47,10 @@ import SendIcon from "@material-ui/icons/Send";
 import AirplayIcon from "@material-ui/icons/Airplay";
 import StrikethroughSIcon from "@material-ui/icons/StrikethroughS";
 import SignIn from "./SignIn";
+
+let panelSetting = {
+  snackWindowDuration: 2000,
+};
 
 // panelReading's record and log should be sorted chronologically
 let panelReading = {
@@ -323,6 +329,10 @@ let emojiList = new Array(69)
     String.fromCodePoint(`0x${(128512 + index).toString(16)}`)
   );
 
+function Alert(props) {
+  return <MuiAlert elevation={6} variant="filled" {...props} />;
+}
+
 export default function Panel() {
   const classes = useStyles();
 
@@ -334,7 +344,9 @@ export default function Panel() {
     menuLogOut: false,
     backdrop: false,
     textEmoji: false,
-    stillFocus: false,
+    snackWindow: false,
+    snackWindowType: "",
+    snackWindowMessage: "",
   });
 
   // about list item and info in app bar
@@ -464,11 +476,12 @@ export default function Panel() {
 
   // about emoji and image
   const handleToggleTextEmoji = () => {
-    setPanelPopup((panelPopup) => ({
-      ...panelPopup,
-      textEmoji: true,
-      stillFocus: panelInfo.state.focus,
-    }));
+    if (panelInfo.state.focus)
+      setPanelPopup((panelPopup) => ({
+        ...panelPopup,
+        textEmoji: true,
+      }));
+    else toggleSnackWindow("warning", "Please focus on text area to insert emoji.");
   };
   const handleCloseTextEmoji = () => {
     setPanelPopup((panelPopup) => ({
@@ -478,8 +491,7 @@ export default function Panel() {
   };
   const handleTextEmojiSelect = (event, index) => {
     handleCloseTextEmoji();
-    if (panelPopup.stillFocus)
-      handleRichTextMark("", "", String.fromCodePoint(`0x${(128512 + index).toString(16)}`));
+    handleRichTextMark("", "", String.fromCodePoint(`0x${(128512 + index).toString(16)}`));
   };
   const handleToggleImage = () => {
     // TODO: complete this function
@@ -521,18 +533,23 @@ export default function Panel() {
   };
   const handleTextBold = () => {
     if (panelInfo.state.focus) handleRichTextMark("*", "*");
+    else toggleSnackWindow("warning", "Please focus on text area to insert bold tag.");
   };
   const handleTextItalic = () => {
     if (panelInfo.state.focus) handleRichTextMark("**", "**");
+    else toggleSnackWindow("warning", "Please focus on text area to insert italic tag.");
   };
   const handleTextStrikethrough = () => {
     if (panelInfo.state.focus) handleRichTextMark("~~", "~~");
+    else toggleSnackWindow("warning", "Please focus on text area to insert strikethrough.");
   };
   const handleTextLink = () => {
     if (panelInfo.state.focus) handleRichTextMark("[", "]()");
+    else toggleSnackWindow("warning", "Please focus on text area to insert link.");
   };
   const handleTextCode = () => {
     if (panelInfo.state.focus) handleRichTextMark("`", "`");
+    else toggleSnackWindow("warning", "Please focus on text area to insert code.");
   };
 
   // about preview and send
@@ -543,7 +560,7 @@ export default function Panel() {
     // TODO: complete this function
   };
 
-  // about backdrop
+  // about backdrop and snack window
   const toggleBackdrop = () => {
     setPanelPopup((panelPopup) => ({
       ...panelPopup,
@@ -556,6 +573,20 @@ export default function Panel() {
       backdrop: false
     }));
   };
+  const toggleSnackWindow = (type, message) => {
+    setPanelPopup((panelPopup) => ({
+      ...panelPopup,
+      snackWindow: true,
+      snackWindowType: type,
+      snackWindowMessage: message,
+    }));
+  };
+  const closeSnackWindow = () => {
+    setPanelPopup((panelPopup) => ({
+      ...panelPopup,
+      snackWindow: false
+    }));
+  }
 
   return (
     <div className={classes.root}>
@@ -852,6 +883,16 @@ export default function Panel() {
       <Backdrop className={classes.backdrop} open={panelPopup.backdrop}>
         <CircularProgress color="inherit" size={56} />
       </Backdrop>
+      <Snackbar
+        open={panelPopup.snackWindow}
+        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+        autoHideDuration={panelSetting.snackWindowDuration}
+        onClose={closeSnackWindow}
+      >
+        <Alert onClose={closeSnackWindow} severity={panelPopup.snackWindowType}>
+          {panelPopup.snackWindowMessage}
+        </Alert>
+      </Snackbar>
     </div>
   );
 }
