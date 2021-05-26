@@ -412,6 +412,7 @@ export default function Panel() {
     handleMenuLogOutCalcelClick();
     toggleBackdrop();
     setTimeout(() => {
+      closeBackdrop();
       ReactDOM.render(<SignIn />, document.getElementById("root"));
     }, 1000);
   };
