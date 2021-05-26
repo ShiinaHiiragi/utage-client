@@ -1,4 +1,5 @@
 import React from 'react';
+import ReactDOM from "react-dom";
 import Avatar from '@material-ui/core/Avatar';
 import Button from '@material-ui/core/Button';
 import CssBaseline from '@material-ui/core/CssBaseline';
@@ -18,6 +19,14 @@ import IconButton from "@material-ui/core/IconButton";
 import OutlinedInput from "@material-ui/core/OutlinedInput";
 import InputLabel from "@material-ui/core/InputLabel";
 import FormControl from "@material-ui/core/FormControl";
+import Dialog from "@material-ui/core/Dialog";
+import DialogActions from "@material-ui/core/DialogActions";
+import DialogContent from "@material-ui/core/DialogContent";
+import DialogContentText from "@material-ui/core/DialogContentText";
+import DialogTitle from "@material-ui/core/DialogTitle";
+import Snackbar from "@material-ui/core/Snackbar";
+import MuiAlert from "@material-ui/lab/Alert";
+import SignIn from "./SignIn";
 
 const useStyles = makeStyles((theme) => ({
   noneSelect: {
@@ -42,6 +51,10 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
+function Alert(props) {
+  return <MuiAlert elevation={6} variant="filled" {...props} />;
+}
+
 export default function SignUp() {
   const classes = useStyles();
   const [formContent, setFormContent] = React.useState({
@@ -51,6 +64,20 @@ export default function SignUp() {
   });
   const [showPassword, setShowPassword] = React.useState(false);
 
+  // snack windows of any hints
+  const [snackWindow, setSnackWindow] = React.useState(false);
+  const [snackWindowType, setSnackWindowType] = React.useState("");
+  const [snackWindowMessage, setSnackWindowMessage] = React.useState("");
+  const snackWindowToggle = (type, message) => {
+    setSnackWindowType(type);
+    setSnackWindowMessage(message);
+    setSnackWindow(true);
+  };
+  const snackWindowClose = () => {
+    setSnackWindow(false);
+  };
+
+  // handle of form input
   const handlePasswordInput = (event, prop) => {
     setFormContent((formContent) => ({
       ...formContent,
@@ -70,15 +97,28 @@ export default function SignUp() {
     }));
   };
 
+  // handle of buttons
   const handleClickShowPassword = () => {
     setShowPassword((prev) => !prev)
   };
   const handleMouseDownPassword = (event) => {
     event.preventDefault();
   };
-
   const handleButtonClick = () => {
-    console.log(formContent);
+    if (formContent.email === "" || formContent.password === "" || formContent.username === "")
+      snackWindowToggle("error", "Please enter all the information needed.");
+    // TODO: complete sign up
+
+    
+  };
+
+  // dialogue of copyright infomation
+  const [copyrightInfoWindow, setCopyrightInfoWindow] = React.useState(false);
+  const copyrightInfoToggle = () => {
+    setCopyrightInfoWindow(true);
+  };
+  const copyrightInfoClose = () => {
+    setCopyrightInfoWindow(false);
   };
 
   return (
@@ -106,7 +146,6 @@ export default function SignUp() {
                 <InputLabel>Username</InputLabel>
                 <OutlinedInput
                   id="username"
-                  type="text"
                   onChange={handleUsernameInput}
                   fullWidth
                   labelWidth={70}
@@ -156,23 +195,74 @@ export default function SignUp() {
           </Button>
           <Grid container justify="flex-end">
             <Grid item>
-              <Link href="#" variant="body2">
+              <Link href="#!" onClick={() => {
+                ReactDOM.render(<SignIn />, document.getElementById("root"))
+              }} variant="body2">
                 Already have an account? Sign in
               </Link>
             </Grid>
           </Grid>
         </form>
       </div>
-      <Box mt={5}>
+      <Box mt={8}>
         <Typography variant="body2" color="textSecondary" align="center">
-        {'Copyright © '}
-          <Link color="inherit" href="https://material-ui.com/">
-            Your Website
-          </Link>{' '}
-          {new Date().getFullYear()}
-          {'.'}
+          {"Copyright © "}
+          <Link color="inherit" href="#!" onClick={copyrightInfoToggle}>
+            Utage
+          </Link>
+          {" " + new Date().getFullYear() + "."}
         </Typography>
+
+        <Dialog
+          open={copyrightInfoWindow}
+          onClose={copyrightInfoClose}
+          aria-labelledby="alert-dialog-title"
+          aria-describedby="alert-dialog-description"
+          className={classes.noneSelect}
+        >
+          <DialogTitle id="alert-dialog-title">{`MIT License\nCopyright ${new Date().getFullYear()} Utage`}</DialogTitle>
+          <DialogContent>
+            <DialogContentText id="alert-dialog-description">
+              Permission is hereby granted, free of charge, to any person
+              obtaining a copy of this software and associated documentation
+              files (the "Software"), to deal in the Software without
+              restriction, including without limitation the rights to use, copy,
+              modify, merge, publish, distribute, sublicense, and/or sell copies
+              of the Software, and to permit persons to whom the Software is
+              furnished to do so, subject to the following conditions:
+              <br />
+              <br />
+              The above copyright notice and this permission notice shall be
+              included in all copies or substantial portions of the Software.
+              <br />
+              <br />
+              THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+              EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+              MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+              NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+              HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+              WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+              OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+              DEALINGS IN THE SOFTWARE.
+            </DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={copyrightInfoClose} color="primary">
+              Close
+            </Button>
+          </DialogActions>
+        </Dialog>
       </Box>
+      <Snackbar
+        open={snackWindow}
+        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+        autoHideDuration={2000}
+        onClose={snackWindowClose}
+      >
+        <Alert onClose={snackWindowClose} severity={snackWindowType}>
+          {snackWindowMessage}
+        </Alert>
+      </Snackbar>
     </Container>
   );
 }
