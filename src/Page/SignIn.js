@@ -76,7 +76,7 @@ function saveSetting(callback) {
   fs.writeFile(settingPath, JSON.stringify(signInSetting), callback);
 }
 
-export default function SignIn() {
+export default function SignIn(props) {
   // using style defined in the front
   const styleClass = useStyles();
 
@@ -130,6 +130,12 @@ export default function SignIn() {
     setSnackWindow(false);
   };
 
+  // special snack
+  const [specialSnack, setSpecialSnack] = React.useState(props.snack);
+  const handleSpecialSnackClose = () => {
+    setSpecialSnack(false);
+  };
+
   // checkbox of remember account
   const [rememberAccount, setRememberAccount] = React.useState(
     signInSetting.remember
@@ -156,8 +162,9 @@ export default function SignIn() {
   };
 
   // when sign in button are pressed
-  const [email, setEmail] = React.useState(
-    signInSetting.remember ? signInSetting.account : ""
+  const [email, setEmail] = React.useState(props.account
+    ? props.account
+    : (signInSetting.remember ? signInSetting.account : "")
   );
   const [password, setPassword] = React.useState("");
   const emailInput = (event) => {
@@ -175,10 +182,13 @@ export default function SignIn() {
       saveSetting(() => {});
     }
     backdropToggle();
-    // TODO: complete sign in behavior here
 
+    // TODO: complete sign in behavior here
     // TEMP: delete setTimeout later
-    setTimeout(backdropClose, 2000);
+    setTimeout(() => {
+      backdropClose();
+      ReactDOM.render(<Panel />, document.getElementById("root"));
+    }, 2000);
   };
 
   // the backdrop when communicate with server
@@ -188,8 +198,6 @@ export default function SignIn() {
   };
   const backdropClose = () => {
     setBackdrop(false);
-    // TEMP: change logic later
-    ReactDOM.render(<Panel />, document.getElementById("root"));
   };
 
   const handleSignUp = () => {
@@ -362,6 +370,16 @@ export default function SignIn() {
             </Button>
           </DialogActions>
         </Dialog>
+        <Snackbar
+          open={specialSnack}
+          anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+          autoHideDuration={2000}
+          onClose={handleSpecialSnackClose}
+        >
+          <Alert onClose={snackWindowClose} severity='success'>
+            {"Your account has been created successfully. You can sign in now."}
+          </Alert>
+        </Snackbar>
       </Box>
     </Container>
   );

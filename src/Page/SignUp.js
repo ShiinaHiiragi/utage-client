@@ -26,6 +26,8 @@ import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
 import Snackbar from "@material-ui/core/Snackbar";
 import MuiAlert from "@material-ui/lab/Alert";
+import Backdrop from "@material-ui/core/Backdrop";
+import CircularProgress from "@material-ui/core/CircularProgress";
 import SignIn from "./SignIn";
 
 const useStyles = makeStyles((theme) => ({
@@ -49,6 +51,10 @@ const useStyles = makeStyles((theme) => ({
   submit: {
     margin: theme.spacing(3, 0, 2),
   },
+  backdrop: {
+    zIndex: theme.zIndex.drawer + 1,
+    color: "#fff"
+  }
 }));
 
 function Alert(props) {
@@ -106,10 +112,27 @@ export default function SignUp() {
   };
   const handleButtonClick = () => {
     if (formContent.email === "" || formContent.password === "" || formContent.username === "")
+    {
       snackWindowToggle("error", "Please enter all the information needed.");
-    // TODO: complete sign up
+      return;
+    }
 
-    
+    backdropToggle();
+    // TODO: complete sign in behavior here
+    // TEMP: delete setTimeout later
+    setTimeout(() => {
+      backdropClose();
+      ReactDOM.render(<SignIn snack={true} account={formContent.email}/>, document.getElementById("root"));
+    }, 2000);
+  };
+
+  // the backdrop when communicate with server
+  const [backdrop, setBackdrop] = React.useState(false);
+  const backdropToggle = () => {
+    setBackdrop(true);
+  };
+  const backdropClose = () => {
+    setBackdrop(false);
   };
 
   // dialogue of copyright infomation
@@ -263,6 +286,9 @@ export default function SignUp() {
           {snackWindowMessage}
         </Alert>
       </Snackbar>
+      <Backdrop className={classes.backdrop} open={backdrop}>
+        <CircularProgress color="inherit" size={56} />
+      </Backdrop>
     </Container>
   );
 }
