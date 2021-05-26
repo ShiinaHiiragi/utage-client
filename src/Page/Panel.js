@@ -49,7 +49,7 @@ import StrikethroughSIcon from "@material-ui/icons/StrikethroughS";
 import SignIn from "./SignIn";
 
 let panelSetting = {
-  snackWindowDuration: 2000,
+  snackWindowDuration: 2000
 };
 
 // panelReading's record and log should be sorted chronologically
@@ -346,7 +346,7 @@ export default function Panel() {
     textEmoji: false,
     snackWindow: false,
     snackWindowType: "",
-    snackWindowMessage: "",
+    snackWindowMessage: ""
   });
 
   // about list item and info in app bar
@@ -365,7 +365,6 @@ export default function Panel() {
   const handleMoreInfoClick = () => {
     // TODO: complete the functions
   };
-
 
   // about list item and more menu
   const handleListItemClick = (event, comb, name) => {
@@ -479,9 +478,13 @@ export default function Panel() {
     if (panelInfo.state.focus)
       setPanelPopup((panelPopup) => ({
         ...panelPopup,
-        textEmoji: true,
+        textEmoji: true
       }));
-    else toggleSnackWindow("warning", "Please focus on text area to insert emoji.");
+    else
+      toggleSnackWindow(
+        "warning",
+        "Please focus on text area to insert emoji."
+      );
   };
   const handleCloseTextEmoji = () => {
     setPanelPopup((panelPopup) => ({
@@ -491,7 +494,11 @@ export default function Panel() {
   };
   const handleTextEmojiSelect = (event, index) => {
     handleCloseTextEmoji();
-    handleRichTextMark("", "", String.fromCodePoint(`0x${(128512 + index).toString(16)}`));
+    handleRichTextMark(
+      "",
+      "",
+      String.fromCodePoint(`0x${(128512 + index).toString(16)}`)
+    );
   };
   const handleToggleImage = () => {
     // TODO: complete this function
@@ -533,23 +540,37 @@ export default function Panel() {
   };
   const handleTextBold = () => {
     if (panelInfo.state.focus) handleRichTextMark("*", "*");
-    else toggleSnackWindow("warning", "Please focus on text area to insert bold tag.");
+    else
+      toggleSnackWindow(
+        "warning",
+        "Please focus on text area to insert bold tag."
+      );
   };
   const handleTextItalic = () => {
     if (panelInfo.state.focus) handleRichTextMark("**", "**");
-    else toggleSnackWindow("warning", "Please focus on text area to insert italic tag.");
+    else
+      toggleSnackWindow(
+        "warning",
+        "Please focus on text area to insert italic tag."
+      );
   };
   const handleTextStrikethrough = () => {
     if (panelInfo.state.focus) handleRichTextMark("~~", "~~");
-    else toggleSnackWindow("warning", "Please focus on text area to insert strikethrough.");
+    else
+      toggleSnackWindow(
+        "warning",
+        "Please focus on text area to insert strikethrough."
+      );
   };
   const handleTextLink = () => {
     if (panelInfo.state.focus) handleRichTextMark("[", "]()");
-    else toggleSnackWindow("warning", "Please focus on text area to insert link.");
+    else
+      toggleSnackWindow("warning", "Please focus on text area to insert link.");
   };
   const handleTextCode = () => {
     if (panelInfo.state.focus) handleRichTextMark("`", "`");
-    else toggleSnackWindow("warning", "Please focus on text area to insert code.");
+    else
+      toggleSnackWindow("warning", "Please focus on text area to insert code.");
   };
 
   // about preview and send
@@ -578,7 +599,7 @@ export default function Panel() {
       ...panelPopup,
       snackWindow: true,
       snackWindowType: type,
-      snackWindowMessage: message,
+      snackWindowMessage: message
     }));
   };
   const closeSnackWindow = () => {
@@ -586,7 +607,7 @@ export default function Panel() {
       ...panelPopup,
       snackWindow: false
     }));
-  }
+  };
 
   return (
     <div className={classes.root}>
@@ -860,7 +881,9 @@ export default function Panel() {
                 {emojiList.map((value, index) => (
                   <IconButton
                     key={index}
-                    onClick={(event) => { handleTextEmojiSelect(event, index) }}
+                    onClick={(event) => {
+                      handleTextEmojiSelect(event, index);
+                    }}
                     color="inherit"
                   >
                     {`${value}`}

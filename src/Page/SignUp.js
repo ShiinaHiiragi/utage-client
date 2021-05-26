@@ -1,16 +1,16 @@
-import React from 'react';
+import React from "react";
 import ReactDOM from "react-dom";
-import Avatar from '@material-ui/core/Avatar';
-import Button from '@material-ui/core/Button';
-import CssBaseline from '@material-ui/core/CssBaseline';
-import TextField from '@material-ui/core/TextField';
-import Link from '@material-ui/core/Link';
-import Grid from '@material-ui/core/Grid';
-import Box from '@material-ui/core/Box';
-import OpenInBrowserIcon from '@material-ui/icons/OpenInBrowser';
-import Typography from '@material-ui/core/Typography';
-import { makeStyles } from '@material-ui/core/styles';
-import Container from '@material-ui/core/Container';
+import Avatar from "@material-ui/core/Avatar";
+import Button from "@material-ui/core/Button";
+import CssBaseline from "@material-ui/core/CssBaseline";
+import TextField from "@material-ui/core/TextField";
+import Link from "@material-ui/core/Link";
+import Grid from "@material-ui/core/Grid";
+import Box from "@material-ui/core/Box";
+import OpenInBrowserIcon from "@material-ui/icons/OpenInBrowser";
+import Typography from "@material-ui/core/Typography";
+import { makeStyles } from "@material-ui/core/styles";
+import Container from "@material-ui/core/Container";
 import InputAdornment from "@material-ui/core/InputAdornment";
 import FormHelperText from "@material-ui/core/FormHelperText";
 import Visibility from "@material-ui/icons/Visibility";
@@ -32,24 +32,24 @@ import SignIn from "./SignIn";
 
 const useStyles = makeStyles((theme) => ({
   noneSelect: {
-    userSelect: 'none',
+    userSelect: "none"
   },
   paper: {
     marginTop: theme.spacing(8),
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center"
   },
   avatar: {
     margin: theme.spacing(1),
-    backgroundColor: theme.palette.secondary.main,
+    backgroundColor: theme.palette.secondary.main
   },
   form: {
-    width: '100%', // Fix IE 11 issue.
-    marginTop: theme.spacing(3),
+    width: "100%", // Fix IE 11 issue.
+    marginTop: theme.spacing(3)
   },
   submit: {
-    margin: theme.spacing(3, 0, 2),
+    margin: theme.spacing(3, 0, 2)
   },
   backdrop: {
     zIndex: theme.zIndex.drawer + 1,
@@ -66,7 +66,7 @@ export default function SignUp() {
   const [formContent, setFormContent] = React.useState({
     email: "",
     username: "",
-    password: "",
+    password: ""
   });
   const [showPassword, setShowPassword] = React.useState(false);
 
@@ -87,32 +87,35 @@ export default function SignUp() {
   const handlePasswordInput = (event, prop) => {
     setFormContent((formContent) => ({
       ...formContent,
-      password: event.target.value,
+      password: event.target.value
     }));
   };
   const handleEmailInput = (event, prop) => {
     setFormContent((formContent) => ({
       ...formContent,
-      email: event.target.value,
+      email: event.target.value
     }));
   };
   const handleUsernameInput = (event, prop) => {
     setFormContent((formContent) => ({
       ...formContent,
-      username: event.target.value,
+      username: event.target.value
     }));
   };
 
   // handle of buttons
   const handleClickShowPassword = () => {
-    setShowPassword((prev) => !prev)
+    setShowPassword((prev) => !prev);
   };
   const handleMouseDownPassword = (event) => {
     event.preventDefault();
   };
   const handleButtonClick = () => {
-    if (formContent.email === "" || formContent.password === "" || formContent.username === "")
-    {
+    if (
+      formContent.email === "" ||
+      formContent.password === "" ||
+      formContent.username === ""
+    ) {
       snackWindowToggle("error", "Please enter all the information needed.");
       return;
     }
@@ -122,7 +125,10 @@ export default function SignUp() {
     // TEMP: delete setTimeout later
     setTimeout(() => {
       backdropClose();
-      ReactDOM.render(<SignIn snack={true} account={formContent.email}/>, document.getElementById("root"));
+      ReactDOM.render(
+        <SignIn snack={true} account={formContent.email} />,
+        document.getElementById("root")
+      );
     }, 2000);
   };
 
@@ -180,7 +186,9 @@ export default function SignUp() {
             </Grid>
             <Grid item xs={12}>
               <FormControl variant="outlined" fullWidth>
-                <InputLabel htmlFor="outlined-adornment-password">Password</InputLabel>
+                <InputLabel htmlFor="outlined-adornment-password">
+                  Password
+                </InputLabel>
                 <OutlinedInput
                   id="outlined-adornment-password"
                   type={showPassword ? "text" : "password"}
@@ -218,9 +226,13 @@ export default function SignUp() {
           </Button>
           <Grid container justify="flex-end">
             <Grid item>
-              <Link href="#!" onClick={() => {
-                ReactDOM.render(<SignIn />, document.getElementById("root"))
-              }} variant="body2">
+              <Link
+                href="#!"
+                onClick={() => {
+                  ReactDOM.render(<SignIn />, document.getElementById("root"));
+                }}
+                variant="body2"
+              >
                 Already have an account? Sign in
               </Link>
             </Grid>

@@ -162,9 +162,12 @@ export default function SignIn(props) {
   };
 
   // when sign in button are pressed
-  const [email, setEmail] = React.useState(props.account
-    ? props.account
-    : (signInSetting.remember ? signInSetting.account : "")
+  const [email, setEmail] = React.useState(
+    props.account
+      ? props.account
+      : signInSetting.remember
+      ? signInSetting.account
+      : ""
   );
   const [password, setPassword] = React.useState("");
   const emailInput = (event) => {
@@ -202,7 +205,7 @@ export default function SignIn(props) {
 
   const handleSignUp = () => {
     ReactDOM.render(<SignUp />, document.getElementById("root"));
-  }
+  };
 
   return (
     <Container component="main" maxWidth="xs" className={styleClass.noneSelect}>
@@ -376,7 +379,7 @@ export default function SignIn(props) {
           autoHideDuration={2000}
           onClose={handleSpecialSnackClose}
         >
-          <Alert onClose={snackWindowClose} severity='success'>
+          <Alert onClose={snackWindowClose} severity="success">
             {"Your account has been created successfully. You can sign in now."}
           </Alert>
         </Snackbar>
