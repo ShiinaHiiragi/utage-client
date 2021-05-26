@@ -410,7 +410,8 @@ export default function Panel() {
   };
   const handleMenuLogOutOKClick = () => {
     handleMenuLogOutCalcelClick();
-    toggleBackdropTime(() => {
+    toggleBackdrop();
+    setTimeout(() => {
       ReactDOM.render(<SignIn />, document.getElementById("root"));
     }, 1000);
   };
@@ -542,18 +543,17 @@ export default function Panel() {
   };
 
   // about backdrop
-  const toggleBackdropTime = (callback, timeSpan) => {
+  const toggleBackdrop = () => {
     setPanelPopup((panelPopup) => ({
       ...panelPopup,
       backdrop: true
     }));
-    setTimeout(() => {
-      setPanelPopup((panelPopup) => ({
-        ...panelPopup,
-        backdrop: false
-      }));
-      callback();
-    }, timeSpan);
+  };
+  const closeBackdrop = () => {
+    setPanelPopup((panelPopup) => ({
+      ...panelPopup,
+      backdrop: false
+    }));
   };
 
   return (
