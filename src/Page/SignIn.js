@@ -24,6 +24,7 @@ import Backdrop from "@material-ui/core/Backdrop";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import { makeStyles } from "@material-ui/core/styles";
 import Panel from "./Panel";
+import SignUp from "./SignUp";
 
 const fs = window.require("fs");
 const settingPath = "./data/setting/SignInSetting.json";
@@ -191,6 +192,10 @@ export default function SignIn() {
     ReactDOM.render(<Panel />, document.getElementById("root"));
   };
 
+  const handleSignUp = () => {
+    ReactDOM.render(<SignUp />, document.getElementById("root"));
+  }
+
   return (
     <Container component="main" maxWidth="xs" className={styleClass.noneSelect}>
       <CssBaseline />
@@ -302,7 +307,7 @@ export default function SignIn() {
               {/* <Link href="#" variant="body2">{"Forgot password?"}</Link> */}
             </Grid>
             <Grid item>
-              <Link href="#" variant="body2">
+              <Link href="#!" onClick={handleSignUp} variant="body2">
                 {"Don't have an account? Sign Up"}
               </Link>
             </Grid>
