@@ -302,6 +302,7 @@ export default function SignUp() {
         anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
         autoHideDuration={2000}
         onClose={snackWindowClose}
+        className={classes.noneSelect}
       >
         <Alert onClose={snackWindowClose} severity={snackWindowType}>
           {snackWindowMessage}

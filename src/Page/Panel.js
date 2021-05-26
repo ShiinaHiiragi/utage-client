@@ -911,6 +911,7 @@ export default function Panel() {
         anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
         autoHideDuration={panelSetting.snackWindowDuration}
         onClose={closeSnackWindow}
+        className={classes.noneSelect}
       >
         <Alert onClose={closeSnackWindow} severity={panelPopup.snackWindowType}>
           {panelPopup.snackWindowMessage}
