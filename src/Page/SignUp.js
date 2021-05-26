@@ -10,6 +10,14 @@ import OpenInBrowserIcon from '@material-ui/icons/OpenInBrowser';
 import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
+import InputAdornment from "@material-ui/core/InputAdornment";
+import FormHelperText from "@material-ui/core/FormHelperText";
+import Visibility from "@material-ui/icons/Visibility";
+import VisibilityOff from "@material-ui/icons/VisibilityOff";
+import IconButton from "@material-ui/core/IconButton";
+import OutlinedInput from "@material-ui/core/OutlinedInput";
+import InputLabel from "@material-ui/core/InputLabel";
+import FormControl from "@material-ui/core/FormControl";
 
 const useStyles = makeStyles((theme) => ({
   noneSelect: {
@@ -36,6 +44,42 @@ const useStyles = makeStyles((theme) => ({
 
 export default function SignUp() {
   const classes = useStyles();
+  const [formContent, setFormContent] = React.useState({
+    email: "",
+    username: "",
+    password: "",
+  });
+  const [showPassword, setShowPassword] = React.useState(false);
+
+  const handlePasswordInput = (event, prop) => {
+    setFormContent((formContent) => ({
+      ...formContent,
+      password: event.target.value,
+    }));
+  };
+  const handleEmailInput = (event, prop) => {
+    setFormContent((formContent) => ({
+      ...formContent,
+      email: event.target.value,
+    }));
+  };
+  const handleUsernameInput = (event, prop) => {
+    setFormContent((formContent) => ({
+      ...formContent,
+      username: event.target.value,
+    }));
+  };
+
+  const handleClickShowPassword = () => {
+    setShowPassword((prev) => !prev)
+  };
+  const handleMouseDownPassword = (event) => {
+    event.preventDefault();
+  };
+
+  const handleButtonClick = () => {
+    console.log(formContent);
+  };
 
   return (
     <Container component="main" maxWidth="xs" className={classes.noneSelect}>
@@ -53,37 +97,60 @@ export default function SignUp() {
               <TextField
                 variant="outlined"
                 fullWidth
-                id="email"
+                onChange={handleEmailInput}
                 label="Email Address"
-                name="email"
               />
             </Grid>
             <Grid item xs={12}>
-              <TextField
-                variant="outlined"
-                fullWidth
-                id="userName"
-                label="Username"
-                name="userName"
-              />
+              <FormControl variant="outlined" fullWidth>
+                <InputLabel>Username</InputLabel>
+                <OutlinedInput
+                  id="username"
+                  type="text"
+                  onChange={handleUsernameInput}
+                  fullWidth
+                  labelWidth={70}
+                />
+                <FormHelperText id="outlined-weight-helper-text">
+                  We only support ASCII characters in usernames.
+                </FormHelperText>
+              </FormControl>
             </Grid>
             <Grid item xs={12}>
-              <TextField
-                variant="outlined"
-                fullWidth
-                name="password"
-                label="Password"
-                type="password"
-                id="password"
-              />
+              <FormControl variant="outlined" fullWidth>
+                <InputLabel htmlFor="outlined-adornment-password">Password</InputLabel>
+                <OutlinedInput
+                  id="outlined-adornment-password"
+                  type={showPassword ? "text" : "password"}
+                  value={formContent.password}
+                  onChange={handlePasswordInput}
+                  fullWidth
+                  endAdornment={
+                    <InputAdornment position="end">
+                      <IconButton
+                        aria-label="toggle password visibility"
+                        onClick={handleClickShowPassword}
+                        onMouseDown={handleMouseDownPassword}
+                        edge="end"
+                      >
+                        {showPassword ? <Visibility /> : <VisibilityOff />}
+                      </IconButton>
+                    </InputAdornment>
+                  }
+                  labelWidth={70}
+                />
+                <FormHelperText id="outlined-weight-helper-text">
+                  The password should contain at least eight characters.
+                </FormHelperText>
+              </FormControl>
             </Grid>
           </Grid>
           <Button
-            type="submit"
             fullWidth
             variant="contained"
             color="primary"
             className={classes.submit}
+            onClick={handleButtonClick}
           >
             Sign Up
           </Button>
