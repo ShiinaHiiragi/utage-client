@@ -321,7 +321,7 @@ export default function SignIn(props) {
             <Snackbar
               open={snackWindow}
               anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-              autoHideDuration={2000}
+              autoHideDuration={globalSetting.snackWindowDuration}
               onClose={snackWindowClose}
               className={styleClass.snack}
             >
@@ -393,7 +393,7 @@ export default function SignIn(props) {
         <Snackbar
           open={specialSnack}
           anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-          autoHideDuration={2000}
+          autoHideDuration={globalSetting.snackWindowDuration}
           onClose={handleSpecialSnackClose}
         >
           <Alert onClose={snackWindowClose} severity="success">

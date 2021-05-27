@@ -349,7 +349,7 @@ export default function SignUp() {
       <Snackbar
         open={snackWindow}
         anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-        autoHideDuration={2000}
+        autoHideDuration={globalSetting.snackWindowDuration}
         onClose={snackWindowClose}
         className={classes.snack}
       >
