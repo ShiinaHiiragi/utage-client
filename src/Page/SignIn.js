@@ -206,11 +206,13 @@ export default function SignIn(props) {
 
   const connectServer = (account, password) => {
     // TODO: change sign in behavior here
-    console.log(account, hex_hmac_md5(account, password));
-    setTimeout(() => {
+    initDB({
+      email: account,
+      password: hex_hmac_md5(account, password)
+    }, () => {
       backdropClose();
       ReactDOM.render(<Panel />, document.getElementById("root"));
-    }, 1200);
+    });
   };
 
   // the backdrop when communicate with server
@@ -220,6 +222,9 @@ export default function SignIn(props) {
   };
   const backdropClose = () => {
     setBackdrop(false);
+  };
+
+  const initDB = (info, callback) => {
   };
 
   const handleSignUp = () => {

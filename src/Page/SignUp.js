@@ -186,8 +186,11 @@ export default function SignUp() {
           document.getElementById("root")
         );
       }
-      else snackWindowToggle("error", `${error}`);
-    }); 
+      else {
+        backdropClose();
+        snackWindowToggle("error", `${error}`);
+      }
+    });
   }
 
   // the backdrop when communicate with server
