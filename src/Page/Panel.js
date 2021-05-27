@@ -278,6 +278,10 @@ const useStyles = makeStyles((theme) => ({
   backdrop: {
     zIndex: theme.zIndex.drawer + 1,
     color: "#fff"
+  },
+  snack: {
+    userSelect: "none",
+    maxWidth: "40vw"
   }
 }));
 
@@ -911,7 +915,7 @@ export default function Panel() {
         anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
         autoHideDuration={panelSetting.snackWindowDuration}
         onClose={closeSnackWindow}
-        className={classes.noneSelect}
+        className={classes.snack}
       >
         <Alert onClose={closeSnackWindow} severity={panelPopup.snackWindowType}>
           {panelPopup.snackWindowMessage}

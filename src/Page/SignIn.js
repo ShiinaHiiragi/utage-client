@@ -53,7 +53,7 @@ const useStyles = makeStyles((theme) => ({
     margin: theme.spacing(2, 0, 2)
   },
   snack: {
-    width: "100%",
+    maxWidth: "40vw",
     "& > * + *": {
       marginTop: theme.spacing(2)
     }
@@ -71,10 +71,13 @@ function Alert(props) {
 function checkURL(stringURL, callback) {
   if (stringURL.charAt(stringURL.length - 1) !== "/")
     stringURL += "/";
-  request(`${stringURL}who`, (err, res, body) => {
+  request({
+    url: `${stringURL}who`,
+    timeout: 10000
+  }, (err, res, body) => {
     if (!err && res.statusCode === 200 && body === "utage")
       callback(null, stringURL);
-    else callback(true, null);
+    else callback(err, null);
   });
 }
 
@@ -104,7 +107,7 @@ export default function SignIn(props) {
         signInSetting.proxy = newString;
         saveProxySetting(proxyHasChanged);
       } else
-      snackWindowToggle("error", "Invalid URL, please recheck your input.");
+      snackWindowToggle("error", "Cannot connect to server. Please recheck your input.");
     });
   };
   const proxyUpdateInput = (event) => {
@@ -153,10 +156,7 @@ export default function SignIn(props) {
     signInSetting.remember = event.target.checked;
     saveSetting(() => {
       if (signInSetting.remember)
-        snackWindowToggle(
-          "success",
-          "The account will be remembered. Please do it on private PC."
-        );
+        snackWindowToggle("success", "The account will be remembered.");
     });
   };
 
@@ -193,10 +193,19 @@ export default function SignIn(props) {
       saveSetting(() => {});
     }
     backdropToggle();
+    checkURL(signInSetting.proxy, (err) => {
+      if (err)
+      {
+        backdropClose();
+        snackWindowToggle("error", `${err}`);
+      }
+      else connectServer(email, password);
+    });
+  };
 
-    // TODO: complete sign in behavior here
-    // TEMP: delete setTimeout later
-    console.log(password);
+  const connectServer = (account, password) => {
+    // TODO: change sign in behavior here
+    console.log(account, password);
     setTimeout(() => {
       backdropClose();
       ReactDOM.render(<Panel />, document.getElementById("root"));
@@ -272,9 +281,6 @@ export default function SignIn(props) {
               <Button onClick={proxyWindowToggle}>Switch Server</Button>
               <Button onClick={signInClick}>Sign In</Button>
             </ButtonGroup>
-            <Backdrop className={styleClass.backdrop} open={backdrop}>
-              <CircularProgress color="inherit" size={56} />
-            </Backdrop>
             <Dialog
               className={styleClass.noneSelect}
               open={proxyWindow}
@@ -316,6 +322,7 @@ export default function SignIn(props) {
               anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
               autoHideDuration={2000}
               onClose={snackWindowClose}
+              className={styleClass.snack}
             >
               <Alert onClose={snackWindowClose} severity={snackWindowType}>
                 {snackWindowMessage}
@@ -392,6 +399,9 @@ export default function SignIn(props) {
             {"Your account has been created successfully. You can sign in now."}
           </Alert>
         </Snackbar>
+        <Backdrop className={styleClass.backdrop} open={backdrop}>
+          <CircularProgress color="inherit" size={56} />
+        </Backdrop>
       </Box>
     </Container>
   );

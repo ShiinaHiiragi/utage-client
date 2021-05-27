@@ -54,6 +54,10 @@ const useStyles = makeStyles((theme) => ({
   backdrop: {
     zIndex: theme.zIndex.drawer + 1,
     color: "#fff"
+  },
+  snack: {
+    userSelect: "none",
+    maxWidth: "40vw",
   }
 }));
 
@@ -302,7 +306,7 @@ export default function SignUp() {
         anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
         autoHideDuration={2000}
         onClose={snackWindowClose}
-        className={classes.noneSelect}
+        className={classes.snack}
       >
         <Alert onClose={snackWindowClose} severity={snackWindowType}>
           {snackWindowMessage}
