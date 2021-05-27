@@ -27,6 +27,7 @@ import Panel from "./Panel";
 import SignUp from "./SignUp";
 
 const fs = window.require("fs");
+const request = window.require("request");
 const settingPath = "./data/setting/SignInSetting.json";
 var signInSetting = JSON.parse(fs.readFileSync(settingPath));
 
@@ -67,9 +68,14 @@ function Alert(props) {
   return <MuiAlert elevation={6} variant="filled" {...props} />;
 }
 
-// TODO: check the validity of the URL input if possible.
-function checkURL(stringURL) {
-  return true;
+function checkURL(stringURL, callback) {
+  if (stringURL.charAt(stringURL.length - 1) !== "/")
+    stringURL += "/";
+  request(`${stringURL}who`, (err, res, body) => {
+    if (!err && res.statusCode === 200 && body === "utage")
+      callback(null, stringURL);
+    else callback(true, null);
+  });
 }
 
 function saveSetting(callback) {
@@ -91,13 +97,15 @@ export default function SignIn(props) {
     setProxyWindow(false);
   };
   const proxyWindowSubmit = (newValue) => {
-    if (checkURL(newValue)) {
-      var proxyHasChanged = signInSetting.proxy !== newValue;
-      setProxyWindow(false);
-      signInSetting.proxy = newValue;
-      saveProxySetting(proxyHasChanged);
-    } else
+    checkURL(newValue, (err, newString) => {
+      if (!err) {
+        var proxyHasChanged = signInSetting.proxy !== newValue;
+        setProxyWindow(false);
+        signInSetting.proxy = newString;
+        saveProxySetting(proxyHasChanged);
+      } else
       snackWindowToggle("error", "Invalid URL, please recheck your input.");
+    });
   };
   const proxyUpdateInput = (event) => {
     setProxyInput(event.target.value);
