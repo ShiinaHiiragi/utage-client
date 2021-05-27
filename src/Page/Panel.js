@@ -547,7 +547,7 @@ export default function Panel() {
     event.preventDefault();
   };
   const handleTextBold = () => {
-    if (panelInfo.state.focus) handleRichTextMark("*", "*");
+    if (panelInfo.state.focus) handleRichTextMark("**", "**");
     else
       toggleSnackWindow(
         "warning",
@@ -555,7 +555,7 @@ export default function Panel() {
       );
   };
   const handleTextItalic = () => {
-    if (panelInfo.state.focus) handleRichTextMark("**", "**");
+    if (panelInfo.state.focus) handleRichTextMark("*", "*");
     else
       toggleSnackWindow(
         "warning",
