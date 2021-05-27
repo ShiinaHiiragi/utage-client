@@ -186,6 +186,7 @@ export default function SignIn(props) {
     setPassword(event.target.value);
   };
   const signInClick = () => {
+    // check the illegal data
     if (email === "" || password === "") {
       snackWindowToggle("error", "Please enter the account and password.");
       return;
@@ -193,26 +194,32 @@ export default function SignIn(props) {
       globalSetting.account = email;
       saveSetting(() => {});
     }
+
     backdropToggle();
-    checkURL(globalSetting.proxy, (err) => {
-      if (err)
-      {
+    const info = {email: email, password: hex_hmac_md5(email, password)};
+    connectServer(info, () => {
+      initDB(info, () => {
         backdropClose();
-        snackWindowToggle("error", `${err}`);
-      }
-      else connectServer(email, password);
+        ReactDOM.render(<Panel />, document.getElementById("root"));
+      });
     });
   };
 
-  const connectServer = (account, password) => {
-    // TODO: change sign in behavior here
-    initDB({
-      email: account,
-      password: hex_hmac_md5(account, password)
-    }, () => {
-      backdropClose();
-      ReactDOM.render(<Panel />, document.getElementById("root"));
-    });
+  const connectServer = (info, callback) => {
+    console.log(info.email, info.password);
+    checkURL(globalSetting.proxy, (err) => {
+      if (err) {
+        backdropClose();
+        snackWindowToggle("error", `${err}`);
+      } else {
+        // TEMP: move callback later
+        callback();
+      }
+    })
+  }
+  const initDB = (info, callback) => {
+    // TEMP: move callback later
+    callback();
   };
 
   // the backdrop when communicate with server
@@ -222,9 +229,6 @@ export default function SignIn(props) {
   };
   const backdropClose = () => {
     setBackdrop(false);
-  };
-
-  const initDB = (info, callback) => {
   };
 
   const handleSignUp = () => {

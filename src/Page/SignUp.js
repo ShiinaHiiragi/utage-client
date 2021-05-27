@@ -167,8 +167,9 @@ export default function SignUp() {
       });
     });
   };
-  // NOTE: test this function later
+
   const requestSignUp = (info) => {
+    console.log(info);
     request({
       url: `${globalSetting.proxy}sign/up`,
       method: "POST",
@@ -176,7 +177,7 @@ export default function SignUp() {
       headers: {
         "content-type": "application/json",
       },
-      body: JSON.stringify(info),
+      body: info,
       timeout: 10000,
     }, (error, response) => {
       if (!error && response.statusCode == 200) {
@@ -188,7 +189,7 @@ export default function SignUp() {
       }
       else {
         backdropClose();
-        snackWindowToggle("error", `${error}`);
+        snackWindowToggle("error", `Server Error: ${response.body}`);
       }
     });
   }
