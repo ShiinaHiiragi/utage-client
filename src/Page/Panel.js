@@ -258,8 +258,11 @@ const useStyles = makeStyles((theme) => ({
     userSelect: "none"
   },
   cardText: {
-    padding: theme.spacing(0, 2, 1, 2),
+    // The markdown style
     fontSize: "16px"
+  },
+  cardPadding: {
+    padding: theme.spacing(0, 2, 1, 2),
   },
   textField: {
     "& .MuiTextField-root": {
@@ -348,6 +351,7 @@ export default function Panel() {
     menuLogOut: false,
     backdrop: false,
     textEmoji: false,
+    textPreview: false,
     snackWindow: false,
     snackWindowType: "",
     snackWindowMessage: ""
@@ -578,10 +582,28 @@ export default function Panel() {
   };
 
   // about preview and send
-  const handleTogglePreview = () => {
-    // TODO: complete this function
+  const handleTextPreviewToggle = () => {
+    handlePreCheck();
+    setPanelPopup(panelPopup => ({
+      ...panelPopup,
+      textPreview: true,
+    }));
+  };
+  const handleTextPreviewBack = () => {
+    setPanelPopup(panelPopup => ({
+      ...panelPopup,
+      textPreview: false,
+    }));
+  };
+  const handleTextPreviewSend = () => {
+    handleTextPreviewBack();
+    handleSend();
   };
   const handleSend = () => {
+    // TODO: complete this function
+    handlePreCheck();
+  };
+  const handlePreCheck = () => {
     // TODO: complete this function
   };
 
@@ -814,7 +836,7 @@ export default function Panel() {
                         <b>{value.sender}</b> {formatSideTime(value.time)}
                       </Typography>
                     </div>
-                    <div className={classes.cardText}>
+                    <div className={clsx(classes.cardText, classes.cardPadding)}>
                       <Markdown>{value.text}</Markdown>
                     </div>
                   </Card>
@@ -855,7 +877,7 @@ export default function Panel() {
                 ["Link", <LinkIcon />, handleTextLink],
                 ["Code Line", <CodeIcon />, handleTextCode],
                 <div key="span" className={classes.textSpan}></div>,
-                ["Preview", <AirplayIcon />, handleTogglePreview],
+                ["Preview", <AirplayIcon />, handleTextPreviewToggle],
                 ["Send", <SendIcon />, handleSend]
               ].map((value) => {
                 if (value instanceof Array)
@@ -901,6 +923,36 @@ export default function Panel() {
                   autoFocus
                 >
                   Cancel
+                </Button>
+              </DialogActions>
+            </Dialog>
+            <Dialog
+              open={panelPopup.textPreview}
+              onClose={handleTextPreviewBack}
+            >
+              <DialogTitle
+                id="alert-dialog-title"
+                className={classes.noneSelect}
+              >
+                {"Preview in Markdown"}
+              </DialogTitle>
+              <DialogContent className={classes.cardText}>
+                <Markdown>
+                  { panelInfo.record.find(
+                      (value) =>
+                        value.accessInfo.id === panelInfo.state.selectedRecord
+                    ).status.textInput }
+                </Markdown>
+              </DialogContent>
+              <DialogActions>
+                <Button
+                  onClick={handleTextPreviewBack}
+                  color="primary"
+                >
+                  Back
+                </Button>
+                <Button onClick={handleTextPreviewSend} color="secondary">
+                  Send
                 </Button>
               </DialogActions>
             </Dialog>
