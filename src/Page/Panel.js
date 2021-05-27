@@ -48,6 +48,12 @@ import AirplayIcon from "@material-ui/icons/Airplay";
 import StrikethroughSIcon from "@material-ui/icons/StrikethroughS";
 import SignIn from "./SignIn";
 
+const electron = window.require("electron");
+const fs = window.require("fs");
+const path = window.require("path");
+const app = electron.remote.app;
+
+const imgPath = app.isPackaged ? "./resources/app/build/" : "./build/";
 let panelSetting = {
   snackWindowDuration: 2000
 };
@@ -589,7 +595,6 @@ export default function Panel() {
     }));
   };
   const handleTextPreviewToggle = () => {
-    // TODO: add image check
     const checkInfo = handlePreCheck();
     if (checkInfo !== "")
       toggleSnackWindow("warning", checkInfo);
@@ -603,10 +608,16 @@ export default function Panel() {
       (value) =>
         value.accessInfo.id === panelInfo.state.selectedRecord
     ).status.textInput;
+    let pattern = /!\[(.*?)\]\((.*?)\)/mg, matcher;
     if (nowTextInput === "")
       return "The input panel is vacant.";
-    // TODO: complete this function
-    else return "";
+    while ((matcher = pattern.exec(nowTextInput)) !== null)
+      try {
+        fs.accessSync(path.join(imgPath, matcher[2]))
+      } catch (err) {
+        return `${err}`;
+      }
+    return "";
   };
   const handleTextSend = (hasChecked) => {
     // IMPORTANT: DO NOT WRITE AS `!hasChecked`
@@ -968,7 +979,9 @@ export default function Panel() {
                 >
                   Back
                 </Button>
-                <Button onClick={() => {handleTextSend(true)}} color="secondary">
+                <Button onClick={() => {
+                  handleTextPreviewBack();
+                  handleTextSend(true);}} color="secondary">
                   Send
                 </Button>
               </DialogActions>

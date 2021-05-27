@@ -209,7 +209,7 @@ export default function SignIn(props) {
     setTimeout(() => {
       backdropClose();
       ReactDOM.render(<Panel />, document.getElementById("root"));
-    }, 2000);
+    }, 1200);
   };
 
   // the backdrop when communicate with server
