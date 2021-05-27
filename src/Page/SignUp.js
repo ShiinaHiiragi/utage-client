@@ -160,14 +160,15 @@ export default function SignUp() {
       if (err) {
         backdropClose();
         snackWindowToggle("error", `${err}`);
-      } else signUp({
+      } else requestSignUp({
         email: formContent.email,
         userName: formContent.username,
         password: hex_hmac_md5(formContent.email, formContent.password)
       });
     });
   };
-  const signUp = (info) => {
+  // NOTE: test this function later
+  const requestSignUp = (info) => {
     request({
       url: `${signInSetting.proxy}sign/up`,
       method: "POST",
