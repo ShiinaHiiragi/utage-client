@@ -13,6 +13,7 @@
 /static
 /data/database
 /*-win32-x64
+/data
 
 # misc
 .DS_Store

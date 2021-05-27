@@ -33,8 +33,8 @@ import hex_hmac_md5 from "../Lib/MD5";
 
 const fs = window.require("fs");
 const request = window.require("request");
-const settingPath = "./data/setting/SignInSetting.json";
-var signInSetting = JSON.parse(fs.readFileSync(settingPath));
+const settingPath = "./data/setting.json";
+let globalSetting = JSON.parse(fs.readFileSync(settingPath));
 
 const useStyles = makeStyles((theme) => ({
   noneSelect: {
@@ -156,7 +156,7 @@ export default function SignUp() {
     }
 
     backdropToggle();
-    checkURL(signInSetting.proxy, (err) => {
+    checkURL(globalSetting.proxy, (err) => {
       if (err) {
         backdropClose();
         snackWindowToggle("error", `${err}`);
@@ -170,7 +170,7 @@ export default function SignUp() {
   // NOTE: test this function later
   const requestSignUp = (info) => {
     request({
-      url: `${signInSetting.proxy}sign/up`,
+      url: `${globalSetting.proxy}sign/up`,
       method: "POST",
       json: true,
       headers: {

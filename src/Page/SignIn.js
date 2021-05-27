@@ -29,8 +29,8 @@ import hex_hmac_md5 from "../Lib/MD5";
 
 const fs = window.require("fs");
 const request = window.require("request");
-const settingPath = "./data/setting/SignInSetting.json";
-var signInSetting = JSON.parse(fs.readFileSync(settingPath));
+const settingPath = "./data/setting.json";
+let globalSetting = JSON.parse(fs.readFileSync(settingPath));
 
 const useStyles = makeStyles((theme) => ({
   noneSelect: {
@@ -83,7 +83,7 @@ function checkURL(stringURL, callback) {
 }
 
 function saveSetting(callback) {
-  fs.writeFile(settingPath, JSON.stringify(signInSetting), callback);
+  fs.writeFile(settingPath, JSON.stringify(globalSetting), callback);
 }
 
 export default function SignIn(props) {
@@ -93,7 +93,7 @@ export default function SignIn(props) {
   // proxyWindowStatus: is window of setting IP on?
   // proxyNow: the value of input in the window of setting IP.
   const [proxyWindow, setProxyWindow] = React.useState(false);
-  const [proxyInput, setProxyInput] = React.useState(signInSetting.proxy);
+  const [proxyInput, setProxyInput] = React.useState(globalSetting.proxy);
   const proxyWindowToggle = () => {
     setProxyWindow(true);
   };
@@ -103,9 +103,9 @@ export default function SignIn(props) {
   const proxyWindowSubmit = (newValue) => {
     checkURL(newValue, (err, newString) => {
       if (!err) {
-        var proxyHasChanged = signInSetting.proxy !== newValue;
+        var proxyHasChanged = globalSetting.proxy !== newValue;
         setProxyWindow(false);
-        signInSetting.proxy = newString;
+        globalSetting.proxy = newString;
         saveProxySetting(proxyHasChanged);
       } else
       snackWindowToggle("error", "Cannot connect to server. Please recheck your input.");
@@ -150,13 +150,13 @@ export default function SignIn(props) {
 
   // checkbox of remember account
   const [rememberAccount, setRememberAccount] = React.useState(
-    signInSetting.remember
+    globalSetting.remember
   );
   const rememberAccountChange = (event) => {
     setRememberAccount(event.target.checked);
-    signInSetting.remember = event.target.checked;
+    globalSetting.remember = event.target.checked;
     saveSetting(() => {
-      if (signInSetting.remember)
+      if (globalSetting.remember)
         snackWindowToggle("success", "The account will be remembered.");
     });
   };
@@ -174,8 +174,8 @@ export default function SignIn(props) {
   const [email, setEmail] = React.useState(
     props.account
       ? props.account
-      : signInSetting.remember
-      ? signInSetting.account
+      : globalSetting.remember
+      ? globalSetting.account
       : ""
   );
   const [password, setPassword] = React.useState("");
@@ -189,12 +189,12 @@ export default function SignIn(props) {
     if (email === "" || password === "") {
       snackWindowToggle("error", "Please enter the account and password.");
       return;
-    } else if (signInSetting.remember) {
-      signInSetting.account = email;
+    } else if (globalSetting.remember) {
+      globalSetting.account = email;
       saveSetting(() => {});
     }
     backdropToggle();
-    checkURL(signInSetting.proxy, (err) => {
+    checkURL(globalSetting.proxy, (err) => {
       if (err)
       {
         backdropClose();
@@ -296,7 +296,7 @@ export default function SignIn(props) {
                 </DialogContentText>
                 <TextField
                   autoFocus
-                  defaultValue={signInSetting.proxy}
+                  defaultValue={globalSetting.proxy}
                   onChange={proxyUpdateInput}
                   margin="dense"
                   id="name"

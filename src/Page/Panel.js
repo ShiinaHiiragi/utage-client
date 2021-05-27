@@ -54,9 +54,8 @@ const path = window.require("path");
 const app = electron.remote.app;
 
 const imgPath = app.isPackaged ? "./resources/app/build/" : "./build/";
-let panelSetting = {
-  snackWindowDuration: 2000
-};
+const settingPath = "./data/setting.json";
+let globalSetting = JSON.parse(fs.readFileSync(settingPath));
 
 // panelReading's record and log should be sorted chronologically
 let panelReading = {
@@ -995,7 +994,7 @@ export default function Panel() {
       <Snackbar
         open={panelPopup.snackWindow}
         anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-        autoHideDuration={panelSetting.snackWindowDuration}
+        autoHideDuration={globalSetting.snackWindowDuration}
         onClose={closeSnackWindow}
         className={classes.snack}
       >
