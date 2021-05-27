@@ -582,28 +582,45 @@ export default function Panel() {
   };
 
   // about preview and send
-  const handleTextPreviewToggle = () => {
-    handlePreCheck();
-    setPanelPopup(panelPopup => ({
-      ...panelPopup,
-      textPreview: true,
-    }));
-  };
   const handleTextPreviewBack = () => {
     setPanelPopup(panelPopup => ({
       ...panelPopup,
       textPreview: false,
     }));
   };
-  const handleTextPreviewSend = () => {
-    handleTextPreviewBack();
-    handleSend();
-  };
-  const handleSend = () => {
-    // TODO: complete this function
-    handlePreCheck();
+  const handleTextPreviewToggle = () => {
+    // TODO: add image check
+    const checkInfo = handlePreCheck();
+    if (checkInfo !== "")
+      toggleSnackWindow("warning", checkInfo);
+    else setPanelPopup(panelPopup => ({
+        ...panelPopup,
+        textPreview: true,
+      }));
   };
   const handlePreCheck = () => {
+    const nowTextInput = panelInfo.record.find(
+      (value) =>
+        value.accessInfo.id === panelInfo.state.selectedRecord
+    ).status.textInput;
+    if (nowTextInput === "")
+      return "The input panel is vacant.";
+    // TODO: complete this function
+    else return "";
+  };
+  const handleTextSend = (hasChecked) => {
+    // IMPORTANT: DO NOT WRITE AS `!hasChecked`
+    // because hasChecked is either `true` or a event Object
+    // TEMP: change the logic later
+    const nowTextInput = panelInfo.record.find(
+      (value) =>
+        value.accessInfo.id === panelInfo.state.selectedRecord
+    ).status.textInput;
+    let checkInfo = (hasChecked === true) ? "" : handlePreCheck();
+    if (checkInfo !== "") {
+      toggleSnackWindow("warning", checkInfo);
+      return;
+    }
     // TODO: complete this function
   };
 
@@ -878,7 +895,7 @@ export default function Panel() {
                 ["Code Line", <CodeIcon />, handleTextCode],
                 <div key="span" className={classes.textSpan}></div>,
                 ["Preview", <AirplayIcon />, handleTextPreviewToggle],
-                ["Send", <SendIcon />, handleSend]
+                ["Send", <SendIcon />, handleTextSend]
               ].map((value) => {
                 if (value instanceof Array)
                   return (
@@ -951,7 +968,7 @@ export default function Panel() {
                 >
                   Back
                 </Button>
-                <Button onClick={handleTextPreviewSend} color="secondary">
+                <Button onClick={() => {handleTextSend(true)}} color="secondary">
                   Send
                 </Button>
               </DialogActions>
