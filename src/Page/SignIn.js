@@ -25,6 +25,7 @@ import CircularProgress from "@material-ui/core/CircularProgress";
 import { makeStyles } from "@material-ui/core/styles";
 import Panel from "./Panel";
 import SignUp from "./SignUp";
+import hex_hmac_md5 from "../Lib/MD5";
 
 const fs = window.require("fs");
 const request = window.require("request");
@@ -205,7 +206,7 @@ export default function SignIn(props) {
 
   const connectServer = (account, password) => {
     // TODO: change sign in behavior here
-    console.log(account, password);
+    console.log(account, hex_hmac_md5(account, password));
     setTimeout(() => {
       backdropClose();
       ReactDOM.render(<Panel />, document.getElementById("root"));
