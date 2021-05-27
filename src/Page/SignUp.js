@@ -29,6 +29,12 @@ import MuiAlert from "@material-ui/lab/Alert";
 import Backdrop from "@material-ui/core/Backdrop";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import SignIn from "./SignIn";
+import hex_hmac_md5 from "../Lib/MD5";
+
+const fs = window.require("fs");
+const request = window.require("request");
+const settingPath = "./data/setting/SignInSetting.json";
+var signInSetting = JSON.parse(fs.readFileSync(settingPath));
 
 const useStyles = makeStyles((theme) => ({
   noneSelect: {
@@ -63,6 +69,19 @@ const useStyles = makeStyles((theme) => ({
 
 function Alert(props) {
   return <MuiAlert elevation={6} variant="filled" {...props} />;
+}
+
+function checkURL(stringURL, callback) {
+  if (stringURL.charAt(stringURL.length - 1) !== "/")
+    stringURL += "/";
+  request({
+    url: `${stringURL}who`,
+    timeout: 10000
+  }, (err, res, body) => {
+    if (!err && res.statusCode === 200 && body === "utage")
+      callback(null);
+    else callback(err);
+  });
 }
 
 export default function SignUp() {
@@ -125,25 +144,50 @@ export default function SignUp() {
     } else if (!/^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(formContent.email)) {
       snackWindowToggle("error", "Unsupported E-mail Address.");
       return;
+    } else if (formContent.username.length > 16) {
+      snackWindowToggle("error", "The username should contains no more than 16 characters.");
+      return;
     } else if (!/^[\x0-\x7F]*$/.test(formContent.username)) {
-      snackWindowToggle("error", "Your username contains illegal characters.");
+      snackWindowToggle("error", "THe username contains illegal characters.");
       return;
     } else if (formContent.password.length < 8) {
-      snackWindowToggle("error", "Your password is too short.");
+      snackWindowToggle("error", "The password should contains no less than 8 characters.");
       return;
     }
 
     backdropToggle();
-    // TODO: complete sign in behavior here
-    // TEMP: delete setTimeout later
-    setTimeout(() => {
-      backdropClose();
-      ReactDOM.render(
-        <SignIn snack={true} account={formContent.email} />,
-        document.getElementById("root")
-      );
-    }, 2000);
+    checkURL(signInSetting.proxy, (err) => {
+      if (err) {
+        backdropClose();
+        snackWindowToggle("error", `${err}`);
+      } else signUp({
+        email: formContent.email,
+        userName: formContent.username,
+        password: hex_hmac_md5(formContent.email, formContent.password)
+      });
+    });
   };
+  const signUp = (info) => {
+    request({
+      url: `${signInSetting.proxy}sign/up`,
+      method: "POST",
+      json: true,
+      headers: {
+        "content-type": "application/json",
+      },
+      body: JSON.stringify(info),
+      timeout: 10000,
+    }, (error, response) => {
+      if (!error && response.statusCode == 200) {
+        backdropClose();
+        ReactDOM.render(
+          <SignIn snack={true} account={formContent.email} />,
+          document.getElementById("root")
+        );
+      }
+      else snackWindowToggle("error", `${error}`);
+    }); 
+  }
 
   // the backdrop when communicate with server
   const [backdrop, setBackdrop] = React.useState(false);
@@ -193,7 +237,7 @@ export default function SignUp() {
                   labelWidth={70}
                 />
                 <FormHelperText id="outlined-weight-helper-text">
-                  We only support ASCII characters in usernames.
+                  We only support ASCII characters in usernames no more than 16 characters.
                 </FormHelperText>
               </FormControl>
             </Grid>
