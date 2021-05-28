@@ -55,9 +55,18 @@ const app = electron.remote.app;
 
 const imgPath = app.isPackaged ? "./resources/app/build/" : "./build/";
 const settingPath = "./data/setting.json";
-let globalSetting = JSON.parse(fs.readFileSync(settingPath));
+const markdownOverride = {
+  img: {
+    props: {
+      style: {
+        maxWidth: "100%"
+      }
+    }
+  }
+};
 
 // panelReading's record and log should be sorted chronologically
+let globalSetting = JSON.parse(fs.readFileSync(settingPath));
 let panelReading = {
   usrInfo: {
     uid: "1024U",
@@ -83,7 +92,7 @@ let panelReading = {
           sender: "chocomint",
           senderID: "2048U",
           senderAvatar: "png",
-          text: "Lorem ipsum dolor sit amet consectetur adipisicing elit.",
+          text: "Lorem ipsum dolor sit amet consectetur adipisicing elit. ![](https://ichinoe.github.io/img/header/domain.jpg)",
           time: "2021-05-23T04:20:44.733Z"
         },
         {
@@ -864,7 +873,9 @@ export default function Panel() {
                       </Typography>
                     </div>
                     <div className={clsx(classes.cardText, classes.cardPadding)}>
-                      <Markdown>{value.text}</Markdown>
+                      <Markdown options={{overrides: markdownOverride}}>
+                        {value.text}
+                      </Markdown>
                     </div>
                   </Card>
                 </div>
@@ -964,7 +975,7 @@ export default function Panel() {
                 {"Preview in Markdown"}
               </DialogTitle>
               <DialogContent className={classes.cardText}>
-                <Markdown>
+                <Markdown options={{overrides: markdownOverride}}>
                   { panelInfo.record.find(
                       (value) =>
                         value.accessInfo.id === panelInfo.state.selectedRecord

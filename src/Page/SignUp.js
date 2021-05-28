@@ -180,7 +180,7 @@ export default function SignUp() {
       body: info,
       timeout: 10000,
     }, (error, response) => {
-      if (!error && response.statusCode == 200) {
+      if (!error && response.statusCode === 200) {
         backdropClose();
         ReactDOM.render(
           <SignIn snack={true} account={formContent.email} />,
