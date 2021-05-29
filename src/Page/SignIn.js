@@ -70,18 +70,16 @@ function Alert(props) {
 }
 
 function checkURL(stringURL, callback) {
-  if (stringURL.charAt(stringURL.length - 1) !== "/") stringURL += "/";
-  request(
-    {
-      url: `${stringURL}who`,
-      timeout: 10000
-    },
-    (err, res, body) => {
-      if (!err && res.statusCode === 200 && body === "utage")
-        callback(null, stringURL);
-      else callback(err, null);
-    }
-  );
+  if (stringURL.charAt(stringURL.length - 1) !== "/")
+    stringURL += "/";
+  request({
+    url: `${stringURL}who`,
+    timeout: 10000
+  }, (err, res, body) => {
+    if (!err && res.statusCode === 200 && body === "utage")
+      callback(null, stringURL);
+    else callback(err, null);
+  });
 }
 
 function saveSetting(callback) {
@@ -110,10 +108,7 @@ export default function SignIn(props) {
         globalSetting.proxy = newString;
         saveProxySetting(proxyHasChanged);
       } else
-        snackWindowToggle(
-          "error",
-          "Cannot connect to server. Please recheck your input."
-        );
+      snackWindowToggle("error", "Cannot connect to server. Please recheck your input.");
     });
   };
   const proxyUpdateInput = (event) => {
@@ -201,7 +196,7 @@ export default function SignIn(props) {
     }
 
     backdropToggle();
-    const info = { email: email, password: hex_hmac_md5(email, password) };
+    const info = {email: email, password: hex_hmac_md5(email, password)};
     connectServer(info, () => {
       initDB(info, () => {
         backdropClose();
@@ -220,8 +215,8 @@ export default function SignIn(props) {
         // TEMP: move callback later
         callback();
       }
-    });
-  };
+    })
+  }
   const initDB = (info, callback) => {
     // TEMP: move callback later
     callback();

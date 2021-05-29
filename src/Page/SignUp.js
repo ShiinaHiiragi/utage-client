@@ -63,7 +63,7 @@ const useStyles = makeStyles((theme) => ({
   },
   snack: {
     userSelect: "none",
-    maxWidth: "40vw"
+    maxWidth: "40vw",
   }
 }));
 
@@ -72,17 +72,16 @@ function Alert(props) {
 }
 
 function checkURL(stringURL, callback) {
-  if (stringURL.charAt(stringURL.length - 1) !== "/") stringURL += "/";
-  request(
-    {
-      url: `${stringURL}who`,
-      timeout: 10000
-    },
-    (err, res, body) => {
-      if (!err && res.statusCode === 200 && body === "utage") callback(null);
-      else callback(err);
-    }
-  );
+  if (stringURL.charAt(stringURL.length - 1) !== "/")
+    stringURL += "/";
+  request({
+    url: `${stringURL}who`,
+    timeout: 10000
+  }, (err, res, body) => {
+    if (!err && res.statusCode === 200 && body === "utage")
+      callback(null);
+    else callback(err);
+  });
 }
 
 export default function SignUp() {
@@ -142,27 +141,17 @@ export default function SignUp() {
     ) {
       snackWindowToggle("error", "Please enter all the information needed.");
       return;
-    } else if (
-      !/^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(
-        formContent.email
-      )
-    ) {
+    } else if (!/^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(formContent.email)) {
       snackWindowToggle("error", "Unsupported E-mail Address.");
       return;
     } else if (formContent.username.length > 16) {
-      snackWindowToggle(
-        "error",
-        "The username should contains no more than 16 characters."
-      );
+      snackWindowToggle("error", "The username should contains no more than 16 characters.");
       return;
     } else if (!/^[\x0-\x7F]*$/.test(formContent.username)) {
       snackWindowToggle("error", "THe username contains illegal characters.");
       return;
     } else if (formContent.password.length < 8) {
-      snackWindowToggle(
-        "error",
-        "The password should contains no less than 8 characters."
-      );
+      snackWindowToggle("error", "The password should contains no less than 8 characters.");
       return;
     }
 
@@ -171,42 +160,39 @@ export default function SignUp() {
       if (err) {
         backdropClose();
         snackWindowToggle("error", `${err}`);
-      } else
-        requestSignUp({
-          email: formContent.email,
-          userName: formContent.username,
-          password: hex_hmac_md5(formContent.email, formContent.password)
-        });
+      } else requestSignUp({
+        email: formContent.email,
+        userName: formContent.username,
+        password: hex_hmac_md5(formContent.email, formContent.password)
+      });
     });
   };
 
   const requestSignUp = (info) => {
     console.log(info);
-    request(
-      {
-        url: `${globalSetting.proxy}sign/up`,
-        method: "POST",
-        json: true,
-        headers: {
-          "content-type": "application/json"
-        },
-        body: info,
-        timeout: 10000
+    request({
+      url: `${globalSetting.proxy}sign/up`,
+      method: "POST",
+      json: true,
+      headers: {
+        "content-type": "application/json",
       },
-      (error, response) => {
-        if (!error && response.statusCode === 200) {
-          backdropClose();
-          ReactDOM.render(
-            <SignIn snack={true} account={formContent.email} />,
-            document.getElementById("root")
-          );
-        } else {
-          backdropClose();
-          snackWindowToggle("error", `Server Error: ${response.body}`);
-        }
+      body: info,
+      timeout: 10000,
+    }, (error, response) => {
+      if (!error && response.statusCode === 200) {
+        backdropClose();
+        ReactDOM.render(
+          <SignIn snack={true} account={formContent.email} />,
+          document.getElementById("root")
+        );
       }
-    );
-  };
+      else {
+        backdropClose();
+        snackWindowToggle("error", `Server Error: ${response.body}`);
+      }
+    });
+  }
 
   // the backdrop when communicate with server
   const [backdrop, setBackdrop] = React.useState(false);
@@ -256,8 +242,7 @@ export default function SignUp() {
                   labelWidth={70}
                 />
                 <FormHelperText id="outlined-weight-helper-text">
-                  We only support ASCII characters in usernames no more than 16
-                  characters.
+                  We only support ASCII characters in usernames no more than 16 characters.
                 </FormHelperText>
               </FormControl>
             </Grid>
