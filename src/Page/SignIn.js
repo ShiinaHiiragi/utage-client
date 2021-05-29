@@ -92,6 +92,11 @@ export default function SignIn(props) {
   // using style defined in the front
   const styleClass = useStyles();
 
+  // Equals to componentDidmount
+  React.useEffect(() => {
+    globalSetting = JSON.parse(fs.readFileSync(settingPath));
+  }, []);
+
   // proxyWindowStatus: is window of setting IP on?
   // proxyNow: the value of input in the window of setting IP.
   const [proxyWindow, setProxyWindow] = React.useState(false);

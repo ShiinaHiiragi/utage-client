@@ -94,6 +94,11 @@ export default function SignUp() {
   });
   const [showPassword, setShowPassword] = React.useState(false);
 
+  // Equals to componentDidmount
+  React.useEffect(() => {
+    globalSetting = JSON.parse(fs.readFileSync(settingPath));
+  }, []);
+
   // snack windows of any hints
   const [snackWindow, setSnackWindow] = React.useState(false);
   const [snackWindowType, setSnackWindowType] = React.useState("");

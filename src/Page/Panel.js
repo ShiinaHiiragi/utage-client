@@ -82,7 +82,7 @@ let panelReading = {
         avatar: "png"
       },
       status: {
-        unread: 2,
+        unread: 0,
         all: true,
         textInput: ""
       },
@@ -357,6 +357,11 @@ function Alert(props) {
 
 export default function Panel() {
   const classes = useStyles();
+
+  // Equals to componentDidmount
+  React.useEffect(() => {
+    globalSetting = JSON.parse(fs.readFileSync(settingPath));
+  }, []);
 
   // the state info need by user interface
   const [panelInfo, setPanelInfo] = React.useState(panelReading);
