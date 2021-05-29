@@ -30,6 +30,10 @@ import Snackbar from "@material-ui/core/Snackbar";
 import MuiAlert from "@material-ui/lab/Alert";
 import Backdrop from "@material-ui/core/Backdrop";
 import CircularProgress from "@material-ui/core/CircularProgress";
+import Table from "@material-ui/core/Table";
+import TableBody from "@material-ui/core/TableBody";
+import TableCell from "@material-ui/core/TableCell";
+import TableRow from "@material-ui/core/TableRow";
 import { makeStyles } from "@material-ui/core/styles";
 import InfoOutlinedIcon from "@material-ui/icons/InfoOutlined";
 import MenuIcon from "@material-ui/icons/Menu";
@@ -190,6 +194,26 @@ const useStyles = makeStyles((theme) => ({
   snack: {
     userSelect: "none",
     maxWidth: "40vw"
+  },
+  table: {
+    minWidth: "300px",
+  },
+  avatarProfile: {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center"
+  },
+  largeAvatar: {
+    width: theme.spacing(12),
+    height: theme.spacing(12),
+    margin: theme.spacing(0, 0, 2, 0)
+  },
+  notLargeAvatar: {
+    width: theme.spacing(8),
+    height: theme.spacing(8),
+  },
+  formFont: {
+    fontSize: "16px"
   }
 }));
 
@@ -378,22 +402,10 @@ export default function Panel(props) {
     textPreview: false,
     profile: {
       open: false,
-      uid: "",
-      username: "",
-      email: "",
-      tel: "",
-      city: "",
-      bitrh: "",
-      gender: "",
-      avatar: ""
-    },
-    groupProfile: {
-      open: false,
-      gid: "",
-      groupName: "",
-      groupHolder: "",
-      joinTime: "",
-      avatar: ""
+      rows: [],
+      id: "",
+      avatar: "",
+      name: ""
     },
     snackWindow: {
       open: false,
@@ -415,8 +427,30 @@ export default function Panel(props) {
       sideListItem: false
     }));
   };
+  const createData = (props, value) => ({props, value});
   const handleMoreInfoClick = () => {
-    // TODO: complete the functions
+    setPanelPopup(panelPopup => ({
+      ...panelPopup,
+      profile: {
+        open: true,
+        rows: [
+          createData("UID", 159),
+          createData("E-mail", 237)
+        ],
+        id: "1024U",
+        avatar: "png",
+        name: "Koishi"
+      }
+    }));
+  };
+  const handleMoreInfoClose = () => {
+    setPanelPopup(panelPopup => ({
+      ...panelPopup,
+      profile: {
+        ...panelPopup.profile,
+        open: false
+      }
+    }));
   };
 
   // about list item and more menu
@@ -1050,29 +1084,47 @@ export default function Panel(props) {
           {panelPopup.snackWindow.snackWindowMessage}
         </Alert>
       </Snackbar>
-
-      {/* <Dialog
-        open={open}
-        onClose={handleClose}
+      <Dialog
+        open={panelPopup.profile.open}
+        onClose={handleMoreInfoClose}
         aria-labelledby="alert-dialog-title"
         aria-describedby="alert-dialog-description"
       >
-        <DialogTitle id="alert-dialog-title">{"Use Google's location service?"}</DialogTitle>
         <DialogContent>
-          <DialogContentText id="alert-dialog-description">
-            Let Google help apps determine location. This means sending anonymous location data to
-            Google, even when no apps are running.
-          </DialogContentText>
+          <div className={classes.avatarProfile}>
+            <Avatar
+              src={`static/avatar/avatar-${panelPopup.profile.id}.${panelPopup.profile.avatar}`}
+              className={classes.largeAvatar}
+            >
+              {
+                panelPopup.profile.id.charAt(panelPopup.profile.id.length - 1) === "U"
+                ? <PersonIcon className={classes.notLargeAvatar}/>
+                : <GroupIcon className={classes.notLargeAvatar}/>
+              }
+            </Avatar>
+            <Typography variant="h5">
+              {panelPopup.profile.name}
+          </Typography>
+          </div>
+          <Table className={classes.table} size="small">
+            <TableBody>
+              {panelPopup.profile.rows.map((row) => (
+                <TableRow key={row.name}>
+                  <TableCell component="th" scope="row" className={classes.formFont}>
+                    {row.props}
+                    </TableCell>
+                  <TableCell align="right" className={classes.formFont}>{row.value}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleClose} color="primary">
-            Disagree
-          </Button>
-          <Button onClick={handleClose} color="primary" autoFocus>
-            Agree
+          <Button onClick={handleMoreInfoClose} color="primary" autoFocus>
+            Close
           </Button>
         </DialogActions>
-      </Dialog> */}
+      </Dialog>
     </div>
   );
 }
