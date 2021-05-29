@@ -67,6 +67,7 @@ const markdownOverride = {
 
 // panelReading's record and log should be sorted chronologically
 let globalSetting = JSON.parse(fs.readFileSync(settingPath));
+let keyClient, pubServer;
 
 const drawerWidth = 300;
 const useStyles = makeStyles((theme) => ({
@@ -244,12 +245,15 @@ function Alert(props) {
   return <MuiAlert elevation={6} variant="filled" {...props} />;
 }
 
-export default function Panel() {
+export default function Panel(props) {
   const classes = useStyles();
 
   // Equals to componentDidmount
   React.useEffect(() => {
     globalSetting = JSON.parse(fs.readFileSync(settingPath));
+    keyClient = props.client;
+    pubServer = props.server;
+    console.log(keyClient, pubServer);
   }, []);
 
   // the state info need by user interface

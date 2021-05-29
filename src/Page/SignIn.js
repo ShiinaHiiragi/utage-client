@@ -197,10 +197,10 @@ export default function SignIn(props) {
 
     backdropToggle();
     const info = { email: email, password: cryptoJS.SHA256(email + password).toString() };
-    connectServer(info, () => {
-      initDB(info, () => {
+    connectServer(info, (keyClient, pubServer, serverRawFirst) => {
+      initDB(keyClient, pubServer, serverRawFirst, (keyClient, pubServer) => {
         backdropClose();
-        // ReactDOM.render(<Panel />, document.getElementById("root"));
+        ReactDOM.render(<Panel client={keyClient} server={pubServer}/>, document.getElementById("root"));
       });
     });
   };
@@ -243,8 +243,7 @@ export default function SignIn(props) {
               timeout: 10000,
             }, (err, response) => {
               if (!err && response.statusCode == 200) {
-                let result = JSON.parse(keyClient.decrypt(response.body[0]));
-                console.log(result);
+                callback(keyClient, pubServer, response.body);
               } else {
                 backdropClose();
                 snackWindowToggle("error", (err ? `${err}` : `Server Error: ${response.body}`));
@@ -261,9 +260,9 @@ export default function SignIn(props) {
       }
     });
   };
-  const initDB = (info, callback) => {
+  const initDB = (keyClient, pubServer, serverRawFirst, callback) => {
     // TEMP: move callback later
-    callback();
+    callback(keyClient, pubServer);
   };
 
   // the backdrop when communicate with server
