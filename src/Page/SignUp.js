@@ -72,16 +72,10 @@ function Alert(props) {
 }
 
 function checkURL(stringURL, callback) {
-  if (stringURL.charAt(stringURL.length - 1) !== "/") stringURL += "/";
-  request(
-    {
+  request({
       url: `${stringURL}who`,
       timeout: 10000
-    },
-    (err, res, body) => {
-      if (!err && res.statusCode === 200 && body === "utage") callback(null);
-      else callback(err);
-    }
+    }, (err, response) => { callback(err, response); }
   );
 }
 
@@ -172,21 +166,21 @@ export default function SignUp() {
     }
 
     backdropToggle();
-    checkURL(globalSetting.proxy, (err) => {
-      if (err) {
-        backdropClose();
-        snackWindowToggle("error", `${err}`);
-      } else
+    checkURL(globalSetting.proxy, (err, response) => {
+      if (!err && response.statusCode === 200 && response.body === "utage")
         requestSignUp({
           email: formContent.email,
           userName: formContent.username,
           password: hex_hmac_md5(formContent.email, formContent.password)
         });
+      else {
+        backdropClose();
+        snackWindowToggle("error", (err ? err : `Server Error: ${response.body}`));
+      }
     });
   };
 
   const requestSignUp = (info) => {
-    console.log(info);
     request(
       {
         url: `${globalSetting.proxy}sign/up`,
@@ -198,8 +192,8 @@ export default function SignUp() {
         body: info,
         timeout: 10000
       },
-      (error, response) => {
-        if (!error && response.statusCode === 200) {
+      (err, response) => {
+        if (!err && response.statusCode === 200) {
           backdropClose();
           ReactDOM.render(
             <SignIn snack={true} account={formContent.email} />,
@@ -207,7 +201,7 @@ export default function SignUp() {
           );
         } else {
           backdropClose();
-          snackWindowToggle("error", `Server Error: ${response.body}`);
+          snackWindowToggle("error", (err ? err : `Server Error: ${response.body}`));
         }
       }
     );
