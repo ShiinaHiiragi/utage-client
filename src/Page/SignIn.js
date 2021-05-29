@@ -197,10 +197,17 @@ export default function SignIn(props) {
 
     backdropToggle();
     const info = { email: email, password: cryptoJS.SHA256(email + password).toString() };
-    connectServer(info, (keyClient, pubServer, serverRawFirst) => {
-      initDB(keyClient, pubServer, serverRawFirst, (keyClient, pubServer) => {
+    connectServer(info, (passwords, serverRawFirst) => {
+      initDB(passwords, serverRawFirst, (passwords) => {
         backdropClose();
-        ReactDOM.render(<Panel client={keyClient} server={pubServer}/>, document.getElementById("root"));
+        ReactDOM.render(
+          <Panel
+            client={passwords.keyClient}
+            server={passwords.pubServer}
+            AES={passwords.passwordAES}
+          />,
+          document.getElementById("root")
+        );
       });
     });
   };
@@ -243,7 +250,12 @@ export default function SignIn(props) {
               timeout: 10000,
             }, (err, response) => {
               if (!err && response.statusCode == 200) {
-                callback(keyClient, pubServer, response.body);
+                let passwords = {
+                  passwordAES: info.password,
+                  keyClient: keyClient,
+                  pubServer: pubServer
+                };
+                callback(passwords, response.body);
               } else {
                 backdropClose();
                 snackWindowToggle("error", (err ? `${err}` : `Server Error: ${response.body}`));
@@ -260,9 +272,9 @@ export default function SignIn(props) {
       }
     });
   };
-  const initDB = (keyClient, pubServer, serverRawFirst, callback) => {
+  const initDB = (passwords, serverRawFirst, callback) => {
     // TEMP: move callback later
-    callback(keyClient, pubServer);
+    callback(passwords);
   };
 
   // the backdrop when communicate with server

@@ -67,7 +67,7 @@ const markdownOverride = {
 
 // panelReading's record and log should be sorted chronologically
 let globalSetting = JSON.parse(fs.readFileSync(settingPath));
-let keyClient, pubServer;
+let keyClient, pubServer, passwordAES;
 
 const drawerWidth = 300;
 const useStyles = makeStyles((theme) => ({
@@ -253,7 +253,8 @@ export default function Panel(props) {
     globalSetting = JSON.parse(fs.readFileSync(settingPath));
     keyClient = props.client;
     pubServer = props.server;
-    console.log(keyClient, pubServer);
+    passwordAES = props.AES;
+    console.log(keyClient, pubServer, passwordAES);
   }, []);
 
   // the state info need by user interface
