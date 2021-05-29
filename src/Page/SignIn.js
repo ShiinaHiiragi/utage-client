@@ -25,7 +25,7 @@ import CircularProgress from "@material-ui/core/CircularProgress";
 import { makeStyles } from "@material-ui/core/styles";
 import Panel from "./Panel";
 import SignUp from "./SignUp";
-import hex_hmac_md5 from "../Lib/MD5";
+import cryptoJS from "crypto-js";
 
 const fs = window.require("fs");
 const request = window.require("request");
@@ -109,17 +109,6 @@ export default function SignIn(props) {
         globalSetting.proxy = newString;
         saveProxySetting(proxyHasChanged);
       } else snackWindowToggle("error", (err ? `${err}` : `Server Error: ${response.body}`));
-
-      // if (!err) {
-      //   var proxyHasChanged = globalSetting.proxy !== newValue;
-      //   setProxyWindow(false);
-      //   globalSetting.proxy = newString;
-      //   saveProxySetting(proxyHasChanged);
-      // } else
-      //   snackWindowToggle(
-      //     "error",
-      //     "Cannot connect to server. Please recheck your input."
-      //   );
     });
   };
   const proxyUpdateInput = (event) => {
@@ -207,7 +196,7 @@ export default function SignIn(props) {
     }
 
     backdropToggle();
-    const info = { email: email, password: hex_hmac_md5(email, password) };
+    const info = { email: email, password: cryptoJS.SHA256(email + password).toString() };
     connectServer(info, () => {
       initDB(info, () => {
         backdropClose();
@@ -217,7 +206,6 @@ export default function SignIn(props) {
   };
 
   const connectServer = (info, callback) => {
-    console.log(info.email, info.password);
     checkURL(globalSetting.proxy, (err, response) => {
       if (!err && response.statusCode === 200 && response.body === "utage") {
         // key spawned by client, use it to dectypt info from server
@@ -226,7 +214,7 @@ export default function SignIn(props) {
 
         // the public key of keyClient should be sent to server
         request({
-          url: `http://localhost:8080/sign/in/pub`,
+          url: `${globalSetting.proxy}sign/in/pub`,
           method: "POST",
           json: true,
           headers: {
@@ -238,6 +226,34 @@ export default function SignIn(props) {
           },
           timeout: 10000,
         }, (err, response) => {
+          if (!err && response.statusCode == 200) {
+            // key spawned by server, use it to enctypt info and send it to server
+            const pubServer = new nodeRSA().importKey(response.body);
+            request({
+              url: `${globalSetting.proxy}sign/in`,
+              method: "POST",
+              json: true,
+              headers: {
+                "content-type": "application/json",
+              },
+              body: {
+                email: info.email,
+                password: pubServer.encrypt(info.password, "base64")
+              },
+              timeout: 10000,
+            }, (err, response) => {
+              if (!err && response.statusCode == 200) {
+                let result = JSON.parse(keyClient.decrypt(response.body[0]));
+                console.log(result);
+              } else {
+                backdropClose();
+                snackWindowToggle("error", (err ? `${err}` : `Server Error: ${response.body}`));
+              }
+            });
+          } else {
+            backdropClose();
+            snackWindowToggle("error", (err ? `${err}` : `Server Error: ${response.body}`));
+          }
         });
       } else {
         backdropClose();

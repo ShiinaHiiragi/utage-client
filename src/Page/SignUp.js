@@ -28,8 +28,8 @@ import Snackbar from "@material-ui/core/Snackbar";
 import MuiAlert from "@material-ui/lab/Alert";
 import Backdrop from "@material-ui/core/Backdrop";
 import CircularProgress from "@material-ui/core/CircularProgress";
+import cryptoJS from "crypto-js";
 import SignIn from "./SignIn";
-import hex_hmac_md5 from "../Lib/MD5";
 
 const fs = window.require("fs");
 const request = window.require("request");
@@ -171,7 +171,7 @@ export default function SignUp() {
         requestSignUp({
           email: formContent.email,
           userName: formContent.username,
-          password: hex_hmac_md5(formContent.email, formContent.password)
+          password: cryptoJS.SHA256(formContent.email + formContent.password).toString()
         });
       else {
         backdropClose();
