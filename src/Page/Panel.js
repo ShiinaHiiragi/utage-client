@@ -91,7 +91,8 @@ let panelReading = {
           sender: "chocomint",
           senderID: "2048U",
           senderAvatar: "png",
-          text: "Lorem ipsum dolor sit amet consectetur adipisicing elit. ![](https://ichinoe.github.io/img/header/domain.jpg)",
+          text:
+            "Lorem ipsum dolor sit amet consectetur adipisicing elit. ![](https://ichinoe.github.io/img/header/domain.jpg)",
           time: "2021-05-23T04:20:44.733Z"
         },
         {
@@ -275,7 +276,7 @@ const useStyles = makeStyles((theme) => ({
     fontSize: "16px"
   },
   cardPadding: {
-    padding: theme.spacing(0, 2, 1, 2),
+    padding: theme.spacing(0, 2, 1, 2)
   },
   textField: {
     "& .MuiTextField-root": {
@@ -597,31 +598,30 @@ export default function Panel() {
 
   // about preview and send
   const handleTextPreviewBack = () => {
-    setPanelPopup(panelPopup => ({
+    setPanelPopup((panelPopup) => ({
       ...panelPopup,
-      textPreview: false,
+      textPreview: false
     }));
   };
   const handleTextPreviewToggle = () => {
     const checkInfo = handlePreCheck();
-    if (checkInfo !== "")
-      toggleSnackWindow("warning", checkInfo);
-    else setPanelPopup(panelPopup => ({
+    if (checkInfo !== "") toggleSnackWindow("warning", checkInfo);
+    else
+      setPanelPopup((panelPopup) => ({
         ...panelPopup,
-        textPreview: true,
+        textPreview: true
       }));
   };
   const handlePreCheck = () => {
     const nowTextInput = panelInfo.record.find(
-      (value) =>
-        value.accessInfo.id === panelInfo.state.selectedRecord
+      (value) => value.accessInfo.id === panelInfo.state.selectedRecord
     ).status.textInput;
-    let pattern = /!\[(.*?)\]\((.*?)\)/mg, matcher;
-    if (nowTextInput === "")
-      return "The input panel is vacant.";
+    let pattern = /!\[(.*?)\]\((.*?)\)/gm,
+      matcher;
+    if (nowTextInput === "") return "The input panel is vacant.";
     while ((matcher = pattern.exec(nowTextInput)) !== null)
       try {
-        fs.accessSync(path.join(imgPath, matcher[2]))
+        fs.accessSync(path.join(imgPath, matcher[2]));
       } catch (err) {
         return `${err}`;
       }
@@ -632,10 +632,9 @@ export default function Panel() {
     // because hasChecked is either `true` or a event Object
     // TEMP: change the logic later
     const nowTextInput = panelInfo.record.find(
-      (value) =>
-        value.accessInfo.id === panelInfo.state.selectedRecord
+      (value) => value.accessInfo.id === panelInfo.state.selectedRecord
     ).status.textInput;
-    let checkInfo = (hasChecked === true) ? "" : handlePreCheck();
+    let checkInfo = hasChecked === true ? "" : handlePreCheck();
     if (checkInfo !== "") {
       toggleSnackWindow("warning", checkInfo);
       return;
@@ -872,8 +871,10 @@ export default function Panel() {
                         <b>{value.sender}</b> {formatSideTime(value.time)}
                       </Typography>
                     </div>
-                    <div className={clsx(classes.cardText, classes.cardPadding)}>
-                      <Markdown options={{overrides: markdownOverride}}>
+                    <div
+                      className={clsx(classes.cardText, classes.cardPadding)}
+                    >
+                      <Markdown options={{ overrides: markdownOverride }}>
                         {value.text}
                       </Markdown>
                     </div>
@@ -975,23 +976,26 @@ export default function Panel() {
                 {"Preview in Markdown"}
               </DialogTitle>
               <DialogContent className={classes.cardText}>
-                <Markdown options={{overrides: markdownOverride}}>
-                  { panelInfo.record.find(
+                <Markdown options={{ overrides: markdownOverride }}>
+                  {
+                    panelInfo.record.find(
                       (value) =>
                         value.accessInfo.id === panelInfo.state.selectedRecord
-                    ).status.textInput }
+                    ).status.textInput
+                  }
                 </Markdown>
               </DialogContent>
               <DialogActions>
-                <Button
-                  onClick={handleTextPreviewBack}
-                  color="primary"
-                >
+                <Button onClick={handleTextPreviewBack} color="primary">
                   Back
                 </Button>
-                <Button onClick={() => {
-                  handleTextPreviewBack();
-                  handleTextSend(true);}} color="secondary">
+                <Button
+                  onClick={() => {
+                    handleTextPreviewBack();
+                    handleTextSend(true);
+                  }}
+                  color="secondary"
+                >
                   Send
                 </Button>
               </DialogActions>
