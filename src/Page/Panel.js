@@ -66,7 +66,6 @@ const markdownOverride = {
 };
 
 // panelReading's record and log should be sorted chronologically
-let globalSetting = JSON.parse(fs.readFileSync(settingPath));
 let panelReading = {
   usrInfo: {
     uid: "1024U",
@@ -303,7 +302,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 // eslint-disable-next-line
-Date.prototype.format = function (formatString) {
+Date.prototype.format = (formatString) => {
   var formatComponent = {
     "M+": this.getMonth() + 1,
     "d+": this.getDate(),
@@ -355,6 +354,7 @@ function Alert(props) {
 }
 
 export default function Panel() {
+  let globalSetting = JSON.parse(fs.readFileSync(settingPath));
   const classes = useStyles();
 
   // the state info need by user interface
