@@ -246,7 +246,7 @@ export default function SignIn(props) {
             timeout: 10000
           },
           (err, response) => {
-            if (!err && response.statusCode == 200) {
+            if (!err && response.statusCode === 200) {
               // key spawned by server, use it to enctypt info and send it to server
               const pubServer = new nodeRSA().importKey(response.body);
               request(
@@ -264,7 +264,7 @@ export default function SignIn(props) {
                   timeout: 10000
                 },
                 (err, response) => {
-                  if (!err && response.statusCode == 200) {
+                  if (!err && response.statusCode === 200) {
                     let passwords = {
                       passwordAES: info.password,
                       keyClient: keyClient,

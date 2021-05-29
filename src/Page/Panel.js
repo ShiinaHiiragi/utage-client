@@ -376,9 +376,30 @@ export default function Panel(props) {
     backdrop: false,
     textEmoji: false,
     textPreview: false,
-    snackWindow: false,
-    snackWindowType: "",
-    snackWindowMessage: ""
+    profile: {
+      open: false,
+      uid: "",
+      username: "",
+      email: "",
+      tel: "",
+      city: "",
+      bitrh: "",
+      gender: "",
+      avatar: ""
+    },
+    groupProfile: {
+      open: false,
+      gid: "",
+      groupName: "",
+      groupHolder: "",
+      joinTime: "",
+      avatar: ""
+    },
+    snackWindow: {
+      open: false,
+      snackWindowType: "",
+      snackWindowMessage: ""
+    },
   });
 
   // about list item and info in app bar
@@ -667,15 +688,20 @@ export default function Panel(props) {
   const toggleSnackWindow = (type, message) => {
     setPanelPopup((panelPopup) => ({
       ...panelPopup,
-      snackWindow: true,
-      snackWindowType: type,
-      snackWindowMessage: message
+      snackWindow: {
+        open: true,
+        snackWindowType: type,
+        snackWindowMessage: message
+      },
     }));
   };
   const closeSnackWindow = () => {
     setPanelPopup((panelPopup) => ({
       ...panelPopup,
-      snackWindow: false
+      snackWindow: {
+        ...panelPopup.snackWindow,
+        open: false
+      }
     }));
   };
 
@@ -1014,16 +1040,39 @@ export default function Panel(props) {
         <CircularProgress color="inherit" size={56} />
       </Backdrop>
       <Snackbar
-        open={panelPopup.snackWindow}
+        open={panelPopup.snackWindow.open}
         anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
         autoHideDuration={globalSetting.snackWindowDuration}
         onClose={closeSnackWindow}
         className={classes.snack}
       >
-        <Alert onClose={closeSnackWindow} severity={panelPopup.snackWindowType}>
-          {panelPopup.snackWindowMessage}
+        <Alert onClose={closeSnackWindow} severity={panelPopup.snackWindow.snackWindowType}>
+          {panelPopup.snackWindow.snackWindowMessage}
         </Alert>
       </Snackbar>
+
+      {/* <Dialog
+        open={open}
+        onClose={handleClose}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogTitle id="alert-dialog-title">{"Use Google's location service?"}</DialogTitle>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-description">
+            Let Google help apps determine location. This means sending anonymous location data to
+            Google, even when no apps are running.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleClose} color="primary">
+            Disagree
+          </Button>
+          <Button onClick={handleClose} color="primary" autoFocus>
+            Agree
+          </Button>
+        </DialogActions>
+      </Dialog> */}
     </div>
   );
 }
