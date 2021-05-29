@@ -67,117 +67,6 @@ const markdownOverride = {
 
 // panelReading's record and log should be sorted chronologically
 let globalSetting = JSON.parse(fs.readFileSync(settingPath));
-let panelReading = {
-  usrInfo: {
-    uid: "1024U",
-    username: "Koishi",
-    email: "abc@xyz.com",
-    avatar: "png"
-  },
-  record: [
-    {
-      accessInfo: {
-        id: "2048U",
-        name: "chocomint",
-        avatar: "png"
-      },
-      status: {
-        unread: 0,
-        all: true,
-        textInput: ""
-      },
-      log: [
-        {
-          rid: 1,
-          sender: "chocomint",
-          senderID: "2048U",
-          senderAvatar: "png",
-          text:
-            "Lorem ipsum dolor sit amet consectetur adipisicing elit. ![](https://ichinoe.github.io/img/header/domain.jpg)",
-          time: "2021-05-23T04:20:44.733Z"
-        },
-        {
-          rid: 2,
-          sender: "Koishi",
-          senderID: "1024U",
-          senderAvatar: "png",
-          text:
-            "Nobis qui esse a distinctio rem sed vero quae repudiandae dolores, dolorem nostrum excepturi inventore consequuntur quo quisquam officiis, expedita hic sit.",
-          time: "2021-05-23T04:21:25.401Z"
-        },
-        {
-          rid: 5,
-          sender: "chocomint",
-          senderID: "2048U",
-          senderAvatar: "png",
-          text:
-            "Lorem ipsum dolor sit, amet consectetur adipisicing elit. Nulla, exercitationem obcaecati? Accusantium voluptatem, dolores voluptatum voluptate tempora impedit aliquam labore doloribus nisi fugit sapiente. Libero consectetur quam corporis ducimus pariatur.",
-          time: "2021-05-24T11:14:31.271Z"
-        },
-        {
-          rid: 6,
-          sender: "Koishi",
-          senderID: "1024U",
-          senderAvatar: "png",
-          text:
-            "Lorem ipsum dolor sit amet consectetur, adipisicing elit. Atque, ducimus. Sit error, repudiandae exercitationem alias asperiores odit officia possimus ducimus, esse amet praesentium, commodi quam aperiam quae maiores suscipit ipsa.",
-          time: "2021-05-24T11:14:41.634Z"
-        }
-      ]
-    },
-    {
-      accessInfo: {
-        id: "16384G",
-        name: "Miya Ouendan",
-        avatar: "jpg"
-      },
-      status: {
-        unread: 0,
-        all: true,
-        textInput: ""
-      },
-      log: [
-        {
-          rid: 3,
-          sender: "Saki",
-          senderID: "32768U",
-          senderAvatar: "jpg",
-          text:
-            "Lorem ipsum dolor, sit amet consectetur adipisicing elit. Fugiat ipsam, temporibus tempora corporis quod vero eligendi odio accusamus porro! Repudiandae iusto quam molestias, doloremque fugiat aliquam beatae similique! Beatae, corporis.",
-          time: "2021-05-23T04:25:41.181Z"
-        },
-        {
-          rid: 4,
-          sender: "Koishi",
-          senderID: "1024U",
-          senderAvatar: "png",
-          text: "Lorem ipsum dolor sit amet",
-          time: "2021-05-23T04:28:46.995Z"
-        }
-      ]
-    },
-    {
-      accessInfo: {
-        id: "4096U",
-        name: "Miku",
-        avatar: "jpg"
-      },
-      status: {
-        unread: 0,
-        all: true,
-        textInput: ""
-      },
-      log: []
-    }
-  ],
-  state: {
-    justSignIn: true,
-    selectedRecord: "",
-    selectedName: "Utage",
-    focus: false,
-    textIndex: [0, 0]
-  }
-};
 
 const drawerWidth = 300;
 const useStyles = makeStyles((theme) => ({
@@ -364,7 +253,117 @@ export default function Panel() {
   }, []);
 
   // the state info need by user interface
-  const [panelInfo, setPanelInfo] = React.useState(panelReading);
+  const [panelInfo, setPanelInfo] = React.useState(() => ({
+    usrInfo: {
+      uid: "1024U",
+      username: "Koishi",
+      email: "abc@xyz.com",
+      avatar: "png"
+    },
+    record: [
+      {
+        accessInfo: {
+          id: "2048U",
+          name: "chocomint",
+          avatar: "png"
+        },
+        status: {
+          unread: 0,
+          all: true,
+          textInput: ""
+        },
+        log: [
+          {
+            rid: 1,
+            sender: "chocomint",
+            senderID: "2048U",
+            senderAvatar: "png",
+            text:
+              "Lorem ipsum dolor sit amet consectetur adipisicing elit. ![](https://ichinoe.github.io/img/header/domain.jpg)",
+            time: "2021-05-23T04:20:44.733Z"
+          },
+          {
+            rid: 2,
+            sender: "Koishi",
+            senderID: "1024U",
+            senderAvatar: "png",
+            text:
+              "Nobis qui esse a distinctio rem sed vero quae repudiandae dolores, dolorem nostrum excepturi inventore consequuntur quo quisquam officiis, expedita hic sit.",
+            time: "2021-05-23T04:21:25.401Z"
+          },
+          {
+            rid: 5,
+            sender: "chocomint",
+            senderID: "2048U",
+            senderAvatar: "png",
+            text:
+              "Lorem ipsum dolor sit, amet consectetur adipisicing elit. Nulla, exercitationem obcaecati? Accusantium voluptatem, dolores voluptatum voluptate tempora impedit aliquam labore doloribus nisi fugit sapiente. Libero consectetur quam corporis ducimus pariatur.",
+            time: "2021-05-24T11:14:31.271Z"
+          },
+          {
+            rid: 6,
+            sender: "Koishi",
+            senderID: "1024U",
+            senderAvatar: "png",
+            text:
+              "Lorem ipsum dolor sit amet consectetur, adipisicing elit. Atque, ducimus. Sit error, repudiandae exercitationem alias asperiores odit officia possimus ducimus, esse amet praesentium, commodi quam aperiam quae maiores suscipit ipsa.",
+            time: "2021-05-24T11:14:41.634Z"
+          }
+        ]
+      },
+      {
+        accessInfo: {
+          id: "16384G",
+          name: "Miya Ouendan",
+          avatar: "jpg"
+        },
+        status: {
+          unread: 0,
+          all: true,
+          textInput: ""
+        },
+        log: [
+          {
+            rid: 3,
+            sender: "Saki",
+            senderID: "32768U",
+            senderAvatar: "jpg",
+            text:
+              "Lorem ipsum dolor, sit amet consectetur adipisicing elit. Fugiat ipsam, temporibus tempora corporis quod vero eligendi odio accusamus porro! Repudiandae iusto quam molestias, doloremque fugiat aliquam beatae similique! Beatae, corporis.",
+            time: "2021-05-23T04:25:41.181Z"
+          },
+          {
+            rid: 4,
+            sender: "Koishi",
+            senderID: "1024U",
+            senderAvatar: "png",
+            text: "Lorem ipsum dolor sit amet",
+            time: "2021-05-23T04:28:46.995Z"
+          }
+        ]
+      },
+      {
+        accessInfo: {
+          id: "4096U",
+          name: "Miku",
+          avatar: "jpg"
+        },
+        status: {
+          unread: 0,
+          all: true,
+          textInput: ""
+        },
+        log: []
+      }
+    ],
+    state: {
+      justSignIn: true,
+      selectedRecord: "",
+      selectedName: "Utage",
+      focus: false,
+      textIndex: [0, 0]
+    }
+  }));
   const [panelPopup, setPanelPopup] = React.useState({
     sideListItem: true,
     moreAnchor: null,
@@ -756,7 +755,7 @@ export default function Panel() {
             >
               <MenuItem onClick={handleMenuProfileClick}>My Profile</MenuItem>
               <MenuItem onClick={handleMenuAddClick}>
-                Add Friends/Groups
+                Friends/Groups
               </MenuItem>
               <MenuItem onClick={handleMenuLogOutClick}>Log Out</MenuItem>
               <Dialog
