@@ -759,9 +759,7 @@ export default function Panel(props) {
               onClose={handleMoreClose}
             >
               <MenuItem onClick={handleMenuProfileClick}>My Profile</MenuItem>
-              <MenuItem onClick={handleMenuAddClick}>
-                Friends/Groups
-              </MenuItem>
+              <MenuItem onClick={handleMenuAddClick}>Friends/Groups</MenuItem>
               <MenuItem onClick={handleMenuLogOutClick}>Log Out</MenuItem>
               <Dialog
                 open={panelPopup.menuLogOut}

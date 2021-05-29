@@ -72,10 +72,14 @@ function Alert(props) {
 }
 
 function checkURL(stringURL, callback) {
-  request({
+  request(
+    {
       url: `${stringURL}who`,
       timeout: 10000
-    }, (err, response) => { callback(err, response); }
+    },
+    (err, response) => {
+      callback(err, response);
+    }
   );
 }
 
@@ -171,11 +175,16 @@ export default function SignUp() {
         requestSignUp({
           email: formContent.email,
           userName: formContent.username,
-          password: cryptoJS.SHA256(formContent.email + formContent.password).toString()
+          password: cryptoJS
+            .SHA256(formContent.email + formContent.password)
+            .toString()
         });
       else {
         backdropClose();
-        snackWindowToggle("error", (err ? `${err}` : `Server Error: ${response.body}`));
+        snackWindowToggle(
+          "error",
+          err ? `${err}` : `Server Error: ${response.body}`
+        );
       }
     });
   };
@@ -201,7 +210,10 @@ export default function SignUp() {
           );
         } else {
           backdropClose();
-          snackWindowToggle("error", (err ? err : `Server Error: ${response.body}`));
+          snackWindowToggle(
+            "error",
+            err ? err : `Server Error: ${response.body}`
+          );
         }
       }
     );

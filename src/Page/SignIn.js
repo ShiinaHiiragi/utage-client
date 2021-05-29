@@ -68,16 +68,20 @@ const useStyles = makeStyles((theme) => ({
 
 const saveSetting = (callback) => {
   fs.writeFile(settingPath, JSON.stringify(globalSetting), callback);
-}
+};
 
 const checkURL = (stringURL, callback) => {
   if (stringURL.charAt(stringURL.length - 1) !== "/") stringURL += "/";
-  request({
+  request(
+    {
       url: `${stringURL}who`,
       timeout: 10000
-    }, (err, response) => { callback(err, response, stringURL); }
+    },
+    (err, response) => {
+      callback(err, response, stringURL);
+    }
   );
-}
+};
 
 function Alert(props) {
   return <MuiAlert elevation={6} variant="filled" {...props} />;
@@ -108,7 +112,11 @@ export default function SignIn(props) {
         setProxyWindow(false);
         globalSetting.proxy = newString;
         saveProxySetting(proxyHasChanged);
-      } else snackWindowToggle("error", (err ? `${err}` : `Server Error: ${response.body}`));
+      } else
+        snackWindowToggle(
+          "error",
+          err ? `${err}` : `Server Error: ${response.body}`
+        );
     });
   };
   const proxyUpdateInput = (event) => {
@@ -196,7 +204,10 @@ export default function SignIn(props) {
     }
 
     backdropToggle();
-    const info = { email: email, password: cryptoJS.SHA256(email + password).toString() };
+    const info = {
+      email: email,
+      password: cryptoJS.SHA256(email + password).toString()
+    };
     connectServer(info, (passwords, serverRawFirst) => {
       initDB(passwords, serverRawFirst, (passwords) => {
         backdropClose();
@@ -217,58 +228,73 @@ export default function SignIn(props) {
       if (!err && response.statusCode === 200 && response.body === "utage") {
         // key spawned by client, use it to dectypt info from server
         const keyClient = new nodeRSA({ b: 512 });
-        const pubClient = keyClient.exportKey('public');
+        const pubClient = keyClient.exportKey("public");
 
         // the public key of keyClient should be sent to server
-        request({
-          url: `${globalSetting.proxy}sign/in/pub`,
-          method: "POST",
-          json: true,
-          headers: {
-            "content-type": "application/json",
+        request(
+          {
+            url: `${globalSetting.proxy}sign/in/pub`,
+            method: "POST",
+            json: true,
+            headers: {
+              "content-type": "application/json"
+            },
+            body: {
+              pub: pubClient,
+              email: info.email
+            },
+            timeout: 10000
           },
-          body: {
-            pub: pubClient,
-            email: info.email
-          },
-          timeout: 10000,
-        }, (err, response) => {
-          if (!err && response.statusCode == 200) {
-            // key spawned by server, use it to enctypt info and send it to server
-            const pubServer = new nodeRSA().importKey(response.body);
-            request({
-              url: `${globalSetting.proxy}sign/in`,
-              method: "POST",
-              json: true,
-              headers: {
-                "content-type": "application/json",
-              },
-              body: {
-                email: info.email,
-                password: pubServer.encrypt(info.password, "base64")
-              },
-              timeout: 10000,
-            }, (err, response) => {
-              if (!err && response.statusCode == 200) {
-                let passwords = {
-                  passwordAES: info.password,
-                  keyClient: keyClient,
-                  pubServer: pubServer
-                };
-                callback(passwords, response.body);
-              } else {
-                backdropClose();
-                snackWindowToggle("error", (err ? `${err}` : `Server Error: ${response.body}`));
-              }
-            });
-          } else {
-            backdropClose();
-            snackWindowToggle("error", (err ? `${err}` : `Server Error: ${response.body}`));
+          (err, response) => {
+            if (!err && response.statusCode == 200) {
+              // key spawned by server, use it to enctypt info and send it to server
+              const pubServer = new nodeRSA().importKey(response.body);
+              request(
+                {
+                  url: `${globalSetting.proxy}sign/in`,
+                  method: "POST",
+                  json: true,
+                  headers: {
+                    "content-type": "application/json"
+                  },
+                  body: {
+                    email: info.email,
+                    password: pubServer.encrypt(info.password, "base64")
+                  },
+                  timeout: 10000
+                },
+                (err, response) => {
+                  if (!err && response.statusCode == 200) {
+                    let passwords = {
+                      passwordAES: info.password,
+                      keyClient: keyClient,
+                      pubServer: pubServer
+                    };
+                    callback(passwords, response.body);
+                  } else {
+                    backdropClose();
+                    snackWindowToggle(
+                      "error",
+                      err ? `${err}` : `Server Error: ${response.body}`
+                    );
+                  }
+                }
+              );
+            } else {
+              backdropClose();
+              snackWindowToggle(
+                "error",
+                err ? `${err}` : `Server Error: ${response.body}`
+              );
+            }
           }
-        });
+        );
       } else {
         backdropClose();
-        snackWindowToggle("error", (err ? `${err}` : `Server Error: ${response.body}`));
+        snackWindowToggle(
+          "error",
+          err ? `${err}` : `Server Error: ${response.body}`
+        );
       }
     });
   };
