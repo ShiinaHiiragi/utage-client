@@ -34,6 +34,7 @@ import hex_hmac_md5 from "../Lib/MD5";
 const fs = window.require("fs");
 const request = window.require("request");
 const settingPath = "./data/setting.json";
+let globalSetting = JSON.parse(fs.readFileSync(settingPath));
 
 const useStyles = makeStyles((theme) => ({
   noneSelect: {
@@ -84,7 +85,6 @@ function checkURL(stringURL, callback) {
 }
 
 export default function SignUp() {
-  let globalSetting = JSON.parse(fs.readFileSync(settingPath));
   const classes = useStyles();
   const [formContent, setFormContent] = React.useState({
     email: "",
