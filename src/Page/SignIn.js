@@ -29,6 +29,7 @@ import hex_hmac_md5 from "../Lib/MD5";
 
 const fs = window.require("fs");
 const request = window.require("request");
+const nodeRSA = require("node-rsa");
 const settingPath = "./data/setting.json";
 let globalSetting = JSON.parse(fs.readFileSync(settingPath));
 
@@ -65,29 +66,22 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-function Alert(props) {
-  return <MuiAlert elevation={6} variant="filled" {...props} />;
-}
-
-function checkURL(stringURL, callback) {
-  if (stringURL.charAt(stringURL.length - 1) !== "/") stringURL += "/";
-  request(
-    {
-      url: `${stringURL}who`,
-      timeout: 10000
-    },
-    (err, res, body) => {
-      if (!err && res.statusCode === 200 && body === "utage")
-        callback(null, stringURL);
-      else callback(err, null);
-    }
-  );
-}
-
-function saveSetting(callback) {
+const saveSetting = (callback) => {
   fs.writeFile(settingPath, JSON.stringify(globalSetting), callback);
 }
 
+const checkURL = (stringURL, callback) => {
+  if (stringURL.charAt(stringURL.length - 1) !== "/") stringURL += "/";
+  request({
+      url: `${stringURL}who`,
+      timeout: 10000
+    }, (err, response) => { callback(err, response, stringURL); }
+  );
+}
+
+function Alert(props) {
+  return <MuiAlert elevation={6} variant="filled" {...props} />;
+}
 export default function SignIn(props) {
   // using style defined in the front
   const styleClass = useStyles();
@@ -108,17 +102,24 @@ export default function SignIn(props) {
     setProxyWindow(false);
   };
   const proxyWindowSubmit = (newValue) => {
-    checkURL(newValue, (err, newString) => {
-      if (!err) {
+    checkURL(newValue, (err, response, newString) => {
+      if (!err && response.statusCode === 200 && response.body === "utage") {
         var proxyHasChanged = globalSetting.proxy !== newValue;
         setProxyWindow(false);
         globalSetting.proxy = newString;
         saveProxySetting(proxyHasChanged);
-      } else
-        snackWindowToggle(
-          "error",
-          "Cannot connect to server. Please recheck your input."
-        );
+      } else snackWindowToggle("error", (err ? `${err}` : `Server Error: ${response.body}`));
+
+      // if (!err) {
+      //   var proxyHasChanged = globalSetting.proxy !== newValue;
+      //   setProxyWindow(false);
+      //   globalSetting.proxy = newString;
+      //   saveProxySetting(proxyHasChanged);
+      // } else
+      //   snackWindowToggle(
+      //     "error",
+      //     "Cannot connect to server. Please recheck your input."
+      //   );
     });
   };
   const proxyUpdateInput = (event) => {
@@ -210,20 +211,37 @@ export default function SignIn(props) {
     connectServer(info, () => {
       initDB(info, () => {
         backdropClose();
-        ReactDOM.render(<Panel />, document.getElementById("root"));
+        // ReactDOM.render(<Panel />, document.getElementById("root"));
       });
     });
   };
 
   const connectServer = (info, callback) => {
     console.log(info.email, info.password);
-    checkURL(globalSetting.proxy, (err) => {
-      if (err) {
-        backdropClose();
-        snackWindowToggle("error", `${err}`);
+    checkURL(globalSetting.proxy, (err, response) => {
+      if (!err && response.statusCode === 200 && response.body === "utage") {
+        // key spawned by client, use it to dectypt info from server
+        const keyClient = new nodeRSA({ b: 512 });
+        const pubClient = keyClient.exportKey('public');
+
+        // the public key of keyClient should be sent to server
+        request({
+          url: `http://localhost:8080/sign/in/pub`,
+          method: "POST",
+          json: true,
+          headers: {
+            "content-type": "application/json",
+          },
+          body: {
+            pub: pubClient,
+            email: info.email
+          },
+          timeout: 10000,
+        }, (err, response) => {
+        });
       } else {
-        // TEMP: move callback later
-        callback();
+        backdropClose();
+        snackWindowToggle("error", (err ? `${err}` : `Server Error: ${response.body}`));
       }
     });
   };

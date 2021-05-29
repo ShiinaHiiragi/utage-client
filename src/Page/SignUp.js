@@ -175,7 +175,7 @@ export default function SignUp() {
         });
       else {
         backdropClose();
-        snackWindowToggle("error", (err ? err : `Server Error: ${response.body}`));
+        snackWindowToggle("error", (err ? `${err}` : `Server Error: ${response.body}`));
       }
     });
   };
