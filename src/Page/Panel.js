@@ -230,7 +230,8 @@ const useStyles = makeStyles((theme) => ({
     height: theme.spacing(8)
   },
   formFont: {
-    fontSize: "16px"
+    fontSize: "16px",
+    border: "0",
   },
   selfProfile: {
     "& .MuiTextField-root": {
