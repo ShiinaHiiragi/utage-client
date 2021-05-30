@@ -61,6 +61,8 @@ import LinkIcon from "@material-ui/icons/Link";
 import SendIcon from "@material-ui/icons/Send";
 import AirplayIcon from "@material-ui/icons/Airplay";
 import StrikethroughSIcon from "@material-ui/icons/StrikethroughS";
+import AddIcon from '@material-ui/icons/Add';
+import NotInterestedIcon from '@material-ui/icons/NotInterested';
 import SignIn from "./SignIn";
 
 const electron = window.require("electron");
@@ -254,6 +256,20 @@ const useStyles = makeStyles((theme) => ({
   checkbox: {
     margin: theme.spacing(0, "2%", 0, "2%"),
     width: "45%"
+  },
+  applicationCenter: {
+    display: "flex",
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  applicationAll: {
+    minHeight: "200px"
+  },
+  nilApplication: {
+    minHeight: "200px",
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "center"
   }
 }));
 
@@ -342,7 +358,7 @@ export default function Panel(props) {
         },
         log: [
           {
-            rid: 1,
+            rid: "1",
             sender: "chocomint",
             senderID: "2048U",
             senderAvatar: "png",
@@ -351,7 +367,7 @@ export default function Panel(props) {
             time: "2021-05-23T04:20:44.733Z"
           },
           {
-            rid: 2,
+            rid: "2",
             sender: "Koishi",
             senderID: "1024U",
             senderAvatar: "png",
@@ -360,7 +376,7 @@ export default function Panel(props) {
             time: "2021-05-23T04:21:25.401Z"
           },
           {
-            rid: 5,
+            rid: "5",
             sender: "chocomint",
             senderID: "2048U",
             senderAvatar: "png",
@@ -369,7 +385,7 @@ export default function Panel(props) {
             time: "2021-05-24T11:14:31.271Z"
           },
           {
-            rid: 6,
+            rid: "6",
             sender: "Koishi",
             senderID: "1024U",
             senderAvatar: "png",
@@ -392,7 +408,7 @@ export default function Panel(props) {
         },
         log: [
           {
-            rid: 3,
+            rid: "3",
             sender: "Saki",
             senderID: "32768U",
             senderAvatar: "jpg",
@@ -401,7 +417,7 @@ export default function Panel(props) {
             time: "2021-05-23T04:25:41.181Z"
           },
           {
-            rid: 4,
+            rid: "4",
             sender: "Koishi",
             senderID: "1024U",
             senderAvatar: "png",
@@ -478,7 +494,23 @@ export default function Panel(props) {
       open: false,
       snackWindowType: "",
       snackWindowMessage: ""
-    }
+    },
+    application: [
+      {
+        uid: "8192",
+        dst: [""],
+        username: "Lia Ignace",
+        avatar: "png",
+        varification: "Lorem ipsum dolor, sit amet consectetur adipisicing elit. Fugiat ipsam, temporibus tempora corporis quod vero eligendi odio accusamus porro! Repudiandae iusto quam molestias, doloremque fugiat aliquam beatae similique! Beatae, corporis.",
+      },
+      {
+        uid: "",
+        dst: ["16384", "Miya Ouendan"],
+        username: "Lynn",
+        avatar: "jpg",
+        varification: "Lorem ipsum dolor."
+      }
+    ],
   });
 
   // about list item
@@ -720,6 +752,23 @@ export default function Panel(props) {
     handleMenuNewClose();
     // TODO: complete this function
   };
+  const menuNewApplicationRemove = (uid, gid) => {
+    panelPopup.application.splice(panelPopup.application.findIndex((item) =>
+      item.uid === uid && item.dst[0] === gid
+    ), 1);
+    setPanelPopup((panelPopup) => ({
+      ...panelPopup,
+      application: panelPopup.application
+    }));
+  }
+  const handleMenuNewApplicationRefuse = (uid, gid) => {
+    // TODO: complete this function
+    menuNewApplicationRemove(uid, gid);
+  };
+  const handleMenuNewApplicationAccept = (uid, gid) => {
+    // TODO: complete this function
+    menuNewApplicationRemove(uid, gid);
+  };
   const handleMenuNewCreateTextChange = (event) => {
     setPanelPopup((panelPopup) => ({
       ...panelPopup,
@@ -729,7 +778,7 @@ export default function Panel(props) {
       }
     }));
   };
-  const handleMenuCreateSubmit = () => {
+  const handleMenuNewCreateSubmit = () => {
     handleMenuNewClose();
     // TODO: complete this function
   };
@@ -898,7 +947,7 @@ export default function Panel(props) {
       }));
   };
   const preCheck = () => {
-    let nowTextInput = panelInfo.record.find(
+    const nowTextInput = panelInfo.record.find(
       (value) => value.accessInfo.id === panelInfo.state.selectedRecord
     ).status.textInput;
     let pattern = /!\[(.*?)\]\((.*?)\)/gm,
@@ -916,7 +965,7 @@ export default function Panel(props) {
     // IMPORTANT: DO NOT WRITE AS `!hasChecked`
     // because hasChecked is either `true` or a event Object
     // TEMP: change the logic later
-    const nowTextInput = panelInfo.record.find(
+    let nowTextInput = panelInfo.record.find(
       (value) => value.accessInfo.id === panelInfo.state.selectedRecord
     ).status.textInput;
     let checkInfo = hasChecked === true ? "" : preCheck();
@@ -926,6 +975,7 @@ export default function Panel(props) {
     }
     // TODO: complete this function
     nowTextInput = nowTextInput.replace(/!\[(.*?)\]\((.*?)\)/gm, "![]()");
+    console.log(nowTextInput);
   };
 
   // about backdrop and snack window
@@ -1030,7 +1080,9 @@ export default function Panel(props) {
             />
             <Tooltip title="More" placement="top">
               <IconButton onClick={handleMenuClick}>
-                <MoreVertIcon />
+                <Badge color="secondary" variant="dot" invisible={panelPopup.application.length === 0}>
+                  <MoreVertIcon />
+                </Badge>
               </IconButton>
             </Tooltip>
             <Menu
@@ -1493,8 +1545,42 @@ export default function Panel(props) {
               </RadioGroup>
             </div>
           )}
-          {panelPopup.newFriend.option === 1 && (
-            <div></div>
+          {panelPopup.newFriend.option === 1 && (panelPopup.application.length !== 0
+            ? (<List className={classes.applicationAll}>
+              {panelPopup.application.map((value) => {
+                return (
+                  <div className={classes.applicationCenter} key={value.uid}>
+                    <ListItem>
+                      <ListItemAvatar>
+                        <Avatar src={`static/avatar/avatar-${value.uid}U.${value.avatar}`}>
+                          <PersonIcon />
+                        </Avatar>
+                      </ListItemAvatar>
+                      <ListItemText
+                        primary={value.username +
+                          (value.dst[0] && ` want to join ${value.dst[1]}`)}
+                        secondary={value.varification}
+                      />
+                    </ListItem>
+                    <Tooltip title="Refuse" placement="top">
+                      <IconButton onClick={() => {handleMenuNewApplicationRefuse(value.uid, value.dst[0])}}>
+                        <NotInterestedIcon color="primary"/>
+                      </IconButton>
+                    </Tooltip>
+                    <Tooltip title="Accept" placement="top">
+                      <IconButton onClick={() => {handleMenuNewApplicationAccept(value.uid, value.dst[0])}}>
+                        <AddIcon color="primary"/>
+                      </IconButton>
+                    </Tooltip>
+                  </div>
+                );
+              })}
+              </List>)
+            : (<div className={classes.nilApplication}>
+              <Typography color="textSecondary" align="center">
+                There is no application now.
+              </Typography>
+              </div>)
           )}
           {panelPopup.newFriend.option === 2 && (
             <TextField
@@ -1512,7 +1598,7 @@ export default function Panel(props) {
             </Button>
           )}
           {panelPopup.newFriend.option === 2 && (
-            <Button color="secondary" onClick={handleMenuCreateSubmit}>
+            <Button color="secondary" onClick={handleMenuNewCreateSubmit}>
               Create
             </Button>
           )}
@@ -1529,14 +1615,12 @@ export default function Panel(props) {
         <DialogTitle>{"Varifying Identity"}</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            The message in plain text you write below will be sent to the
-            {
+            The message in plain text you write below will be sent to the {
               panelPopup.varification.id.charAt(panelPopup.varification.id.length - 1)
                 === "U"
                 ? ` user ${panelPopup.varification.name} `
                 : ` holder of group ${panelPopup.varification.name} `
-            }
-            your want to access. You can access as long as it allows your request.
+            } your want to access. You can access as long as it allows your request.
           </DialogContentText>
           <TextField
             label="Varifying Message"
