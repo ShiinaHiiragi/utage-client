@@ -27,9 +27,12 @@ import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
+import Radio from '@material-ui/core/Radio';
+import RadioGroup from '@material-ui/core/RadioGroup';
 import Select from '@material-ui/core/Select';
 import InputLabel from '@material-ui/core/InputLabel';
 import FormControl from '@material-ui/core/FormControl';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Snackbar from "@material-ui/core/Snackbar";
 import MuiAlert from "@material-ui/lab/Alert";
 import Backdrop from "@material-ui/core/Backdrop";
@@ -38,6 +41,8 @@ import Table from "@material-ui/core/Table";
 import TableBody from "@material-ui/core/TableBody";
 import TableCell from "@material-ui/core/TableCell";
 import TableRow from "@material-ui/core/TableRow";
+import Tabs from '@material-ui/core/Tabs';
+import Tab from '@material-ui/core/Tab';
 import { MuiPickersUtilsProvider, DatePicker } from '@material-ui/pickers';
 import { makeStyles } from "@material-ui/core/styles";
 import DateFnsUtils from '@date-io/date-fns';
@@ -236,6 +241,13 @@ const useStyles = makeStyles((theme) => ({
   selectEmpty: {
     marginTop: theme.spacing(2),
   },
+  searchTextInput: {
+    margin: theme.spacing(2, 0, 2, 0),
+    width: "100%"
+  },
+  checkbox: {
+    width: "48%"
+  }
 }));
 
 // eslint-disable-next-line
@@ -299,7 +311,6 @@ export default function Panel(props) {
     keyClient = props.client;
     pubServer = props.server;
     passwordAES = props.AES;
-    console.log(keyClient, pubServer, passwordAES);
   }, []);
 
   // the state info need by user interface
@@ -421,6 +432,14 @@ export default function Panel(props) {
     backdrop: false,
     textEmoji: false,
     textPreview: false,
+    newFriend: {
+      open: false,
+      option: 0,
+      find: {
+        textInput: "",
+        box: "0"
+      }
+    },
     profile: {
       open: false,
       rows: [],
@@ -557,12 +576,7 @@ export default function Panel(props) {
   };
   const handleMenuProfileApply = () => {
     handleMenuProfileClose();
-    console.log(panelPopup.self);
     // TODO: complete this function
-  };
-  const handleMenuAddClick = () => {
-    handleMoreClose();
-    // TODO: complete this functions
   };
   const handleMenuLogOutClick = () => {
     handleMoreClose();
@@ -584,6 +598,66 @@ export default function Panel(props) {
       closeBackdrop();
       ReactDOM.render(<SignIn />, document.getElementById("root"));
     }, 1000);
+  };
+
+  // about adding new friend or group
+  const handleMenuNewClick = () => {
+    handleMoreClose();
+    setPanelPopup((panelPopup) => ({
+      ...panelPopup,
+      newFriend: {
+        ...panelPopup.newFriend,
+        open: true,
+        option: 0,
+        find: {
+          textInput: "",
+          box: "0"
+        }
+      }
+    }));
+  };
+  const handleMenuNewClose = () => {
+    handleMoreClose();
+    setPanelPopup((panelPopup) => ({
+      ...panelPopup,
+      newFriend: {
+        ...panelPopup.newFriend,
+        open: false
+      }
+    }));
+  };
+  const handleMenuNewTabChange = (event, newValue) => {
+    setPanelPopup((panelPopup) => ({
+      ...panelPopup,
+      newFriend: {
+        ...panelPopup.newFriend,
+        option: newValue,
+      }
+    }));
+  };
+  const handleCheckboxChange = (event) => {
+    setPanelPopup((panelPopup) => ({
+      ...panelPopup,
+      newFriend: {
+        ...panelPopup.newFriend,
+        find: {
+          ...panelPopup.newFriend.find,
+          box: event.target.value
+        }
+      }
+    }));
+  };
+  const handleFindTextChange = (event) => {
+    setPanelPopup((panelPopup) => ({
+      ...panelPopup,
+      newFriend: {
+        ...panelPopup.newFriend,
+        find: {
+          ...panelPopup.newFriend.find,
+          textInput: event.target.value
+        }
+      }
+    }));
   };
 
   // about text input
@@ -890,7 +964,7 @@ export default function Panel(props) {
               onClose={handleMoreClose}
             >
               <MenuItem onClick={handleMenuProfileClick}>My Profile</MenuItem>
-              <MenuItem onClick={handleMenuAddClick}>Friends/Groups</MenuItem>
+              <MenuItem onClick={handleMenuNewClick}>Friends/Groups</MenuItem>
               <MenuItem onClick={handleMenuLogOutClick}>Log Out</MenuItem>
               <Dialog
                 open={panelPopup.menuLogOut}
@@ -911,15 +985,15 @@ export default function Panel(props) {
                   </DialogContentText>
                 </DialogContent>
                 <DialogActions>
+                  <Button onClick={handleMenuLogOutOKClick} color="secondary">
+                    Yes
+                  </Button>
                   <Button
                     onClick={handleMenuLogOutCalcelClick}
                     color="primary"
                     autoFocus
                   >
                     Cancel
-                  </Button>
-                  <Button onClick={handleMenuLogOutOKClick} color="secondary">
-                    Yes
                   </Button>
                 </DialogActions>
               </Dialog>
@@ -1247,7 +1321,6 @@ export default function Panel(props) {
                   value={panelPopup.self.birth}
                   onChange={(value) => {
                     setPanelPopup((panelPopup) => {
-                    console.log(panelPopup.self);
                     return {
                       ...panelPopup,
                       self: {
@@ -1277,6 +1350,62 @@ export default function Panel(props) {
             Apply
           </Button>
           <Button onClick={handleMenuProfileClose} color="primary" autoFocus>
+            Close
+          </Button>
+        </DialogActions>
+      </Dialog>
+      <Dialog
+        open={panelPopup.newFriend.open}
+        onClose={handleMenuNewClose}
+        className={classes.noneSelect}
+      >
+        <DialogContent>
+          <Tabs
+            value={panelPopup.newFriend.option}
+            indicatorColor="primary"
+            textColor="primary"
+            onChange={handleMenuNewTabChange}
+          >
+            <Tab label="Find Users/Groups" />
+            <Tab label="Application from Others" />
+          </Tabs>
+          {
+            panelPopup.newFriend.option === 0 &&
+            <div>
+              <TextField
+                label="Find Users/Groups via ID"
+                value={panelPopup.newFriend.find.textInput}
+                className={classes.searchTextInput}
+                onChange={handleFindTextChange}
+              />
+              <RadioGroup row
+                value={panelPopup.newFriend.find.box}
+                onChange={handleCheckboxChange}
+              >
+                <FormControlLabel
+                  value={"0"}
+                  control={<Radio />}
+                  label="User"
+                  className={classes.checkbox}
+                />
+                <FormControlLabel
+                  value={"1"}
+                  control={<Radio />}
+                  label="Group"
+                  className={classes.checkbox}
+                />
+              </RadioGroup>
+            </div>
+          }
+        </DialogContent>
+        <DialogActions>
+          {
+            panelPopup.newFriend.option === 0 &&
+            <Button color="secondary" onClick={handleMenuNewClose}>
+              Find
+            </Button>
+          }
+          <Button color="primary" onClick={handleMenuNewClose}>
             Close
           </Button>
         </DialogActions>
