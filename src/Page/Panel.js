@@ -311,7 +311,7 @@ function Alert(props) {
 export default function Panel(props) {
   const classes = useStyles();
 
-  // Equals to componentDidmount
+  // equals to componentDidmount
   React.useEffect(() => {
     globalSetting = JSON.parse(fs.readFileSync(settingPath));
     keyClient = props.client;
@@ -431,6 +431,8 @@ export default function Panel(props) {
       textIndex: [0, 0]
     }
   }));
+
+  // the info that all popup window needs
   const [panelPopup, setPanelPopup] = React.useState({
     sideListItem: true,
     moreAnchor: null,
@@ -477,19 +479,21 @@ export default function Panel(props) {
     }
   });
 
-  // about list item and info in app bar
-  const handleToggleSideListItem = () => {
+  // about list item
+  const handleSideListItemToggle = () => {
     setPanelPopup((panelPopup) => ({
       ...panelPopup,
       sideListItem: true
     }));
   };
-  const handleCloseSideListItem = () => {
+  const handleSideListItemClose = () => {
     setPanelPopup((panelPopup) => ({
       ...panelPopup,
       sideListItem: false
     }));
   };
+
+  // about more info in app bar
   const createData = (props, value) => ({ props, value });
   const handleMoreInfoClick = () => {
     setPanelPopup((panelPopup) => ({
@@ -540,7 +544,7 @@ export default function Panel(props) {
       }
     }));
   };
-  const handleVarifyTextChange = (event) => {
+  const handleMoreInfoApplyTextChange = (event) => {
     setPanelPopup((panelPopup) => ({
       ...panelPopup,
       varification: {
@@ -572,22 +576,22 @@ export default function Panel(props) {
       )
     }));
   };
-  const handleMoreClick = (event) => {
+  const handleMenuClick = (event) => {
     setPanelPopup((panelPopup) => ({
       ...panelPopup,
       moreAnchor: event.currentTarget
     }));
   };
-  const handleMoreClose = () => {
+  const handleMenuClose = () => {
     setPanelPopup((panelPopup) => ({
       ...panelPopup,
       moreAnchor: null
     }));
   };
 
-  // menu of the more button
+  // about profile of the menu button
   const handleMenuProfileClick = () => {
-    handleMoreClose();
+    handleMenuClose();
     setPanelPopup((panelPopup) => ({
       ...panelPopup,
       self: {
@@ -613,7 +617,7 @@ export default function Panel(props) {
       }
     }));
   };
-  const handleProfileChange = (event, prop) => {
+  const handleMenuProfileChange = (event, prop) => {
     setPanelPopup((panelPopup) => ({
       ...panelPopup,
       self: {
@@ -626,8 +630,10 @@ export default function Panel(props) {
     handleMenuProfileClose();
     // TODO: complete this function
   };
+
+  // about log out of menu button
   const handleMenuLogOutClick = () => {
-    handleMoreClose();
+    handleMenuClose();
     setPanelPopup((panelPopup) => ({
       ...panelPopup,
       menuLogOut: true
@@ -648,9 +654,9 @@ export default function Panel(props) {
     }, 1000);
   };
 
-  // about adding new friend or group
+  // about friend or group of menu button
   const handleMenuNewClick = () => {
-    handleMoreClose();
+    handleMenuClose();
     setPanelPopup((panelPopup) => ({
       ...panelPopup,
       newFriend: {
@@ -665,7 +671,7 @@ export default function Panel(props) {
     }));
   };
   const handleMenuNewClose = () => {
-    handleMoreClose();
+    handleMenuClose();
     setPanelPopup((panelPopup) => ({
       ...panelPopup,
       newFriend: {
@@ -683,7 +689,7 @@ export default function Panel(props) {
       }
     }));
   };
-  const handleCheckboxChange = (event) => {
+  const handleMenuNewFindCheckboxChange = (event) => {
     setPanelPopup((panelPopup) => ({
       ...panelPopup,
       newFriend: {
@@ -695,7 +701,7 @@ export default function Panel(props) {
       }
     }));
   };
-  const handleFindTextChange = (event) => {
+  const handleMenuNewFindTextChange = (event) => {
     setPanelPopup((panelPopup) => ({
       ...panelPopup,
       newFriend: {
@@ -707,11 +713,11 @@ export default function Panel(props) {
       }
     }));
   };
-  const handleMenuNewFind = () => {
+  const handleMenuNewFindSubmit = () => {
     handleMenuNewClose();
     // TODO: complete this function
   };
-  const handleMenuCreateGroup = () => {
+  const handleMenuCreateSubmit = () => {
     // TODO: complete this function
   };
 
@@ -760,8 +766,8 @@ export default function Panel(props) {
     }));
   };
 
-  // about emoji and image
-  const handleToggleTextEmoji = () => {
+  // about emoji
+  const handleTextEmojiClick = () => {
     if (panelInfo.state.focus)
       setPanelPopup((panelPopup) => ({
         ...panelPopup,
@@ -773,26 +779,28 @@ export default function Panel(props) {
         "Please focus on text area to insert emoji."
       );
   };
-  const handleCloseTextEmoji = () => {
+  const handleTextEmojiClose = () => {
     setPanelPopup((panelPopup) => ({
       ...panelPopup,
       textEmoji: false
     }));
   };
   const handleTextEmojiSelect = (event, index) => {
-    handleCloseTextEmoji();
-    handleRichTextMark(
+    handleTextEmojiClose();
+    richTextMark(
       "",
       "",
       String.fromCodePoint(`0x${(128512 + index).toString(16)}`)
     );
   };
+
+  // about image inserting
   const handleToggleImage = () => {
     // TODO: complete this function
   };
 
   // about text modifying buttons
-  const handleRichTextMark = (left, right, middle) => {
+  const richTextMark = (left, right, middle) => {
     let { textInput } = panelInfo.record.find(
       (value) => value.accessInfo.id === panelInfo.state.selectedRecord
     ).status;
@@ -822,11 +830,11 @@ export default function Panel(props) {
       )
     }));
   };
-  const handlePreventBlur = (event) => {
+  const handleTextPreventBlur = (event) => {
     event.preventDefault();
   };
   const handleTextBold = () => {
-    if (panelInfo.state.focus) handleRichTextMark("**", "**");
+    if (panelInfo.state.focus) richTextMark("**", "**");
     else
       toggleSnackWindow(
         "warning",
@@ -834,7 +842,7 @@ export default function Panel(props) {
       );
   };
   const handleTextItalic = () => {
-    if (panelInfo.state.focus) handleRichTextMark("*", "*");
+    if (panelInfo.state.focus) richTextMark("*", "*");
     else
       toggleSnackWindow(
         "warning",
@@ -842,7 +850,7 @@ export default function Panel(props) {
       );
   };
   const handleTextStrikethrough = () => {
-    if (panelInfo.state.focus) handleRichTextMark("~~", "~~");
+    if (panelInfo.state.focus) richTextMark("~~", "~~");
     else
       toggleSnackWindow(
         "warning",
@@ -850,25 +858,25 @@ export default function Panel(props) {
       );
   };
   const handleTextLink = () => {
-    if (panelInfo.state.focus) handleRichTextMark("[", "]()");
+    if (panelInfo.state.focus) richTextMark("[", "]()");
     else
       toggleSnackWindow("warning", "Please focus on text area to insert link.");
   };
   const handleTextCode = () => {
-    if (panelInfo.state.focus) handleRichTextMark("`", "`");
+    if (panelInfo.state.focus) richTextMark("`", "`");
     else
       toggleSnackWindow("warning", "Please focus on text area to insert code.");
   };
 
   // about preview and send
-  const handleTextPreviewBack = () => {
+  const handleTextPreviewClose = () => {
     setPanelPopup((panelPopup) => ({
       ...panelPopup,
       textPreview: false
     }));
   };
-  const handleTextPreviewToggle = () => {
-    const checkInfo = handlePreCheck();
+  const handleTextPreviewClick = () => {
+    const checkInfo = preCheck();
     if (checkInfo !== "") toggleSnackWindow("warning", checkInfo);
     else
       setPanelPopup((panelPopup) => ({
@@ -876,7 +884,7 @@ export default function Panel(props) {
         textPreview: true
       }));
   };
-  const handlePreCheck = () => {
+  const preCheck = () => {
     const nowTextInput = panelInfo.record.find(
       (value) => value.accessInfo.id === panelInfo.state.selectedRecord
     ).status.textInput;
@@ -898,7 +906,7 @@ export default function Panel(props) {
     const nowTextInput = panelInfo.record.find(
       (value) => value.accessInfo.id === panelInfo.state.selectedRecord
     ).status.textInput;
-    let checkInfo = hasChecked === true ? "" : handlePreCheck();
+    let checkInfo = hasChecked === true ? "" : preCheck();
     if (checkInfo !== "") {
       toggleSnackWindow("warning", checkInfo);
       return;
@@ -956,8 +964,8 @@ export default function Panel(props) {
             className={classes.menuButton}
             onClick={
               panelPopup.sideListItem
-                ? handleCloseSideListItem
-                : handleToggleSideListItem
+                ? handleSideListItemClose
+                : handleSideListItemToggle
             }
           >
             {panelPopup.sideListItem ? (
@@ -1008,7 +1016,7 @@ export default function Panel(props) {
               secondary={panelInfo.usrInfo.email}
             />
             <Tooltip title="More" placement="top">
-              <IconButton onClick={handleMoreClick}>
+              <IconButton onClick={handleMenuClick}>
                 <MoreVertIcon />
               </IconButton>
             </Tooltip>
@@ -1016,7 +1024,7 @@ export default function Panel(props) {
               anchorEl={panelPopup.moreAnchor}
               keepMounted
               open={Boolean(panelPopup.moreAnchor)}
-              onClose={handleMoreClose}
+              onClose={handleMenuClose}
             >
               <MenuItem onClick={handleMenuProfileClick}>My Profile</MenuItem>
               <MenuItem onClick={handleMenuNewClick}>Friends/Groups</MenuItem>
@@ -1167,7 +1175,7 @@ export default function Panel(props) {
             />
             <Toolbar className={classes.textButton}>
               {[
-                ["Emoji", <InsertEmoticonIcon />, handleToggleTextEmoji],
+                ["Emoji", <InsertEmoticonIcon />, handleTextEmojiClick],
                 ["Insert Image", <ImageIcon />, handleToggleImage],
                 ["Bold", <FormatBoldIcon />, handleTextBold],
                 ["Italic", <FormatItalicIcon />, handleTextItalic],
@@ -1179,7 +1187,7 @@ export default function Panel(props) {
                 ["Link", <LinkIcon />, handleTextLink],
                 ["Code Line", <CodeIcon />, handleTextCode],
                 <div key="span" className={classes.textSpan}></div>,
-                ["Preview", <AirplayIcon />, handleTextPreviewToggle],
+                ["Preview", <AirplayIcon />, handleTextPreviewClick],
                 ["Send", <SendIcon />, handleTextSend]
               ].map((value) => {
                 if (value instanceof Array)
@@ -1188,7 +1196,7 @@ export default function Panel(props) {
                       key={value[0]}
                       title={value[0]}
                       placement="top"
-                      onMouseDown={handlePreventBlur}
+                      onMouseDown={handleTextPreventBlur}
                       onClick={value[2]}
                     >
                       <IconButton>{value[1]}</IconButton>
@@ -1199,7 +1207,7 @@ export default function Panel(props) {
             </Toolbar>
             <Dialog
               open={panelPopup.textEmoji}
-              onClose={handleCloseTextEmoji}
+              onClose={handleTextEmojiClose}
               className={classes.noneSelect}
             >
               <DialogTitle id="alert-dialog-title">
@@ -1219,14 +1227,14 @@ export default function Panel(props) {
                 ))}
               </DialogContent>
               <DialogActions>
-                <Button onClick={handleCloseTextEmoji} color="primary">
+                <Button onClick={handleTextEmojiClose} color="primary">
                   Back
                 </Button>
               </DialogActions>
             </Dialog>
             <Dialog
               open={panelPopup.textPreview}
-              onClose={handleTextPreviewBack}
+              onClose={handleTextPreviewClose}
             >
               <DialogTitle
                 id="alert-dialog-title"
@@ -1247,14 +1255,14 @@ export default function Panel(props) {
               <DialogActions>
                 <Button
                   onClick={() => {
-                    handleTextPreviewBack();
+                    handleTextPreviewClose();
                     handleTextSend(true);
                   }}
                   color="secondary"
                 >
                   Send
                 </Button>
-                <Button onClick={handleTextPreviewBack} color="primary">
+                <Button onClick={handleTextPreviewClose} color="primary">
                   Back
                 </Button>
               </DialogActions>
@@ -1355,7 +1363,7 @@ export default function Panel(props) {
                 style: { textAlign: "center" }
               }}
               onChange={(event) => {
-                handleProfileChange(event, "username");
+                handleMenuProfileChange(event, "username");
               }}
             />
           </div>
@@ -1377,14 +1385,14 @@ export default function Panel(props) {
                 label="TEL"
                 defaultValue={panelPopup.self.tel}
                 onChange={(event) => {
-                  handleProfileChange(event, "tel");
+                  handleMenuProfileChange(event, "tel");
                 }}
               />
               <TextField
                 label="City"
                 defaultValue={panelPopup.self.city}
                 onChange={(event) => {
-                  handleProfileChange(event, "city");
+                  handleMenuProfileChange(event, "city");
                 }}
               />
             </div>
@@ -1415,7 +1423,7 @@ export default function Panel(props) {
                   value={panelPopup.self.gender}
                   className={classes.selectEmpty}
                   onChange={(event) => {
-                    handleProfileChange(event, "gender");
+                    handleMenuProfileChange(event, "gender");
                   }}
                 >
                   <MenuItem value={"F"}>Female</MenuItem>
@@ -1456,12 +1464,12 @@ export default function Panel(props) {
                 label="Find Users/Groups via ID"
                 value={panelPopup.newFriend.find.textInput}
                 className={classes.searchTextInput}
-                onChange={handleFindTextChange}
+                onChange={handleMenuNewFindTextChange}
               />
               <RadioGroup
                 row
                 value={panelPopup.newFriend.find.box}
-                onChange={handleCheckboxChange}
+                onChange={handleMenuNewFindCheckboxChange}
               >
                 <FormControlLabel
                   value={"0"}
@@ -1481,12 +1489,12 @@ export default function Panel(props) {
         </DialogContent>
         <DialogActions>
           {panelPopup.newFriend.option === 0 && (
-            <Button color="secondary" onClick={handleMenuNewFind}>
+            <Button color="secondary" onClick={handleMenuNewFindSubmit}>
               Find
             </Button>
           )}
           {panelPopup.newFriend.option === 2 && (
-            <Button color="secondary" onClick={handleMenuCreateGroup}>
+            <Button color="secondary" onClick={handleMenuCreateSubmit}>
               Create
             </Button>
           )}
@@ -1518,7 +1526,7 @@ export default function Panel(props) {
             rows={4}
             value={panelPopup.varification.textInput}
             fullWidth
-            onChange={handleVarifyTextChange}
+            onChange={handleMoreInfoApplyTextChange}
           />
         </DialogContent>
         <DialogActions>
