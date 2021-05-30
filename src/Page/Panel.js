@@ -464,6 +464,12 @@ export default function Panel(props) {
       gender: "",
       avatar: ""
     },
+    varification: {
+      open: false,
+      id: "",
+      textInput: "",
+      name: ""
+    },
     snackWindow: {
       open: false,
       snackWindowType: "",
@@ -491,12 +497,12 @@ export default function Panel(props) {
       profile: {
         open: true,
         rows: [
-          createData("UID", "1024"),
+          createData("UID", "8192"),
           createData("E-mail", "abc@xyz.com"),
           createData("TEL", "0731-84802007"),
           createData("City", "Shanghai")
         ],
-        id: "1024U",
+        id: "8192U",
         avatar: "png",
         name: "Koishi"
       }
@@ -512,6 +518,39 @@ export default function Panel(props) {
     }));
   };
   const handleMoreInfoApply = () => {
+    // When this window opens, the target info must have been stored in profile
+    handleMoreInfoClose();
+    setPanelPopup((panelPopup) => ({
+      ...panelPopup,
+      varification: {
+        ...panelPopup.varification,
+        open: true,
+        id: panelPopup.profile.id,
+        name: panelPopup.profile.name,
+        textInput: ""
+      }
+    }));
+  };
+  const handleMoreInfoApplyClose = () => {
+    setPanelPopup((panelPopup) => ({
+      ...panelPopup,
+      varification: {
+        ...panelPopup.varification,
+        open: false,
+      }
+    }));
+  };
+  const handleVarifyTextChange = (event) => {
+    setPanelPopup((panelPopup) => ({
+      ...panelPopup,
+      varification: {
+        ...panelPopup.varification,
+        textInput: event.target.value,
+      }
+    }));
+  }
+  const handleMoreInfoApplySend = () => {
+    handleMoreInfoApplyClose();
     // TODO: complete this function
   };
 
@@ -670,6 +709,9 @@ export default function Panel(props) {
   };
   const handleMenuNewFind = () => {
     handleMenuNewClose();
+    // TODO: complete this function
+  };
+  const handleMenuCreateGroup = () => {
     // TODO: complete this function
   };
 
@@ -862,6 +904,7 @@ export default function Panel(props) {
       return;
     }
     // TODO: complete this function
+    nowTextInput = nowTextInput.replace(/!\[(.*?)\]\((.*?)\)/gm, "![]()");
   };
 
   // about backdrop and snack window
@@ -909,7 +952,6 @@ export default function Panel(props) {
         <Toolbar>
           <IconButton
             color="inherit"
-            aria-label="open drawer"
             edge="start"
             className={classes.menuButton}
             onClick={
@@ -1240,8 +1282,6 @@ export default function Panel(props) {
       <Dialog
         open={panelPopup.profile.open}
         onClose={handleMoreInfoClose}
-        aria-labelledby="alert-dialog-title"
-        aria-describedby="alert-dialog-description"
       >
         <DialogContent>
           <div className={classes.avatarProfile}>
@@ -1261,8 +1301,8 @@ export default function Panel(props) {
           </div>
           <Table className={classes.table} size="small">
             <TableBody>
-              {panelPopup.profile.rows.map((row) => (
-                <TableRow key={row.name}>
+              {panelPopup.profile.rows.map((row, index) => (
+                <TableRow key={index}>
                   <TableCell
                     component="th"
                     scope="row"
@@ -1298,8 +1338,6 @@ export default function Panel(props) {
       <Dialog
         open={panelPopup.self.open}
         onClose={handleMenuProfileClose}
-        aria-labelledby="alert-dialog-title"
-        aria-describedby="alert-dialog-description"
       >
         <DialogContent>
           <div className={classes.avatarProfile}>
@@ -1410,6 +1448,7 @@ export default function Panel(props) {
           >
             <Tab label="Find Users/Groups" />
             <Tab label="Application from Others" />
+            <Tab label="Create a Group" />
           </Tabs>
           {panelPopup.newFriend.option === 0 && (
             <div>
@@ -1446,7 +1485,47 @@ export default function Panel(props) {
               Find
             </Button>
           )}
+          {panelPopup.newFriend.option === 2 && (
+            <Button color="secondary" onClick={handleMenuCreateGroup}>
+              Create
+            </Button>
+          )}
           <Button color="primary" onClick={handleMenuNewClose}>
+            Back
+          </Button>
+        </DialogActions>
+      </Dialog>
+      <Dialog
+        open={panelPopup.varification.open}
+        onClose={handleMoreInfoApplyClose}
+        className={classes.noneSelect}
+      >
+        <DialogTitle id="alert-dialog-title">{"Varifying Identity"}</DialogTitle>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-description">
+            The message in plain text you write below will be sent to the
+            {
+              panelPopup.varification.id.charAt(panelPopup.varification.id.length - 1)
+                === "U"
+                ? ` user ${panelPopup.varification.name} `
+                : ` holder of group ${panelPopup.varification.name} `
+            }
+            your want to access. You can access as long as it allows your request.
+          </DialogContentText>
+          <TextField
+            label="Varifying Message"
+            multiline
+            rows={4}
+            value={panelPopup.varification.textInput}
+            fullWidth
+            onChange={handleVarifyTextChange}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button color="secondary" onClick={handleMoreInfoApplySend}>
+            Send
+          </Button>
+          <Button color="primary" onClick={handleMoreInfoApplyClose}>
             Back
           </Button>
         </DialogActions>

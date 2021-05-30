@@ -286,7 +286,6 @@ export default function SignUp() {
                   endAdornment={
                     <InputAdornment position="end">
                       <IconButton
-                        aria-label="toggle password visibility"
                         onClick={handleClickShowPassword}
                         onMouseDown={handleMouseDownPassword}
                         edge="end"
@@ -339,8 +338,6 @@ export default function SignUp() {
         <Dialog
           open={copyrightInfoWindow}
           onClose={copyrightInfoClose}
-          aria-labelledby="alert-dialog-title"
-          aria-describedby="alert-dialog-description"
           className={classes.noneSelect}
         >
           <DialogTitle id="alert-dialog-title">{`MIT License\nCopyright ${new Date().getFullYear()} Utage`}</DialogTitle>

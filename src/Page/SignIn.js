@@ -367,7 +367,6 @@ export default function SignIn(props) {
               className={styleClass.buttonGroup}
               variant="contained"
               color="primary"
-              aria-label="contained primary button group"
             >
               <Button onClick={proxyWindowToggle}>Switch Server</Button>
               <Button onClick={signInClick}>Sign In</Button>
@@ -376,7 +375,6 @@ export default function SignIn(props) {
               className={styleClass.noneSelect}
               open={proxyWindow}
               onClose={proxyWindowCancel}
-              aria-labelledby="form-dialog-title"
             >
               <DialogTitle id="form-dialog-title">Switch Server</DialogTitle>
               <DialogContent>
@@ -444,8 +442,6 @@ export default function SignIn(props) {
         <Dialog
           open={copyrightInfoWindow}
           onClose={copyrightInfoClose}
-          aria-labelledby="alert-dialog-title"
-          aria-describedby="alert-dialog-description"
           className={styleClass.noneSelect}
         >
           <DialogTitle id="alert-dialog-title">{`MIT License\nCopyright ${new Date().getFullYear()} Utage`}</DialogTitle>
