@@ -1,7 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom";
 import clsx from "clsx";
-import 'date-fns';
+import "date-fns";
 import Markdown from "markdown-to-jsx";
 import CssBaseline from "@material-ui/core/CssBaseline";
 import Drawer from "@material-ui/core/Drawer";
@@ -27,12 +27,12 @@ import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
-import Radio from '@material-ui/core/Radio';
-import RadioGroup from '@material-ui/core/RadioGroup';
-import Select from '@material-ui/core/Select';
-import InputLabel from '@material-ui/core/InputLabel';
-import FormControl from '@material-ui/core/FormControl';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
+import Radio from "@material-ui/core/Radio";
+import RadioGroup from "@material-ui/core/RadioGroup";
+import Select from "@material-ui/core/Select";
+import InputLabel from "@material-ui/core/InputLabel";
+import FormControl from "@material-ui/core/FormControl";
+import FormControlLabel from "@material-ui/core/FormControlLabel";
 import Snackbar from "@material-ui/core/Snackbar";
 import MuiAlert from "@material-ui/lab/Alert";
 import Backdrop from "@material-ui/core/Backdrop";
@@ -41,11 +41,11 @@ import Table from "@material-ui/core/Table";
 import TableBody from "@material-ui/core/TableBody";
 import TableCell from "@material-ui/core/TableCell";
 import TableRow from "@material-ui/core/TableRow";
-import Tabs from '@material-ui/core/Tabs';
-import Tab from '@material-ui/core/Tab';
-import { MuiPickersUtilsProvider, DatePicker } from '@material-ui/pickers';
+import Tabs from "@material-ui/core/Tabs";
+import Tab from "@material-ui/core/Tab";
+import { MuiPickersUtilsProvider, DatePicker } from "@material-ui/pickers";
 import { makeStyles } from "@material-ui/core/styles";
-import DateFnsUtils from '@date-io/date-fns';
+import DateFnsUtils from "@date-io/date-fns";
 import InfoOutlinedIcon from "@material-ui/icons/InfoOutlined";
 import MenuIcon from "@material-ui/icons/Menu";
 import ChevronLeftIcon from "@material-ui/icons/ChevronLeft";
@@ -212,13 +212,13 @@ const useStyles = makeStyles((theme) => ({
   },
   table: {
     minWidth: "300px",
-    userSelect: "none",
+    userSelect: "none"
   },
   avatarProfile: {
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
-    userSelect: "none",
+    userSelect: "none"
   },
   largeAvatar: {
     width: theme.spacing(12),
@@ -227,23 +227,23 @@ const useStyles = makeStyles((theme) => ({
   },
   notLargeAvatar: {
     width: theme.spacing(8),
-    height: theme.spacing(8),
+    height: theme.spacing(8)
   },
   formFont: {
     fontSize: "16px"
   },
   selfProfile: {
-    '& .MuiTextField-root': {
+    "& .MuiTextField-root": {
       margin: theme.spacing(1),
       width: "200px"
-    },
+    }
   },
   genderControl: {
     margin: theme.spacing(1),
     width: "200px"
   },
   selectEmpty: {
-    marginTop: theme.spacing(2),
+    marginTop: theme.spacing(2)
   },
   searchTextInput: {
     margin: theme.spacing(2, 0, 2, 0),
@@ -453,20 +453,20 @@ export default function Panel(props) {
     },
     self: {
       open: false,
-      uid: '',
-      username: '',
-      email: '',
-      tel: '',
-      city: '',
-      birth: '',
-      gender: '',
-      avatar: ''
+      uid: "",
+      username: "",
+      email: "",
+      tel: "",
+      city: "",
+      birth: "",
+      gender: "",
+      avatar: ""
     },
     snackWindow: {
       open: false,
       snackWindowType: "",
       snackWindowMessage: ""
-    },
+    }
   });
 
   // about list item and info in app bar
@@ -482,9 +482,9 @@ export default function Panel(props) {
       sideListItem: false
     }));
   };
-  const createData = (props, value) => ({props, value});
+  const createData = (props, value) => ({ props, value });
   const handleMoreInfoClick = () => {
-    setPanelPopup(panelPopup => ({
+    setPanelPopup((panelPopup) => ({
       ...panelPopup,
       profile: {
         open: true,
@@ -492,7 +492,7 @@ export default function Panel(props) {
           createData("UID", "1024"),
           createData("E-mail", "abc@xyz.com"),
           createData("TEL", "0731-84802007"),
-          createData("City", "Shanghai"),
+          createData("City", "Shanghai")
         ],
         id: "1024U",
         avatar: "png",
@@ -501,7 +501,7 @@ export default function Panel(props) {
     }));
   };
   const handleMoreInfoClose = () => {
-    setPanelPopup(panelPopup => ({
+    setPanelPopup((panelPopup) => ({
       ...panelPopup,
       profile: {
         ...panelPopup.profile,
@@ -547,24 +547,24 @@ export default function Panel(props) {
   // menu of the more button
   const handleMenuProfileClick = () => {
     handleMoreClose();
-    setPanelPopup(panelPopup => ({
+    setPanelPopup((panelPopup) => ({
       ...panelPopup,
       self: {
         ...panelPopup.self,
         open: true,
-        uid: '1024',
-        username: 'Koishi',
-        email: 'abc@xyz.com',
-        tel: '0731-84802110',
-        city: 'Shanghai',
-        birth: '2019-12-31T16:00:00.000Z',
-        gender: 'F',
-        avatar: 'png'
+        uid: "1024",
+        username: "Koishi",
+        email: "abc@xyz.com",
+        tel: "0731-84802110",
+        city: "Shanghai",
+        birth: "2019-12-31T16:00:00.000Z",
+        gender: "F",
+        avatar: "png"
       }
     }));
   };
   const handleMenuProfileClose = () => {
-    setPanelPopup(panelPopup => ({
+    setPanelPopup((panelPopup) => ({
       ...panelPopup,
       self: {
         ...panelPopup.self,
@@ -573,7 +573,7 @@ export default function Panel(props) {
     }));
   };
   const handleProfileChange = (event, prop) => {
-    setPanelPopup(panelPopup => ({
+    setPanelPopup((panelPopup) => ({
       ...panelPopup,
       self: {
         ...panelPopup.self,
@@ -638,7 +638,7 @@ export default function Panel(props) {
       ...panelPopup,
       newFriend: {
         ...panelPopup.newFriend,
-        option: newValue,
+        option: newValue
       }
     }));
   };
@@ -882,7 +882,7 @@ export default function Panel(props) {
         open: true,
         snackWindowType: type,
         snackWindowMessage: message
-      },
+      }
     }));
   };
   const closeSnackWindow = () => {
@@ -1081,7 +1081,7 @@ export default function Panel(props) {
                       className={classes.recordAvatar}
                       src={`static/avatar/avatar-${value.senderID}.${value.senderAvatar}`}
                     >
-                      <PersonIcon className={classes.recordIcon}/>
+                      <PersonIcon className={classes.recordIcon} />
                     </Avatar>
                   </div>
                   <Card className={classes.card}>
@@ -1228,7 +1228,10 @@ export default function Panel(props) {
         onClose={closeSnackWindow}
         className={classes.snack}
       >
-        <Alert onClose={closeSnackWindow} severity={panelPopup.snackWindow.snackWindowType}>
+        <Alert
+          onClose={closeSnackWindow}
+          severity={panelPopup.snackWindow.snackWindowType}
+        >
           {panelPopup.snackWindow.snackWindowMessage}
         </Alert>
       </Snackbar>
@@ -1244,38 +1247,46 @@ export default function Panel(props) {
               src={`static/avatar/avatar-${panelPopup.profile.id}.${panelPopup.profile.avatar}`}
               className={classes.largeAvatar}
             >
-              {
-                panelPopup.profile.id.charAt(panelPopup.profile.id.length - 1) === "U"
-                ? <PersonIcon className={classes.notLargeAvatar}/>
-                : <GroupIcon className={classes.notLargeAvatar}/>
-              }
+              {panelPopup.profile.id.charAt(
+                panelPopup.profile.id.length - 1
+              ) === "U" ? (
+                <PersonIcon className={classes.notLargeAvatar} />
+              ) : (
+                <GroupIcon className={classes.notLargeAvatar} />
+              )}
             </Avatar>
-            <Typography variant="h5">
-              {panelPopup.profile.name}
-          </Typography>
+            <Typography variant="h5">{panelPopup.profile.name}</Typography>
           </div>
           <Table className={classes.table} size="small">
             <TableBody>
               {panelPopup.profile.rows.map((row) => (
                 <TableRow key={row.name}>
-                  <TableCell component="th" scope="row" className={classes.formFont}>
+                  <TableCell
+                    component="th"
+                    scope="row"
+                    className={classes.formFont}
+                  >
                     {row.props}
-                    </TableCell>
-                  <TableCell align="right" className={classes.formFont}>{row.value}</TableCell>
+                  </TableCell>
+                  <TableCell align="right" className={classes.formFont}>
+                    {row.value}
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>
           </Table>
         </DialogContent>
         <DialogActions>
-          {
-            !(panelPopup.profile.id === panelInfo.usrInfo.uid ||
+          {!(
+            panelPopup.profile.id === panelInfo.usrInfo.uid ||
             panelInfo.record.find(
-              (value) => panelPopup.profile.id === value.accessInfo.id)) &&
+              (value) => panelPopup.profile.id === value.accessInfo.id
+            )
+          ) && (
             <Button onClick={handleMoreInfoApply} color="secondary">
               Apply for Access
             </Button>
-          }
+          )}
           <Button onClick={handleMoreInfoClose} color="primary">
             Back
           </Button>
@@ -1293,33 +1304,47 @@ export default function Panel(props) {
               src={`static/avatar/avatar-${panelPopup.self.uid}U.${panelPopup.self.avatar}`}
               className={classes.largeAvatar}
             >
-              <PersonIcon className={classes.notLargeAvatar}/>
+              <PersonIcon className={classes.notLargeAvatar} />
             </Avatar>
             <TextField
               label="Username"
               defaultValue={panelPopup.self.username}
               inputProps={{
                 spellCheck: "false",
-                style: {textAlign: "center"}
+                style: { textAlign: "center" }
               }}
-              onChange={(event) => {handleProfileChange(event, "username")}}
+              onChange={(event) => {
+                handleProfileChange(event, "username");
+              }}
             />
           </div>
           <div className={classes.selfProfile}>
             <div>
-              <TextField label="UID" defaultValue={panelPopup.self.uid} disabled />
-              <TextField label="E-mail" defaultValue={panelPopup.self.email} disabled />
+              <TextField
+                label="UID"
+                defaultValue={panelPopup.self.uid}
+                disabled
+              />
+              <TextField
+                label="E-mail"
+                defaultValue={panelPopup.self.email}
+                disabled
+              />
             </div>
             <div>
               <TextField
                 label="TEL"
                 defaultValue={panelPopup.self.tel}
-                onChange={(event) => {handleProfileChange(event, "tel")}}
+                onChange={(event) => {
+                  handleProfileChange(event, "tel");
+                }}
               />
               <TextField
                 label="City"
                 defaultValue={panelPopup.self.city}
-                onChange={(event) => {handleProfileChange(event, "city")}}
+                onChange={(event) => {
+                  handleProfileChange(event, "city");
+                }}
               />
             </div>
             <div>
@@ -1332,13 +1357,14 @@ export default function Panel(props) {
                   value={panelPopup.self.birth}
                   onChange={(value) => {
                     setPanelPopup((panelPopup) => {
-                    return {
-                      ...panelPopup,
-                      self: {
-                        ...panelPopup.self,
-                        birth: value.toISOString()
-                      }
-                    }})
+                      return {
+                        ...panelPopup,
+                        self: {
+                          ...panelPopup.self,
+                          birth: value.toISOString()
+                        }
+                      };
+                    });
                   }}
                 />
               </MuiPickersUtilsProvider>
@@ -1347,7 +1373,9 @@ export default function Panel(props) {
                 <Select
                   value={panelPopup.self.gender}
                   className={classes.selectEmpty}
-                  onChange={(event) => {handleProfileChange(event, "gender")}}
+                  onChange={(event) => {
+                    handleProfileChange(event, "gender");
+                  }}
                 >
                   <MenuItem value={"F"}>Female</MenuItem>
                   <MenuItem value={"M"}>Male</MenuItem>
@@ -1357,10 +1385,10 @@ export default function Panel(props) {
           </div>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleMenuProfileApply} color="secondary" >
+          <Button onClick={handleMenuProfileApply} color="secondary">
             Apply
           </Button>
-          <Button onClick={handleMenuProfileClose} color="primary" >
+          <Button onClick={handleMenuProfileClose} color="primary">
             Back
           </Button>
         </DialogActions>
@@ -1380,8 +1408,7 @@ export default function Panel(props) {
             <Tab label="Find Users/Groups" />
             <Tab label="Application from Others" />
           </Tabs>
-          {
-            panelPopup.newFriend.option === 0 &&
+          {panelPopup.newFriend.option === 0 && (
             <div>
               <TextField
                 label="Find Users/Groups via ID"
@@ -1389,7 +1416,8 @@ export default function Panel(props) {
                 className={classes.searchTextInput}
                 onChange={handleFindTextChange}
               />
-              <RadioGroup row
+              <RadioGroup
+                row
                 value={panelPopup.newFriend.find.box}
                 onChange={handleCheckboxChange}
               >
@@ -1407,15 +1435,14 @@ export default function Panel(props) {
                 />
               </RadioGroup>
             </div>
-          }
+          )}
         </DialogContent>
         <DialogActions>
-          {
-            panelPopup.newFriend.option === 0 &&
+          {panelPopup.newFriend.option === 0 && (
             <Button color="secondary" onClick={handleMenuNewFind}>
               Find
             </Button>
-          }
+          )}
           <Button color="primary" onClick={handleMenuNewClose}>
             Back
           </Button>
