@@ -170,6 +170,10 @@ const useStyles = makeStyles((theme) => ({
     width: theme.spacing(6),
     height: theme.spacing(6)
   },
+  recordIcon: {
+    width: theme.spacing(4),
+    height: theme.spacing(4)
+  },
   recordOffset: {
     paddingTop: theme.spacing(1)
   },
@@ -504,6 +508,9 @@ export default function Panel(props) {
         open: false
       }
     }));
+  };
+  const handleMoreInfoApply = () => {
+    // TODO: complete this function
   };
 
   // about list item and more menu
@@ -992,11 +999,7 @@ export default function Panel(props) {
                   <Button onClick={handleMenuLogOutOKClick} color="secondary">
                     Yes
                   </Button>
-                  <Button
-                    onClick={handleMenuLogOutCalcelClick}
-                    color="primary"
-                    autoFocus
-                  >
+                  <Button onClick={handleMenuLogOutCalcelClick} color="primary">
                     Back
                   </Button>
                 </DialogActions>
@@ -1078,7 +1081,7 @@ export default function Panel(props) {
                       className={classes.recordAvatar}
                       src={`static/avatar/avatar-${value.senderID}.${value.senderAvatar}`}
                     >
-                      <PersonIcon />
+                      <PersonIcon className={classes.recordIcon}/>
                     </Avatar>
                   </div>
                   <Card className={classes.card}>
@@ -1172,11 +1175,7 @@ export default function Panel(props) {
                 ))}
               </DialogContent>
               <DialogActions>
-                <Button
-                  onClick={handleCloseTextEmoji}
-                  color="primary"
-                  autoFocus
-                >
+                <Button onClick={handleCloseTextEmoji} color="primary">
                   Back
                 </Button>
               </DialogActions>
@@ -1269,7 +1268,15 @@ export default function Panel(props) {
           </Table>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleMoreInfoClose} color="primary" autoFocus>
+          {
+            !(panelPopup.profile.id === panelInfo.usrInfo.uid ||
+            panelInfo.record.find(
+              (value) => panelPopup.profile.id === value.accessInfo.id)) &&
+            <Button onClick={handleMoreInfoApply} color="secondary">
+              Apply for Access
+            </Button>
+          }
+          <Button onClick={handleMoreInfoClose} color="primary">
             Back
           </Button>
         </DialogActions>
@@ -1350,10 +1357,10 @@ export default function Panel(props) {
           </div>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleMenuProfileApply} color="secondary" autoFocus>
+          <Button onClick={handleMenuProfileApply} color="secondary" >
             Apply
           </Button>
-          <Button onClick={handleMenuProfileClose} color="primary" autoFocus>
+          <Button onClick={handleMenuProfileClose} color="primary" >
             Back
           </Button>
         </DialogActions>
