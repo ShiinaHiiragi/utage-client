@@ -208,8 +208,8 @@ export default function SignIn(props) {
       email: email,
       password: cryptoJS.SHA256(email + password).toString()
     };
-    connectServer(info, (passwords, serverRawFirst) => {
-      initDB(passwords, serverRawFirst, (passwords) => {
+    connectServer(info, (passwords, serverRaw) => {
+      initDB(passwords, serverRaw, (passwords) => {
         backdropClose();
         ReactDOM.render(
           <Panel
@@ -298,8 +298,13 @@ export default function SignIn(props) {
       }
     });
   };
-  const initDB = (passwords, serverRawFirst, callback) => {
-    // TEMP: move callback later
+  const initDB = (passwords, serverRaw, callback) => {
+    const selfUID = serverRaw.profile[0].uid.toString();
+    let requestRecord = indexedDB.open(`${selfUID}-record`);
+    let requestProfile = indexedDB.open(`${selfUID}-profile`);
+    let requestGroup = indexedDB.open(`${selfUID}-group`);
+
+    // TEMP: initialize the database
     callback(passwords);
   };
 

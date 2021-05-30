@@ -84,7 +84,7 @@ const markdownOverride = {
 
 // panelReading's record and log should be sorted chronologically
 let globalSetting = JSON.parse(fs.readFileSync(settingPath));
-let keyClient, pubServer, passwordAES;
+let keyClient, pubServer, passwordAES, serverClock;
 
 const drawerWidth = 300;
 const useStyles = makeStyles((theme) => ({
@@ -334,9 +334,16 @@ export default function Panel(props) {
     keyClient = props.client;
     pubServer = props.server;
     passwordAES = props.AES;
+    serverClock = setInterval(() => {
+      // TODO: ask server for new record
+    }, 2500);
+    return () => {
+      clearInterval(serverClock);
+    }
   }, []);
 
   // the state info need by user interface
+  // TODO: initialize the panelInfo
   const [panelInfo, setPanelInfo] = React.useState(() => ({
     usrInfo: {
       uid: "1024U",
@@ -450,6 +457,7 @@ export default function Panel(props) {
   }));
 
   // the info that all popup window needs
+  // TODO: initialize the panelPopup
   const [panelPopup, setPanelPopup] = React.useState({
     sideListItem: true,
     moreAnchor: null,
@@ -590,7 +598,7 @@ export default function Panel(props) {
   };
   const handleMoreInfoApplySend = () => {
     handleMoreInfoApplyClose();
-    // TODO: complete this function
+    // TODO: send application to target
   };
 
   // about list item and more menu
@@ -652,8 +660,8 @@ export default function Panel(props) {
       }
     }));
   };
-  const handleMenuProfileAvatarClick = () => {
-    // TODO: complete this function
+  const handleMenuProfileAvatarChange = () => {
+    // TODO: upload a new avatar
   };
   const handleMenuProfileChange = (event, prop) => {
     setPanelPopup((panelPopup) => ({
@@ -666,7 +674,7 @@ export default function Panel(props) {
   };
   const handleMenuProfileApply = () => {
     handleMenuProfileClose();
-    // TODO: complete this function
+    // TODO: change the profile (except avatar)
   };
 
   // about log out of menu button
@@ -754,7 +762,7 @@ export default function Panel(props) {
   };
   const handleMenuNewFindSubmit = () => {
     handleMenuNewClose();
-    // TODO: complete this function
+    // TODO: find a user/group by id
   };
   const menuNewApplicationRemove = (uid, gid) => {
     panelPopup.application.splice(
@@ -769,11 +777,11 @@ export default function Panel(props) {
     }));
   };
   const handleMenuNewApplicationRefuse = (uid, gid) => {
-    // TODO: complete this function
+    // TODO: refuse src's application
     menuNewApplicationRemove(uid, gid);
   };
   const handleMenuNewApplicationAccept = (uid, gid) => {
-    // TODO: complete this function
+    // TODO: accept src's application
     menuNewApplicationRemove(uid, gid);
   };
   const handleMenuNewCreateTextChange = (event) => {
@@ -787,7 +795,7 @@ export default function Panel(props) {
   };
   const handleMenuNewCreateSubmit = () => {
     handleMenuNewClose();
-    // TODO: complete this function
+    // TODO: create a new group
   };
 
   // about text input
@@ -864,8 +872,8 @@ export default function Panel(props) {
   };
 
   // about image inserting
-  const handleToggleImage = () => {
-    // TODO: complete this function
+  const handleTextImageClick = () => {
+    // TODO: inserting a image
   };
 
   // about text modifying buttons
@@ -980,7 +988,7 @@ export default function Panel(props) {
       toggleSnackWindow("warning", checkInfo);
       return;
     }
-    // TODO: complete this function
+    // TODO: send the text to the server
     nowTextInput = nowTextInput.replace(/!\[(.*?)\]\((.*?)\)/gm, "![]()");
     console.log(nowTextInput);
   };
@@ -1251,7 +1259,7 @@ export default function Panel(props) {
             <Toolbar className={classes.textButton}>
               {[
                 ["Emoji", <InsertEmoticonIcon />, handleTextEmojiClick],
-                ["Insert Image", <ImageIcon />, handleToggleImage],
+                ["Insert Image", <ImageIcon />, handleTextImageClick],
                 ["Bold", <FormatBoldIcon />, handleTextBold],
                 ["Italic", <FormatItalicIcon />, handleTextItalic],
                 [
@@ -1498,7 +1506,7 @@ export default function Panel(props) {
           </div>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleMenuProfileAvatarClick} color="secondary">
+          <Button onClick={handleMenuProfileAvatarChange} color="secondary">
             Change Avatar
           </Button>
           <Button onClick={handleMenuProfileApply} color="secondary">
