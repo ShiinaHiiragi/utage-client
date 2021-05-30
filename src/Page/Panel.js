@@ -197,11 +197,13 @@ const useStyles = makeStyles((theme) => ({
   },
   table: {
     minWidth: "300px",
+    userSelect: "none",
   },
   avatarProfile: {
     display: "flex",
     flexDirection: "column",
-    alignItems: "center"
+    alignItems: "center",
+    userSelect: "none",
   },
   largeAvatar: {
     width: theme.spacing(12),
@@ -434,8 +436,10 @@ export default function Panel(props) {
       profile: {
         open: true,
         rows: [
-          createData("UID", 159),
-          createData("E-mail", 237)
+          createData("UID", "1024"),
+          createData("E-mail", "abc@xyz.com"),
+          createData("TEL", "0731-84802007"),
+          createData("City", "Shanghai"),
         ],
         id: "1024U",
         avatar: "png",
