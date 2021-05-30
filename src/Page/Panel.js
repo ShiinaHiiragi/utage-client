@@ -1,6 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom";
 import clsx from "clsx";
+import 'date-fns';
 import Markdown from "markdown-to-jsx";
 import CssBaseline from "@material-ui/core/CssBaseline";
 import Drawer from "@material-ui/core/Drawer";
@@ -26,6 +27,9 @@ import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
+import Select from '@material-ui/core/Select';
+import InputLabel from '@material-ui/core/InputLabel';
+import FormControl from '@material-ui/core/FormControl';
 import Snackbar from "@material-ui/core/Snackbar";
 import MuiAlert from "@material-ui/lab/Alert";
 import Backdrop from "@material-ui/core/Backdrop";
@@ -34,7 +38,9 @@ import Table from "@material-ui/core/Table";
 import TableBody from "@material-ui/core/TableBody";
 import TableCell from "@material-ui/core/TableCell";
 import TableRow from "@material-ui/core/TableRow";
+import { MuiPickersUtilsProvider, KeyboardDatePicker } from '@material-ui/pickers';
 import { makeStyles } from "@material-ui/core/styles";
+import DateFnsUtils from '@date-io/date-fns';
 import InfoOutlinedIcon from "@material-ui/icons/InfoOutlined";
 import MenuIcon from "@material-ui/icons/Menu";
 import ChevronLeftIcon from "@material-ui/icons/ChevronLeft";
@@ -216,7 +222,20 @@ const useStyles = makeStyles((theme) => ({
   },
   formFont: {
     fontSize: "16px"
-  }
+  },
+  selfProfile: {
+    '& .MuiTextField-root': {
+      margin: theme.spacing(1),
+      width: "200px"
+    },
+  },
+  genderControl: {
+    margin: theme.spacing(1),
+    width: "200px"
+  },
+  selectEmpty: {
+    marginTop: theme.spacing(2),
+  },
 }));
 
 // eslint-disable-next-line
@@ -409,6 +428,17 @@ export default function Panel(props) {
       avatar: "",
       name: ""
     },
+    self: {
+      open: false,
+      uid: '',
+      username: '',
+      email: '',
+      tel: '',
+      city: '',
+      bitrh: '',
+      gender: '',
+      avatar: ''
+    },
     snackWindow: {
       open: false,
       snackWindowType: "",
@@ -491,11 +521,38 @@ export default function Panel(props) {
   // menu of the more button
   const handleMenuProfileClick = () => {
     handleMoreClose();
-    // TODO: complete the functions
+    setPanelPopup(panelPopup => ({
+      ...panelPopup,
+      self: {
+        ...panelPopup.self,
+        open: true,
+        uid: '1024',
+        username: 'Koishi',
+        email: 'abc@xyz.com',
+        tel: '0731-84802110',
+        city: 'Shanghai',
+        bitrh: '2019-12-31T16:00:00.000Z',
+        gender: 'F',
+        avatar: 'png'
+      }
+    }));
   };
+  const handleMenuProfileClose = () => {
+    setPanelPopup(panelPopup => ({
+      ...panelPopup,
+      self: {
+        ...panelPopup.self,
+        open: false
+      }
+    }));
+  };
+  const handleMenuProfileApply = () => {
+    handleMenuProfileClose();
+    // TODO: complete this function
+  }
   const handleMenuAddClick = () => {
     handleMoreClose();
-    // TODO: complete the functions
+    // TODO: complete this functions
   };
   const handleMenuLogOutClick = () => {
     handleMoreClose();
@@ -1125,6 +1182,76 @@ export default function Panel(props) {
         </DialogContent>
         <DialogActions>
           <Button onClick={handleMoreInfoClose} color="primary" autoFocus>
+            Close
+          </Button>
+        </DialogActions>
+      </Dialog>
+      <Dialog
+        open={panelPopup.self.open}
+        onClose={handleMenuProfileClose}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogContent>
+          <div className={classes.avatarProfile}>
+            <Avatar
+              src={`static/avatar/avatar-${panelPopup.self.uid}U.${panelPopup.self.avatar}`}
+              className={classes.largeAvatar}
+            >
+              <PersonIcon className={classes.notLargeAvatar}/>
+            </Avatar>
+            <TextField
+              label="Username"
+              defaultValue={panelPopup.self.username}
+              inputProps={{
+                spellCheck: "false",
+                style: {textAlign: "center"}
+              }}
+              />
+          </div>
+          <div className={classes.selfProfile}>
+            <div>
+              <TextField label="UID" defaultValue={panelPopup.self.uid} disabled />
+              <TextField label="E-mail" defaultValue={panelPopup.self.email} disabled />
+            </div>
+            <div>
+              <TextField label="TEL" defaultValue={panelPopup.self.tel} />
+              <TextField label="City" defaultValue={panelPopup.self.city} />
+            </div>
+            <div>
+              <MuiPickersUtilsProvider utils={DateFnsUtils}>
+                <KeyboardDatePicker
+                  disableToolbar
+                  variant="inline"
+                  format="yyyy/MM/dd"
+                  margin="normal"
+                  label="Birthday"
+                  value={panelPopup.self.bitrh}
+                  // onChange={handleDateChange}
+                  KeyboardButtonProps={{
+                    'aria-label': 'change date',
+                  }}
+                />
+              </MuiPickersUtilsProvider>
+              <FormControl className={classes.genderControl}>
+                <InputLabel shrink>Gender</InputLabel>
+                <Select
+                  value={panelPopup.self.gender}
+                  className={classes.selectEmpty}
+                  // onChange={handleChange}
+                >
+                  <MenuItem value={"F"}>Female</MenuItem>
+                  <MenuItem value={"M"}>Male</MenuItem>
+                </Select>
+              </FormControl>
+            </div>
+          </div>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleMenuProfileApply} color="secondary" autoFocus>
+            Apply
+          </Button>
+          <Button onClick={handleMenuProfileClose} color="primary" autoFocus>
             Close
           </Button>
         </DialogActions>
