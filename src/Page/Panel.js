@@ -212,7 +212,8 @@ const useStyles = makeStyles((theme) => ({
   },
   table: {
     minWidth: "300px",
-    userSelect: "none"
+    userSelect: "none",
+    marginTop: "16px"
   },
   avatarProfile: {
     display: "flex",
@@ -1265,11 +1266,12 @@ export default function Panel(props) {
                   <TableCell
                     component="th"
                     scope="row"
+                    align="right"
                     className={classes.formFont}
                   >
                     {row.props}
                   </TableCell>
-                  <TableCell align="right" className={classes.formFont}>
+                  <TableCell align="left" className={classes.formFont}>
                     {row.value}
                   </TableCell>
                 </TableRow>
