@@ -248,11 +248,12 @@ const useStyles = makeStyles((theme) => ({
     marginTop: theme.spacing(2)
   },
   searchTextInput: {
-    margin: theme.spacing(2, 0, 2, 0),
-    width: "100%"
+    margin: theme.spacing(2, "2%", 2, "2%"),
+    width: "96%"
   },
   checkbox: {
-    width: "48%"
+    margin: theme.spacing(0, "2%", 0, "2%"),
+    width: "45%"
   }
 }));
 
@@ -446,7 +447,8 @@ export default function Panel(props) {
       find: {
         textInput: "",
         box: "0"
-      }
+      },
+      createGroup: "",
     },
     profile: {
       open: false,
@@ -666,7 +668,8 @@ export default function Panel(props) {
         find: {
           textInput: "",
           box: "0"
-        }
+        },
+        createGroup: ""
       }
     }));
   };
@@ -717,7 +720,17 @@ export default function Panel(props) {
     handleMenuNewClose();
     // TODO: complete this function
   };
+  const handleMenuNewCreateTextChange = (event) => {
+    setPanelPopup((panelPopup) => ({
+      ...panelPopup,
+      newFriend: {
+        ...panelPopup.newFriend,
+        createGroup: event.target.value
+      }
+    }));
+  };
   const handleMenuCreateSubmit = () => {
+    handleMenuNewClose();
     // TODO: complete this function
   };
 
@@ -1043,7 +1056,7 @@ export default function Panel(props) {
                       for (let index = 0; index < size; index += 1)
                         if (panelInfo.record[index].status.textInput !== "")
                           return "The system will not save your input on the text field.";
-                      return "Click Yes to log out.";
+                      return "Click YES to log out.";
                     })()}
                   </DialogContentText>
                 </DialogContent>
@@ -1484,7 +1497,12 @@ export default function Panel(props) {
             <div></div>
           )}
           {panelPopup.newFriend.option === 2 && (
-            <div></div>
+            <TextField
+              label="Name of your New Group"
+              value={panelPopup.newFriend.createGroup}
+              className={classes.searchTextInput}
+              onChange={handleMenuNewCreateTextChange}
+            />
           )}
         </DialogContent>
         <DialogActions>
