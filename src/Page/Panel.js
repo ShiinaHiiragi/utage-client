@@ -1416,7 +1416,6 @@ export default function Panel(props) {
             <Avatar
               src={`static/avatar/avatar-${panelPopup.self.uid}U.${panelPopup.self.avatar}`}
               className={classes.largeAvatar}
-              onClick={handleMenuProfileAvatarClick}
             >
               <PersonIcon className={classes.notLargeAvatar} />
             </Avatar>
@@ -1499,6 +1498,9 @@ export default function Panel(props) {
           </div>
         </DialogContent>
         <DialogActions>
+          <Button onClick={handleMenuProfileAvatarClick} color="secondary">
+            Change Avatar
+          </Button>
           <Button onClick={handleMenuProfileApply} color="secondary">
             Apply
           </Button>
