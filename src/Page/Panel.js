@@ -61,8 +61,8 @@ import LinkIcon from "@material-ui/icons/Link";
 import SendIcon from "@material-ui/icons/Send";
 import AirplayIcon from "@material-ui/icons/Airplay";
 import StrikethroughSIcon from "@material-ui/icons/StrikethroughS";
-import AddIcon from '@material-ui/icons/Add';
-import NotInterestedIcon from '@material-ui/icons/NotInterested';
+import AddIcon from "@material-ui/icons/Add";
+import NotInterestedIcon from "@material-ui/icons/NotInterested";
 import SignIn from "./SignIn";
 
 const electron = window.require("electron");
@@ -234,7 +234,7 @@ const useStyles = makeStyles((theme) => ({
   },
   formFont: {
     fontSize: "16px",
-    border: "0",
+    border: "0"
   },
   selfProfile: {
     "& .MuiTextField-root": {
@@ -260,7 +260,7 @@ const useStyles = makeStyles((theme) => ({
   applicationCenter: {
     display: "flex",
     flexDirection: "row",
-    alignItems: "center",
+    alignItems: "center"
   },
   applicationAll: {
     minHeight: "200px"
@@ -464,7 +464,7 @@ export default function Panel(props) {
         textInput: "",
         box: "0"
       },
-      createGroup: "",
+      createGroup: ""
     },
     profile: {
       open: false,
@@ -501,7 +501,8 @@ export default function Panel(props) {
         dst: [""],
         username: "Lia Ignace",
         avatar: "png",
-        varification: "Lorem ipsum dolor, sit amet consectetur adipisicing elit. Fugiat ipsam, temporibus tempora corporis quod vero eligendi odio accusamus porro! Repudiandae iusto quam molestias, doloremque fugiat aliquam beatae similique! Beatae, corporis.",
+        varification:
+          "Lorem ipsum dolor, sit amet consectetur adipisicing elit. Fugiat ipsam, temporibus tempora corporis quod vero eligendi odio accusamus porro! Repudiandae iusto quam molestias, doloremque fugiat aliquam beatae similique! Beatae, corporis."
       },
       {
         uid: "",
@@ -510,7 +511,7 @@ export default function Panel(props) {
         avatar: "jpg",
         varification: "Lorem ipsum dolor."
       }
-    ],
+    ]
   });
 
   // about list item
@@ -574,7 +575,7 @@ export default function Panel(props) {
       ...panelPopup,
       varification: {
         ...panelPopup.varification,
-        open: false,
+        open: false
       }
     }));
   };
@@ -583,10 +584,10 @@ export default function Panel(props) {
       ...panelPopup,
       varification: {
         ...panelPopup.varification,
-        textInput: event.target.value,
+        textInput: event.target.value
       }
     }));
-  }
+  };
   const handleMoreInfoApplySend = () => {
     handleMoreInfoApplyClose();
     // TODO: complete this function
@@ -650,6 +651,9 @@ export default function Panel(props) {
         open: false
       }
     }));
+  };
+  const handleMenuProfileAvatarClick = () => {
+    // TODO: complete this function
   };
   const handleMenuProfileChange = (event, prop) => {
     setPanelPopup((panelPopup) => ({
@@ -753,14 +757,17 @@ export default function Panel(props) {
     // TODO: complete this function
   };
   const menuNewApplicationRemove = (uid, gid) => {
-    panelPopup.application.splice(panelPopup.application.findIndex((item) =>
-      item.uid === uid && item.dst[0] === gid
-    ), 1);
+    panelPopup.application.splice(
+      panelPopup.application.findIndex(
+        (item) => item.uid === uid && item.dst[0] === gid
+      ),
+      1
+    );
     setPanelPopup((panelPopup) => ({
       ...panelPopup,
       application: panelPopup.application
     }));
-  }
+  };
   const handleMenuNewApplicationRefuse = (uid, gid) => {
     // TODO: complete this function
     menuNewApplicationRemove(uid, gid);
@@ -1080,7 +1087,11 @@ export default function Panel(props) {
             />
             <Tooltip title="More" placement="top">
               <IconButton onClick={handleMenuClick}>
-                <Badge color="secondary" variant="dot" invisible={panelPopup.application.length === 0}>
+                <Badge
+                  color="secondary"
+                  variant="dot"
+                  invisible={panelPopup.application.length === 0}
+                >
                   <MoreVertIcon />
                 </Badge>
               </IconButton>
@@ -1346,10 +1357,7 @@ export default function Panel(props) {
           {panelPopup.snackWindow.snackWindowMessage}
         </Alert>
       </Snackbar>
-      <Dialog
-        open={panelPopup.profile.open}
-        onClose={handleMoreInfoClose}
-      >
+      <Dialog open={panelPopup.profile.open} onClose={handleMoreInfoClose}>
         <DialogContent>
           <div className={classes.avatarProfile}>
             <Avatar
@@ -1402,15 +1410,13 @@ export default function Panel(props) {
           </Button>
         </DialogActions>
       </Dialog>
-      <Dialog
-        open={panelPopup.self.open}
-        onClose={handleMenuProfileClose}
-      >
+      <Dialog open={panelPopup.self.open} onClose={handleMenuProfileClose}>
         <DialogContent>
           <div className={classes.avatarProfile}>
             <Avatar
               src={`static/avatar/avatar-${panelPopup.self.uid}U.${panelPopup.self.avatar}`}
               className={classes.largeAvatar}
+              onClick={handleMenuProfileAvatarClick}
             >
               <PersonIcon className={classes.notLargeAvatar} />
             </Avatar>
@@ -1545,43 +1551,63 @@ export default function Panel(props) {
               </RadioGroup>
             </div>
           )}
-          {panelPopup.newFriend.option === 1 && (panelPopup.application.length !== 0
-            ? (<List className={classes.applicationAll}>
-              {panelPopup.application.map((value) => {
-                return (
-                  <div className={classes.applicationCenter} key={value.uid}>
-                    <ListItem>
-                      <ListItemAvatar>
-                        <Avatar src={`static/avatar/avatar-${value.uid}U.${value.avatar}`}>
-                          <PersonIcon />
-                        </Avatar>
-                      </ListItemAvatar>
-                      <ListItemText
-                        primary={value.username +
-                          (value.dst[0] && ` want to join ${value.dst[1]}`)}
-                        secondary={value.varification}
-                      />
-                    </ListItem>
-                    <Tooltip title="Refuse" placement="top">
-                      <IconButton onClick={() => {handleMenuNewApplicationRefuse(value.uid, value.dst[0])}}>
-                        <NotInterestedIcon color="primary"/>
-                      </IconButton>
-                    </Tooltip>
-                    <Tooltip title="Accept" placement="top">
-                      <IconButton onClick={() => {handleMenuNewApplicationAccept(value.uid, value.dst[0])}}>
-                        <AddIcon color="primary"/>
-                      </IconButton>
-                    </Tooltip>
-                  </div>
-                );
-              })}
-              </List>)
-            : (<div className={classes.nilApplication}>
-              <Typography color="textSecondary" align="center">
-                There is no application now.
-              </Typography>
-              </div>)
-          )}
+          {panelPopup.newFriend.option === 1 &&
+            (panelPopup.application.length !== 0 ? (
+              <List className={classes.applicationAll}>
+                {panelPopup.application.map((value) => {
+                  return (
+                    <div className={classes.applicationCenter} key={value.uid}>
+                      <ListItem>
+                        <ListItemAvatar>
+                          <Avatar
+                            src={`static/avatar/avatar-${value.uid}U.${value.avatar}`}
+                          >
+                            <PersonIcon />
+                          </Avatar>
+                        </ListItemAvatar>
+                        <ListItemText
+                          primary={
+                            value.username +
+                            (value.dst[0] && ` want to join ${value.dst[1]}`)
+                          }
+                          secondary={value.varification}
+                        />
+                      </ListItem>
+                      <Tooltip title="Refuse" placement="top">
+                        <IconButton
+                          onClick={() => {
+                            handleMenuNewApplicationRefuse(
+                              value.uid,
+                              value.dst[0]
+                            );
+                          }}
+                        >
+                          <NotInterestedIcon color="primary" />
+                        </IconButton>
+                      </Tooltip>
+                      <Tooltip title="Accept" placement="top">
+                        <IconButton
+                          onClick={() => {
+                            handleMenuNewApplicationAccept(
+                              value.uid,
+                              value.dst[0]
+                            );
+                          }}
+                        >
+                          <AddIcon color="primary" />
+                        </IconButton>
+                      </Tooltip>
+                    </div>
+                  );
+                })}
+              </List>
+            ) : (
+              <div className={classes.nilApplication}>
+                <Typography color="textSecondary" align="center">
+                  There is no application now.
+                </Typography>
+              </div>
+            ))}
           {panelPopup.newFriend.option === 2 && (
             <TextField
               label="Name of your New Group"
@@ -1615,12 +1641,14 @@ export default function Panel(props) {
         <DialogTitle>{"Varifying Identity"}</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            The message in plain text you write below will be sent to the {
-              panelPopup.varification.id.charAt(panelPopup.varification.id.length - 1)
-                === "U"
-                ? ` user ${panelPopup.varification.name} `
-                : ` holder of group ${panelPopup.varification.name} `
-            } your want to access. You can access as long as it allows your request.
+            The message in plain text you write below will be sent to the{" "}
+            {panelPopup.varification.id.charAt(
+              panelPopup.varification.id.length - 1
+            ) === "U"
+              ? ` user ${panelPopup.varification.name} `
+              : ` holder of group ${panelPopup.varification.name} `}{" "}
+            your want to access. You can access as long as it allows your
+            request.
           </DialogContentText>
           <TextField
             label="Varifying Message"
