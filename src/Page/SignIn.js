@@ -396,15 +396,15 @@ export default function SignIn(props) {
                 />
               </DialogContent>
               <DialogActions>
-                <Button onClick={proxyWindowCancel} color="primary">
-                  Cancel
-                </Button>
                 <Button
                   onClick={() => proxyWindowSubmit(proxyInput)}
-                  color="primary"
+                  color="secondary"
                   type="submit"
                 >
-                  OK
+                  Set
+                </Button>
+                <Button onClick={proxyWindowCancel} color="primary">
+                  Back
                 </Button>
               </DialogActions>
             </Dialog>
@@ -476,7 +476,7 @@ export default function SignIn(props) {
           </DialogContent>
           <DialogActions>
             <Button onClick={copyrightInfoClose} color="primary">
-              Close
+              Back
             </Button>
           </DialogActions>
         </Dialog>

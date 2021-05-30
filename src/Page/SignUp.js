@@ -371,7 +371,7 @@ export default function SignUp() {
           </DialogContent>
           <DialogActions>
             <Button onClick={copyrightInfoClose} color="primary">
-              Close
+              Back
             </Button>
           </DialogActions>
         </Dialog>

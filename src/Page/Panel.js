@@ -659,6 +659,10 @@ export default function Panel(props) {
       }
     }));
   };
+  const handleMenuNewFind = () => {
+    handleMenuNewClose();
+    // TODO: complete this function
+  };
 
   // about text input
   const handleTextInput = (event) => {
@@ -980,7 +984,7 @@ export default function Panel(props) {
                       for (let index = 0; index < size; index += 1)
                         if (panelInfo.record[index].status.textInput !== "")
                           return "The system will not save your input on the text field.";
-                      return "Click OK to log out.";
+                      return "Click Yes to log out.";
                     })()}
                   </DialogContentText>
                 </DialogContent>
@@ -993,7 +997,7 @@ export default function Panel(props) {
                     color="primary"
                     autoFocus
                   >
-                    Cancel
+                    Back
                   </Button>
                 </DialogActions>
               </Dialog>
@@ -1173,7 +1177,7 @@ export default function Panel(props) {
                   color="primary"
                   autoFocus
                 >
-                  Cancel
+                  Back
                 </Button>
               </DialogActions>
             </Dialog>
@@ -1198,9 +1202,6 @@ export default function Panel(props) {
                 </Markdown>
               </DialogContent>
               <DialogActions>
-                <Button onClick={handleTextPreviewBack} color="primary">
-                  Back
-                </Button>
                 <Button
                   onClick={() => {
                     handleTextPreviewBack();
@@ -1209,6 +1210,9 @@ export default function Panel(props) {
                   color="secondary"
                 >
                   Send
+                </Button>
+                <Button onClick={handleTextPreviewBack} color="primary">
+                  Back
                 </Button>
               </DialogActions>
             </Dialog>
@@ -1266,7 +1270,7 @@ export default function Panel(props) {
         </DialogContent>
         <DialogActions>
           <Button onClick={handleMoreInfoClose} color="primary" autoFocus>
-            Close
+            Back
           </Button>
         </DialogActions>
       </Dialog>
@@ -1350,7 +1354,7 @@ export default function Panel(props) {
             Apply
           </Button>
           <Button onClick={handleMenuProfileClose} color="primary" autoFocus>
-            Close
+            Back
           </Button>
         </DialogActions>
       </Dialog>
@@ -1384,13 +1388,13 @@ export default function Panel(props) {
               >
                 <FormControlLabel
                   value={"0"}
-                  control={<Radio />}
+                  control={<Radio color="primary" />}
                   label="User"
                   className={classes.checkbox}
                 />
                 <FormControlLabel
                   value={"1"}
-                  control={<Radio />}
+                  control={<Radio color="primary" />}
                   label="Group"
                   className={classes.checkbox}
                 />
@@ -1401,12 +1405,12 @@ export default function Panel(props) {
         <DialogActions>
           {
             panelPopup.newFriend.option === 0 &&
-            <Button color="secondary" onClick={handleMenuNewClose}>
+            <Button color="secondary" onClick={handleMenuNewFind}>
               Find
             </Button>
           }
           <Button color="primary" onClick={handleMenuNewClose}>
-            Close
+            Back
           </Button>
         </DialogActions>
       </Dialog>
