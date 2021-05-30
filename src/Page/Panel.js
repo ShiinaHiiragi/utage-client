@@ -885,7 +885,7 @@ export default function Panel(props) {
       }));
   };
   const preCheck = () => {
-    const nowTextInput = panelInfo.record.find(
+    let nowTextInput = panelInfo.record.find(
       (value) => value.accessInfo.id === panelInfo.state.selectedRecord
     ).status.textInput;
     let pattern = /!\[(.*?)\]\((.*?)\)/gm,
@@ -1034,9 +1034,9 @@ export default function Panel(props) {
                 onClose={handleMenuLogOutCalcelClick}
                 className={classes.noneSelect}
               >
-                <DialogTitle id="alert-dialog-title">{"WARNING"}</DialogTitle>
+                <DialogTitle>{"WARNING"}</DialogTitle>
                 <DialogContent>
-                  <DialogContentText id="alert-dialog-description">
+                  <DialogContentText>
                     Do you really want to quit your Utage account?{" "}
                     {(function () {
                       let size = panelInfo.record.length;
@@ -1157,7 +1157,6 @@ export default function Panel(props) {
         {!panelInfo.state.justSignIn && (
           <div className={classes.textField}>
             <TextField
-              id="outlined-multiline-static"
               label="Leave a Message in Markdown"
               multiline
               rows={4}
@@ -1210,9 +1209,7 @@ export default function Panel(props) {
               onClose={handleTextEmojiClose}
               className={classes.noneSelect}
             >
-              <DialogTitle id="alert-dialog-title">
-                {"Select a Emoji"}
-              </DialogTitle>
+              <DialogTitle>{"Select a Emoji"}</DialogTitle>
               <DialogContent>
                 {emojiList.map((value, index) => (
                   <IconButton
@@ -1236,10 +1233,7 @@ export default function Panel(props) {
               open={panelPopup.textPreview}
               onClose={handleTextPreviewClose}
             >
-              <DialogTitle
-                id="alert-dialog-title"
-                className={classes.noneSelect}
-              >
+              <DialogTitle className={classes.noneSelect}>
                 {"Preview in Markdown"}
               </DialogTitle>
               <DialogContent className={classes.cardText}>
@@ -1461,7 +1455,7 @@ export default function Panel(props) {
           {panelPopup.newFriend.option === 0 && (
             <div>
               <TextField
-                label="Find Users/Groups via ID"
+                label="Find Users or Groups via ID"
                 value={panelPopup.newFriend.find.textInput}
                 className={classes.searchTextInput}
                 onChange={handleMenuNewFindTextChange}
@@ -1486,6 +1480,12 @@ export default function Panel(props) {
               </RadioGroup>
             </div>
           )}
+          {panelPopup.newFriend.option === 1 && (
+            <div></div>
+          )}
+          {panelPopup.newFriend.option === 2 && (
+            <div></div>
+          )}
         </DialogContent>
         <DialogActions>
           {panelPopup.newFriend.option === 0 && (
@@ -1508,9 +1508,9 @@ export default function Panel(props) {
         onClose={handleMoreInfoApplyClose}
         className={classes.noneSelect}
       >
-        <DialogTitle id="alert-dialog-title">{"Varifying Identity"}</DialogTitle>
+        <DialogTitle>{"Varifying Identity"}</DialogTitle>
         <DialogContent>
-          <DialogContentText id="alert-dialog-description">
+          <DialogContentText>
             The message in plain text you write below will be sent to the
             {
               panelPopup.varification.id.charAt(panelPopup.varification.id.length - 1)
