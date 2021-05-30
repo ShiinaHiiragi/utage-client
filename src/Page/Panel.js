@@ -38,7 +38,7 @@ import Table from "@material-ui/core/Table";
 import TableBody from "@material-ui/core/TableBody";
 import TableCell from "@material-ui/core/TableCell";
 import TableRow from "@material-ui/core/TableRow";
-import { MuiPickersUtilsProvider, KeyboardDatePicker } from '@material-ui/pickers';
+import { MuiPickersUtilsProvider, DatePicker } from '@material-ui/pickers';
 import { makeStyles } from "@material-ui/core/styles";
 import DateFnsUtils from '@date-io/date-fns';
 import InfoOutlinedIcon from "@material-ui/icons/InfoOutlined";
@@ -435,7 +435,7 @@ export default function Panel(props) {
       email: '',
       tel: '',
       city: '',
-      bitrh: '',
+      birth: '',
       gender: '',
       avatar: ''
     },
@@ -531,7 +531,7 @@ export default function Panel(props) {
         email: 'abc@xyz.com',
         tel: '0731-84802110',
         city: 'Shanghai',
-        bitrh: '2019-12-31T16:00:00.000Z',
+        birth: '2019-12-31T16:00:00.000Z',
         gender: 'F',
         avatar: 'png'
       }
@@ -546,10 +546,20 @@ export default function Panel(props) {
       }
     }));
   };
+  const handleProfileChange = (event, prop) => {
+    setPanelPopup(panelPopup => ({
+      ...panelPopup,
+      self: {
+        ...panelPopup.self,
+        [prop]: event.target.value
+      }
+    }));
+  };
   const handleMenuProfileApply = () => {
     handleMenuProfileClose();
+    console.log(panelPopup.self);
     // TODO: complete this function
-  }
+  };
   const handleMenuAddClick = () => {
     handleMoreClose();
     // TODO: complete this functions
@@ -1207,7 +1217,8 @@ export default function Panel(props) {
                 spellCheck: "false",
                 style: {textAlign: "center"}
               }}
-              />
+              onChange={(event) => {handleProfileChange(event, "username")}}
+            />
           </div>
           <div className={classes.selfProfile}>
             <div>
@@ -1215,21 +1226,35 @@ export default function Panel(props) {
               <TextField label="E-mail" defaultValue={panelPopup.self.email} disabled />
             </div>
             <div>
-              <TextField label="TEL" defaultValue={panelPopup.self.tel} />
-              <TextField label="City" defaultValue={panelPopup.self.city} />
+              <TextField
+                label="TEL"
+                defaultValue={panelPopup.self.tel}
+                onChange={(event) => {handleProfileChange(event, "tel")}}
+              />
+              <TextField
+                label="City"
+                defaultValue={panelPopup.self.city}
+                onChange={(event) => {handleProfileChange(event, "city")}}
+              />
             </div>
             <div>
               <MuiPickersUtilsProvider utils={DateFnsUtils}>
-                <KeyboardDatePicker
-                  disableToolbar
+                <DatePicker
                   variant="inline"
                   format="yyyy/MM/dd"
                   margin="normal"
                   label="Birthday"
-                  value={panelPopup.self.bitrh}
-                  // onChange={handleDateChange}
-                  KeyboardButtonProps={{
-                    'aria-label': 'change date',
+                  value={panelPopup.self.birth}
+                  onChange={(value) => {
+                    setPanelPopup((panelPopup) => {
+                    console.log(panelPopup.self);
+                    return {
+                      ...panelPopup,
+                      self: {
+                        ...panelPopup.self,
+                        birth: value.toISOString()
+                      }
+                    }})
                   }}
                 />
               </MuiPickersUtilsProvider>
@@ -1238,7 +1263,7 @@ export default function Panel(props) {
                 <Select
                   value={panelPopup.self.gender}
                   className={classes.selectEmpty}
-                  // onChange={handleChange}
+                  onChange={(event) => {handleProfileChange(event, "gender")}}
                 >
                   <MenuItem value={"F"}>Female</MenuItem>
                   <MenuItem value={"M"}>Male</MenuItem>
