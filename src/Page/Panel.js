@@ -1054,9 +1054,15 @@ export default function Panel(props) {
       toggleSnackWindow("warning", checkInfo);
       return;
     }
+    // preprocess of sending image
+    let imgSequence = [];
+    nowTextInput = nowTextInput.replace(/!\[(.*?)\]\((.*?)\)/gm, (_0, _1, _2) => {
+      imgSequence.push(_2);
+      return `![${_1}](${path.extname(_2)})`;
+    });
     // TODO: send the text to the server
-    nowTextInput = nowTextInput.replace(/!\[(.*?)\]\((.*?)\)/gm, "![]()");
-    console.log(nowTextInput);
+    // post the image to server using the imgSequence array
+    // delete the temp image file using the status.img array
   };
 
   // about backdrop and snack window
