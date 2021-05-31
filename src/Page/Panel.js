@@ -603,6 +603,11 @@ export default function Panel(props) {
     }));
   };
   const handleMoreInfoApplySend = () => {
+    if (panelPopup.varification.textInput === "") {
+      toggleSnackWindow("warning", "The varification message is vacant.");
+      return;
+    }
+
     handleMoreInfoApplyClose();
     // TODO: send application to target
   };
@@ -767,6 +772,14 @@ export default function Panel(props) {
     }));
   };
   const handleMenuNewFindSubmit = () => {
+    if (panelPopup.newFriend.find.textInput === "") {
+      toggleSnackWindow("warning", "The id input is vacant.");
+      return;
+    }
+    else if (!/^[0-9]*$/.test(panelPopup.newFriend.find.textInput)) {
+      toggleSnackWindow("warning", "The id contains illegal characters.");
+      return;
+    }
     handleMenuNewClose();
     // TODO: find a user/group by id
   };
@@ -800,6 +813,10 @@ export default function Panel(props) {
     }));
   };
   const handleMenuNewCreateSubmit = () => {
+    if (panelPopup.newFriend.createGroup === "") {
+      toggleSnackWindow("warning", "The group name cannot be vacant.");
+      return;
+    }
     handleMenuNewClose();
     // TODO: create a new group
   };
@@ -1520,6 +1537,7 @@ export default function Panel(props) {
             <div>
               <MuiPickersUtilsProvider utils={DateFnsUtils}>
                 <DatePicker
+                  disableFuture
                   variant="inline"
                   format="yyyy/MM/dd"
                   margin="normal"

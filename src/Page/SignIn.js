@@ -271,7 +271,7 @@ export default function SignIn(props) {
                     // TEMP: change it later
                     const selfUID = "1024";
                     let dbRequest = indexedDB.open(`${selfUID}`);
-                    dbRequest.onerror((err) => {
+                    dbRequest.onerror((event) => {
                       snackWindowToggle("error", `${event.target.error}`);
                     });
                     dbRequest.onsuccess(() => {
