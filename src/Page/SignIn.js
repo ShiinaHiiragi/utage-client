@@ -299,10 +299,8 @@ export default function SignIn(props) {
     });
   };
   const initDB = (passwords, serverRaw, callback) => {
-    const selfUID = serverRaw.profile[0].uid.toString();
-    let requestRecord = indexedDB.open(`${selfUID}-record`);
-    let requestProfile = indexedDB.open(`${selfUID}-profile`);
-    let requestGroup = indexedDB.open(`${selfUID}-group`);
+    // const selfUID = serverRaw.profile[0].uid.toString();
+    // let dbRequest = indexedDB.open(`${selfUID}`), db;
 
     // TEMP: initialize the database
     callback(passwords);

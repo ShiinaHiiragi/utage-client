@@ -69,6 +69,7 @@ const electron = window.require("electron");
 const fs = window.require("fs");
 const path = window.require("path");
 const app = electron.remote.app;
+const dialog = electron.remote.dialog;
 
 const imgPath = app.isPackaged ? "./resources/app/build/" : "./build/";
 const settingPath = "./data/setting.json";
@@ -84,7 +85,7 @@ const markdownOverride = {
 
 // panelReading's record and log should be sorted chronologically
 let globalSetting = JSON.parse(fs.readFileSync(settingPath));
-let keyClient, pubServer, passwordAES, serverClock;
+let keyClient, pubServer, passwordAES, serverClock, imgCounter;
 
 const drawerWidth = 300;
 const useStyles = makeStyles((theme) => ({
@@ -334,6 +335,7 @@ export default function Panel(props) {
     keyClient = props.client;
     pubServer = props.server;
     passwordAES = props.AES;
+    imgCounter = 0;
     serverClock = setInterval(() => {
       // TODO: ask server for new record
     }, 2500);
@@ -361,7 +363,8 @@ export default function Panel(props) {
         status: {
           unread: 0,
           all: true,
-          textInput: ""
+          textInput: "",
+          img: []
         },
         log: [
           {
@@ -411,7 +414,8 @@ export default function Panel(props) {
         status: {
           unread: 0,
           all: true,
-          textInput: ""
+          textInput: "",
+          img: []
         },
         log: [
           {
@@ -442,7 +446,8 @@ export default function Panel(props) {
         status: {
           unread: 0,
           all: true,
-          textInput: ""
+          textInput: "",
+          img: []
         },
         log: []
       }
@@ -873,7 +878,50 @@ export default function Panel(props) {
 
   // about image inserting
   const handleTextImageClick = () => {
-    // TODO: inserting a image
+    if (panelInfo.state.focus) {
+      dialog.showOpenDialog({
+        title: "Insert a Image",
+        filters: [
+          { name: 'Images', extensions: ["jpg", "png", "gif"] },
+          { name: "All Files", extensions: ["*"] }
+        ]
+      }).then(result => {
+        if (!result.canceled) {
+          let srcPath = result.filePaths[0];
+          let fileName = `${++imgCounter}${path.extname(srcPath)}`;
+          let dstPath = `${imgPath}static/temp/${fileName}`;
+          fs.copyFileSync(srcPath, dstPath);
+          setPanelInfo((panelInfo) => ({
+            ...panelInfo,
+            record: panelInfo.record.map((value) =>
+              value.accessInfo.id === panelInfo.state.selectedRecord
+                ? {
+                    ...value,
+                    status: {
+                      ...value.status,
+                      img: [...value.status.img, fileName]
+                    }
+                  }
+                : value
+            )
+          }));
+          toggleSnackWindow(
+            "info",
+            `Your image is copied to ${`static/temp/${fileName}`}.`
+          );
+          richTextMark(
+            "",
+            "",
+            `![](static/temp/${fileName})`
+          );
+        }
+      });
+    }
+    else
+      toggleSnackWindow(
+        "warning",
+        "Please focus on text area to insert image."
+      );
   };
 
   // about text modifying buttons
