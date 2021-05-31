@@ -143,27 +143,27 @@ export default function SignUp() {
       formContent.password === "" ||
       formContent.username === ""
     ) {
-      snackWindowToggle("error", "Please enter all the information needed.");
+      snackWindowToggle("warning", "Please enter all the information needed.");
       return;
     } else if (
       !/^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(
         formContent.email
       )
     ) {
-      snackWindowToggle("error", "Unsupported E-mail Address.");
+      snackWindowToggle("warning", "Unsupported E-mail Address.");
       return;
     } else if (formContent.username.length > 16) {
       snackWindowToggle(
-        "error",
+        "warning",
         "The username should contains no more than 16 characters."
       );
       return;
     } else if (!/^[\x0-\x7F]*$/.test(formContent.username)) {
-      snackWindowToggle("error", "THe username contains illegal characters.");
+      snackWindowToggle("warning", "The username contains illegal characters.");
       return;
     } else if (formContent.password.length < 8) {
       snackWindowToggle(
-        "error",
+        "warning",
         "The password should contains no less than 8 characters."
       );
       return;
@@ -183,7 +183,7 @@ export default function SignUp() {
         backdropClose();
         snackWindowToggle(
           "error",
-          err ? `${err}` : `Server Error: ${response.body}`
+          err ? `${err}` : `ServerError: ${response.body}.`
         );
       }
     });
@@ -212,7 +212,7 @@ export default function SignUp() {
           backdropClose();
           snackWindowToggle(
             "error",
-            err ? err : `Server Error: ${response.body}`
+            err ? err : `ServerError: ${response.body}.`
           );
         }
       }

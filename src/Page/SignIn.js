@@ -115,7 +115,7 @@ export default function SignIn(props) {
       } else
         snackWindowToggle(
           "error",
-          err ? `${err}` : `Server Error: ${response.body}`
+          err ? `${err}` : `ServerError: ${response.body}.`
         );
     });
   };
@@ -125,10 +125,7 @@ export default function SignIn(props) {
   const saveProxySetting = (changed) => {
     saveSetting((err) => {
       if (err)
-        snackWindowToggle(
-          "error",
-          "An error occurred when saving server value. Please try again later."
-        );
+        snackWindowToggle("error", `${err}`);
       else if (changed)
         snackWindowToggle(
           "success",
@@ -196,7 +193,7 @@ export default function SignIn(props) {
   const signInClick = () => {
     // check the illegal data
     if (email === "" || password === "") {
-      snackWindowToggle("error", "Please enter the account and password.");
+      snackWindowToggle("warning", "Please enter the account and password.");
       return;
     } else if (globalSetting.remember) {
       globalSetting.account = email;
@@ -275,7 +272,7 @@ export default function SignIn(props) {
                     backdropClose();
                     snackWindowToggle(
                       "error",
-                      err ? `${err}` : `Server Error: ${response.body}`
+                      err ? `${err}` : `ServerError: ${response.body}.`
                     );
                   }
                 }
@@ -284,7 +281,7 @@ export default function SignIn(props) {
               backdropClose();
               snackWindowToggle(
                 "error",
-                err ? `${err}` : `Server Error: ${response.body}`
+                err ? `${err}` : `ServerError: ${response.body}.`
               );
             }
           }
@@ -293,14 +290,18 @@ export default function SignIn(props) {
         backdropClose();
         snackWindowToggle(
           "error",
-          err ? `${err}` : `Server Error: ${response.body}`
+          err ? `${err}` : `ServerError: ${response.body}.`
         );
       }
     });
   };
   const initDB = (passwords, serverRaw, callback) => {
     // const selfUID = serverRaw.profile[0].uid.toString();
-    // let dbRequest = indexedDB.open(`${selfUID}`), db;
+    const selfUID = "1024";
+    let dbRequest = indexedDB.open(`${selfUID}`), db;
+    dbRequest.onerror(() => {
+      snackWindowToggle("error", "Error: cannot open local database.");
+    });
 
     // TEMP: initialize the database
     callback(passwords);
