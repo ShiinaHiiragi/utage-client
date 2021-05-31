@@ -346,6 +346,7 @@ export default function Panel(props) {
 
   // the state info need by user interface
   // TODO: initialize the panelInfo
+  // NOTE: use props.UID to get uid of user
   const [panelInfo, setPanelInfo] = React.useState(() => ({
     usrInfo: {
       uid: "1024U",

@@ -31,7 +31,7 @@ const fs = window.require("fs");
 const request = window.require("request");
 const nodeRSA = require("node-rsa");
 const settingPath = "./data/setting.json";
-let globalSetting = JSON.parse(fs.readFileSync(settingPath));
+let db, globalSetting = JSON.parse(fs.readFileSync(settingPath));
 
 const useStyles = makeStyles((theme) => ({
   noneSelect: {
@@ -205,14 +205,15 @@ export default function SignIn(props) {
       email: email,
       password: cryptoJS.SHA256(email + password).toString()
     };
-    connectServer(info, (passwords, serverRaw) => {
-      initDB(passwords, serverRaw, (passwords) => {
+    connectServer(info, (passwords, selfUID, serverRaw) => {
+      initDB(passwords, selfUID, serverRaw, (passwords, selfUID) => {
         backdropClose();
         ReactDOM.render(
           <Panel
             client={passwords.keyClient}
             server={passwords.pubServer}
             AES={passwords.passwordAES}
+            UID={selfUID}
           />,
           document.getElementById("root")
         );
@@ -267,7 +268,23 @@ export default function SignIn(props) {
                       keyClient: keyClient,
                       pubServer: pubServer
                     };
-                    callback(passwords, response.body);
+                    // TEMP: change it later
+                    const selfUID = "1024";
+                    let dbRequest = indexedDB.open(`${selfUID}`);
+                    dbRequest.onerror((err) => {
+                      snackWindowToggle("error", `${event.target.error}`);
+                    });
+                    dbRequest.onsuccess(() => {
+                      db = request.result;
+                      callback(passwords, response.body);
+                    });
+                    dbRequest.onupgradeneeded((event) => {
+                      db = event.target.result;
+                      db.createObjectStore("profile", { keyPath: "uid" });
+                      db.createObjectStore("group", { keyPath: "gid" });
+                      db.createObjectStore("record", { keyPath: "rid" });
+                      callback(passwords, selfUID, response.body);
+                    });
                   } else {
                     backdropClose();
                     snackWindowToggle(
@@ -295,16 +312,9 @@ export default function SignIn(props) {
       }
     });
   };
-  const initDB = (passwords, serverRaw, callback) => {
-    // const selfUID = serverRaw.profile[0].uid.toString();
-    const selfUID = "1024";
-    let dbRequest = indexedDB.open(`${selfUID}`), db;
-    dbRequest.onerror(() => {
-      snackWindowToggle("error", "Error: cannot open local database.");
-    });
-
+  const initDB = (passwords, selfUID, serverRaw, callback) => {
     // TEMP: initialize the database
-    callback(passwords);
+    callback(passwords, selfUID);
   };
 
   // the backdrop when communicate with server
