@@ -63,6 +63,7 @@ import AirplayIcon from "@material-ui/icons/Airplay";
 import StrikethroughSIcon from "@material-ui/icons/StrikethroughS";
 import AddIcon from "@material-ui/icons/Add";
 import NotInterestedIcon from "@material-ui/icons/NotInterested";
+import CryptoJS from "crypto-js";
 import SignIn from "./SignIn";
 
 const electron = window.require("electron");
@@ -86,7 +87,7 @@ const markdownOverride = {
 
 // panelReading's record and log should be sorted chronologically
 let globalSetting = JSON.parse(fs.readFileSync(settingPath));
-let serverClock, imageCounter;
+let serverClock, imageCounter, tempRecord = [], tempApply = [];
 
 const drawerWidth = 300;
 const useStyles = makeStyles((theme) => ({
@@ -329,17 +330,117 @@ function Alert(props) {
 
 export default function Panel(props) {
   const classes = useStyles();
+  const AES = (value) => CryptoJS.AES.encrypt(value, props.KEY.passwordAES).toString();
+  const DAES = (value) => CryptoJS.AES.decrypt(value, props.KEY.passwordAES).toString(CryptoJS.enc.Utf8);
 
   // equals to componentDidmount
   React.useEffect(() => {
     imageCounter = 0;
     serverClock = setInterval(requestNewRecord, 2500);
     globalSetting = JSON.parse(fs.readFileSync(settingPath));
-    // TODO: initialize the panelInfo
+
+    // temp of profile object
+    let selfUID = panelInfo.usrInfo.uid, primaryProfile = {};
+    let objectStore = props.DB.transaction("profile").objectStore("profile");
+    objectStore.openCursor().onsuccess = (event) => {
+      let cursor = event.target.result;
+      if (cursor) {
+        console.log(cursor.value.uid);
+        primaryProfile[cursor.value.uid] = {
+          username: DAES(cursor.value.username),
+          avatar: DAES(cursor.value.avatar.extension)
+        };
+        cursor.continue();
+      } else {
+        // complete record array
+        selfUID = selfUID.substr(0, selfUID.length - 1);
+        objectStore = props.DB.transaction("record").objectStore("record");
+        objectStore.openCursor().onsuccess = (event) => {
+          let cursor = event.target.result;
+          if (cursor) {
+            let type = cursor.value.type, tagID, targetObject, atomRecord;
+            if (type === "U") {
+              tagID = (cursor.value.src === selfUID ? cursor.value.dst : cursor.value.src);
+              targetObject = tempRecord.find((item) => (item.accessInfo.id === `${tagID}U`));
+              atomRecord = {
+                rid: cursor.value.rid,
+                senderID: `${cursor.value.src}U`,
+                sender: primaryProfile[cursor.value.src].username,
+                senderAvatar: primaryProfile[cursor.value.src].avatar,
+                text: DAES(cursor.value.text),
+                time: DAES(cursor.value.time)
+              };
+              if (targetObject !== undefined) {
+                targetObject.log.push(atomRecord);
+              } else {
+                tempRecord.push({
+                  accessInfo: {
+                    id: `${tagID}U`,
+                    name: primaryProfile[tagID].username,
+                    avatar: primaryProfile[tagID].avatar
+                  },
+                  status: {
+                    unread: 0,
+                    all: true,
+                    textInput: "",
+                    img: []
+                  },
+                  log: [atomRecord]
+                });
+              }
+              cursor.continue();
+            } else if (type === "G") {
+              // group chat
+              // dst: "1"  img: []  rid: "1"  src: "2"  type: "G"
+              // text: "U2Fsd"
+              // time: "U2Fsd"
+              tagID = cursor.value.dst;
+            } else if (type === "A") {
+              // apply for friends
+            } else if (type === "N") {
+              // apply for join
+            }
+          } else {
+            tempRecord.forEach((item) => {
+              item.log.sort((left, right) => {
+                return (left.time < right.time) ? -1 : ((left.time > right.time) ? 1 : 0);
+              });
+            });
+            tempRecord.sort((left, right) => {
+              let leftTime = left.log[left.log.length - 1].time;
+              let rightTime = right.log[right.log.length - 1].time;
+              return (leftTime < rightTime) ? -1 : ((leftTime > rightTime) ? 1 : 0);
+            });
+            setPanelInfo((panelInfo) => ({
+              ...panelInfo,
+              record: tempRecord
+            }));
+            setPanelPopup((panelPopup) => ({
+              ...panelPopup,
+              application: tempApply
+            }));
+          }
+        };
+      }
+    }
     return () => {
       clearInterval(serverClock);
     }
   }, []);
+
+  const queryDatabaseByKey = (tableName, key) => {
+    let objectStore = props.DB.transaction([tableName]).objectStore(tableName);
+    let dbRequest = objectStore.get(key);
+
+    return Promise((resolve, reject) => {
+      dbRequest.onerror = (event) => {
+        reject(`${event.target.error}`)
+      };
+      dbRequest.onsuccess = (event) => {
+        resolve(event.target.result);
+      };
+    });
+  }
 
   const requestNewRecord = () => {
     // TODO: ask server for new record
@@ -359,7 +460,6 @@ export default function Panel(props) {
   }));
 
   // the info that all popup window needs
-  // TODO: initialize the panelPopup
   const [panelPopup, setPanelPopup] = React.useState({
     sideListItem: true,
     moreAnchor: null,
@@ -405,23 +505,7 @@ export default function Panel(props) {
       snackWindowType: "",
       snackWindowMessage: ""
     },
-    application: [
-      {
-        uid: "8192",
-        dst: [""],
-        username: "Lia Ignace",
-        avatar: "png",
-        varification:
-          "Lorem ipsum dolor, sit amet consectetur adipisicing elit. Fugiat ipsam, temporibus tempora corporis quod vero eligendi odio accusamus porro! Repudiandae iusto quam molestias, doloremque fugiat aliquam beatae similique! Beatae, corporis."
-      },
-      {
-        uid: "",
-        dst: ["16384", "Miya Ouendan"],
-        username: "Lynn",
-        avatar: "jpg",
-        varification: "Lorem ipsum dolor."
-      }
-    ]
+    application: []
   });
 
   // about list item
@@ -601,6 +685,8 @@ export default function Panel(props) {
   const handleMenuLogOutOKClick = () => {
     handleMenuLogOutCalcelClick();
     toggleBackdrop();
+    tempRecord = [];
+    tempApply = [];
     setTimeout(() => {
       closeBackdrop();
       ReactDOM.render(<SignIn />, document.getElementById("root"));
