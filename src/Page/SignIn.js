@@ -336,7 +336,7 @@ export default function SignIn(props) {
   
   const encryptTuple = (item, tableName, keyAES) => {
     const AES = (value) => CryptoJS.AES.encrypt(value, keyAES).toString();
-    if (tableName === "profile") {
+    if (tableName === "profile")
       return {
         uid: item.userid.toString(),
         username: AES(item.nickname),
@@ -349,11 +349,29 @@ export default function SignIn(props) {
           hash: AES(item.avatarhash)
         }
       };
-    } else if (tableName === "group") {
-      // TODO
-    } else if (tableName === "record") {
-      // TODO
-    }
+    else if (tableName === "group")
+      return {
+        gid: item.groupid.toString(),
+        groupName: AES(item.groupname),
+        groupHolder: AES(item.groupholdername),
+        groupHolderID: AES(item.groupholderid.toString()),
+        joinTime: AES(item.jointime),
+        createTime: AES(item.createtime),
+        avatar: {
+          extension: AES(item.groupavatarsuffix),
+          hash: AES(item.groupavatarhash)
+        }
+      };
+    else if (tableName === "record")
+      return {
+        type: item.type,
+        rid: item.recordid.toString(),
+        src: item.userid.toString(),
+        dst: item.receiverid.toString(),
+        text: AES(item.text),
+        img: item.hash.map((value) => AES(value)),
+        time: AES(item.time),
+      };
   }
   const insertSingleTuple = (item, tableName, keyAES, callback, onerror) => {
     let insertRequest = db.transaction([tableName], 'readwrite')
