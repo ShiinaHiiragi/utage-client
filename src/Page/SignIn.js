@@ -268,23 +268,33 @@ export default function SignIn(props) {
                       keyClient: keyClient,
                       pubServer: pubServer
                     };
-                    // TEMP: change it later
-                    const selfUID = "1024";
+                    let serverRaw = {
+                      profile: response.body.userProfiles.map((item) => (
+                        JSON.parse(keyClient.decrypt(item))
+                      )),
+                      group: response.body.groupProfile.map((item) => (
+                        JSON.parse(keyClient.decrypt(item))
+                      )),
+                      record: response.body.record.map((item) => (
+                        JSON.parse(keyClient.decrypt(item))
+                      ))
+                    };
+                    const selfUID = serverRaw.profile[0].userid.toString();
                     let dbRequest = indexedDB.open(`${selfUID}`);
-                    dbRequest.onerror((event) => {
+                    dbRequest.onerror = (event) => {
                       snackWindowToggle("error", `${event.target.error}`);
-                    });
-                    dbRequest.onsuccess(() => {
+                    };
+                    dbRequest.onsuccess = () => {
                       db = request.result;
                       callback(passwords, response.body);
-                    });
-                    dbRequest.onupgradeneeded((event) => {
+                    };
+                    dbRequest.onupgradeneeded = (event) => {
                       db = event.target.result;
                       db.createObjectStore("profile", { keyPath: "uid" });
                       db.createObjectStore("group", { keyPath: "gid" });
                       db.createObjectStore("record", { keyPath: "rid" });
                       callback(passwords, selfUID, response.body);
-                    });
+                    };
                   } else {
                     backdropClose();
                     snackWindowToggle(
