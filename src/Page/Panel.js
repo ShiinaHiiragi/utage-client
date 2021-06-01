@@ -68,6 +68,7 @@ import SignIn from "./SignIn";
 const electron = window.require("electron");
 const fs = window.require("fs");
 const path = window.require("path");
+const nodeRSA = window.require("node-rsa");
 const app = electron.remote.app;
 const dialog = electron.remote.dialog;
 
@@ -85,7 +86,7 @@ const markdownOverride = {
 
 // panelReading's record and log should be sorted chronologically
 let globalSetting = JSON.parse(fs.readFileSync(settingPath));
-let keyClient, pubServer, passwordAES, serverClock, imgCounter;
+let serverClock, imageCounter;
 
 const drawerWidth = 300;
 const useStyles = makeStyles((theme) => ({
@@ -331,135 +332,30 @@ export default function Panel(props) {
 
   // equals to componentDidmount
   React.useEffect(() => {
+    imageCounter = 0;
+    serverClock = setInterval(requestNewRecord, 2500);
     globalSetting = JSON.parse(fs.readFileSync(settingPath));
-    keyClient = props.client;
-    pubServer = props.server;
-    passwordAES = props.AES;
-    imgCounter = 0;
-    serverClock = setInterval(() => {
-      // TODO: ask server for new record
-    }, 2500);
+    // TODO: initialize the panelInfo
     return () => {
       clearInterval(serverClock);
     }
   }, []);
 
+  const requestNewRecord = () => {
+    // TODO: ask server for new record
+  }
+
   // the state info need by user interface
-  // TODO: initialize the panelInfo
-  // NOTE: use props.UID to get uid of user
   const [panelInfo, setPanelInfo] = React.useState(() => ({
-    usrInfo: {
-      uid: "1024U",
-      username: "Koishi",
-      email: "abc@xyz.com",
-      avatar: "png"
-    },
-    record: [
-      {
-        accessInfo: {
-          id: "2048U",
-          name: "chocomint",
-          avatar: "png"
-        },
-        status: {
-          unread: 0,
-          all: true,
-          textInput: "",
-          img: []
-        },
-        log: [
-          {
-            rid: "1",
-            sender: "chocomint",
-            senderID: "2048U",
-            senderAvatar: "png",
-            text:
-              "Lorem ipsum dolor sit amet consectetur adipisicing elit. ![](https://ichinoe.github.io/img/header/domain.jpg)",
-            time: "2021-05-23T04:20:44.733Z"
-          },
-          {
-            rid: "2",
-            sender: "Koishi",
-            senderID: "1024U",
-            senderAvatar: "png",
-            text:
-              "Nobis qui esse a distinctio rem sed vero quae repudiandae dolores, dolorem nostrum excepturi inventore consequuntur quo quisquam officiis, expedita hic sit.",
-            time: "2021-05-23T04:21:25.401Z"
-          },
-          {
-            rid: "5",
-            sender: "chocomint",
-            senderID: "2048U",
-            senderAvatar: "png",
-            text:
-              "Lorem ipsum dolor sit, amet consectetur adipisicing elit. Nulla, exercitationem obcaecati? Accusantium voluptatem, dolores voluptatum voluptate tempora impedit aliquam labore doloribus nisi fugit sapiente. Libero consectetur quam corporis ducimus pariatur.",
-            time: "2021-05-24T11:14:31.271Z"
-          },
-          {
-            rid: "6",
-            sender: "Koishi",
-            senderID: "1024U",
-            senderAvatar: "png",
-            text:
-              "Lorem ipsum dolor sit amet consectetur, adipisicing elit. Atque, ducimus. Sit error, repudiandae exercitationem alias asperiores odit officia possimus ducimus, esse amet praesentium, commodi quam aperiam quae maiores suscipit ipsa.",
-            time: "2021-05-24T11:14:41.634Z"
-          }
-        ]
-      },
-      {
-        accessInfo: {
-          id: "16384G",
-          name: "Miya Ouendan",
-          avatar: "jpg"
-        },
-        status: {
-          unread: 0,
-          all: true,
-          textInput: "",
-          img: []
-        },
-        log: [
-          {
-            rid: "3",
-            sender: "Saki",
-            senderID: "32768U",
-            senderAvatar: "jpg",
-            text:
-              "Lorem ipsum dolor, sit amet consectetur adipisicing elit. Fugiat ipsam, temporibus tempora corporis quod vero eligendi odio accusamus porro! Repudiandae iusto quam molestias, doloremque fugiat aliquam beatae similique! Beatae, corporis.",
-            time: "2021-05-23T04:25:41.181Z"
-          },
-          {
-            rid: "4",
-            sender: "Koishi",
-            senderID: "1024U",
-            senderAvatar: "png",
-            text: "Lorem ipsum dolor sit amet",
-            time: "2021-05-23T04:28:46.995Z"
-          }
-        ]
-      },
-      {
-        accessInfo: {
-          id: "4096U",
-          name: "Miku",
-          avatar: "jpg"
-        },
-        status: {
-          unread: 0,
-          all: true,
-          textInput: "",
-          img: []
-        },
-        log: []
+      usrInfo: props.SELF,
+      record: [],
+      state: {
+        focus: false,
+        justSignIn: true,
+        selectedRecord: "",
+        selectedName: "Utage",
+        textIndex: [0, 0]
       }
-    ],
-    state: {
-      justSignIn: true,
-      selectedRecord: "",
-      selectedName: "Utage",
-      focus: false,
-      textIndex: [0, 0]
-    }
   }));
 
   // the info that all popup window needs
@@ -906,7 +802,7 @@ export default function Panel(props) {
       }).then(result => {
         if (!result.canceled) {
           let srcPath = result.filePaths[0];
-          let fileName = `${++imgCounter}${path.extname(srcPath)}`;
+          let fileName = `${++imageCounter}${path.extname(srcPath)}`;
           let dstPath = `${imgPath}static/temp/${fileName}`;
           fs.copyFileSync(srcPath, dstPath);
           setPanelInfo((panelInfo) => ({

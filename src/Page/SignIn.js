@@ -29,7 +29,7 @@ import CryptoJS from "crypto-js";
 
 const fs = window.require("fs");
 const request = window.require("request");
-const nodeRSA = require("node-rsa");
+const nodeRSA = window.require("node-rsa");
 const settingPath = "./data/setting.json";
 let db, globalSetting = JSON.parse(fs.readFileSync(settingPath));
 
@@ -205,15 +205,14 @@ export default function SignIn(props) {
       email: email,
       password: CryptoJS.SHA256(email + password).toString()
     };
-    connectServer(info, (passwords, selfUID, serverRaw) => {
+    connectServer(info, (passwords, selfUID, self, serverRaw) => {
       initDB(passwords, selfUID, serverRaw, (passwords, selfUID) => {
         backdropClose();
         ReactDOM.render(
           <Panel
-            client={passwords.keyClient}
-            server={passwords.pubServer}
-            AES={passwords.passwordAES}
-            UID={selfUID}
+            KEY={passwords}
+            SELF={self}
+            DB={db}
           />,
           document.getElementById("root")
         );
@@ -279,21 +278,30 @@ export default function SignIn(props) {
                         JSON.parse(keyClient.decrypt(item))
                       ))
                     };
-                    const selfUID = serverRaw.profile[0].userid.toString();
+                    const selfProfile = serverRaw.profile[0];
+                    const selfUID = selfProfile.userid.toString();
+                    const self = {
+                      uid: `${selfUID}U`,
+                      username: selfProfile.nickname,
+                      email: selfProfile.email,
+                      avatar: selfProfile.avatarsuffix
+                    };
                     let dbRequest = indexedDB.open(`${selfUID}`);
                     dbRequest.onerror = (event) => {
                       snackWindowToggle("error", `${event.target.error}`);
                     };
+                    // TEMP: delete this later
+                    serverRaw = JSON.parse(fs.readFileSync("data/res.json"));
                     dbRequest.onsuccess = () => {
                       db = dbRequest.result;
-                      callback(passwords, selfUID, serverRaw);
+                      callback(passwords, selfUID, self, serverRaw);
                     };
                     dbRequest.onupgradeneeded = (event) => {
                       db = event.target.result;
                       db.createObjectStore("profile", { keyPath: "uid" });
                       db.createObjectStore("group", { keyPath: "gid" });
                       db.createObjectStore("record", { keyPath: "rid" });
-                      callback(passwords, selfUID, serverRaw);
+                      callback(passwords, selfUID, self, serverRaw);
                     };
                   } else {
                     backdropClose();
@@ -323,7 +331,6 @@ export default function SignIn(props) {
     });
   };
   const initDB = (passwords, selfUID, serverRaw, callback) => {
-    // TEMP: initialize the database
     insertTuples(serverRaw, "profile", passwords.passwordAES)
       .then(() => insertTuples(serverRaw, "group", passwords.passwordAES))
       .then(() => insertTuples(serverRaw, "record", passwords.passwordAES))
