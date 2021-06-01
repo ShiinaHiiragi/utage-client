@@ -25,7 +25,7 @@ import CircularProgress from "@material-ui/core/CircularProgress";
 import { makeStyles } from "@material-ui/core/styles";
 import Panel from "./Panel";
 import SignUp from "./SignUp";
-import cryptoJS from "crypto-js";
+import CryptoJS from "crypto-js";
 
 const fs = window.require("fs");
 const request = window.require("request");
@@ -203,7 +203,7 @@ export default function SignIn(props) {
     backdropToggle();
     const info = {
       email: email,
-      password: cryptoJS.SHA256(email + password).toString()
+      password: CryptoJS.SHA256(email + password).toString()
     };
     connectServer(info, (passwords, selfUID, serverRaw) => {
       initDB(passwords, selfUID, serverRaw, (passwords, selfUID) => {
@@ -285,15 +285,15 @@ export default function SignIn(props) {
                       snackWindowToggle("error", `${event.target.error}`);
                     };
                     dbRequest.onsuccess = () => {
-                      db = request.result;
-                      callback(passwords, response.body);
+                      db = dbRequest.result;
+                      callback(passwords, selfUID, serverRaw);
                     };
                     dbRequest.onupgradeneeded = (event) => {
                       db = event.target.result;
                       db.createObjectStore("profile", { keyPath: "uid" });
                       db.createObjectStore("group", { keyPath: "gid" });
                       db.createObjectStore("record", { keyPath: "rid" });
-                      callback(passwords, selfUID, response.body);
+                      callback(passwords, selfUID, serverRaw);
                     };
                   } else {
                     backdropClose();
@@ -324,8 +324,49 @@ export default function SignIn(props) {
   };
   const initDB = (passwords, selfUID, serverRaw, callback) => {
     // TEMP: initialize the database
-    callback(passwords, selfUID);
+    insertTuples(serverRaw, "profile", passwords.passwordAES)
+      .then(() => insertTuples(serverRaw, "group", passwords.passwordAES))
+      .then(() => insertTuples(serverRaw, "record", passwords.passwordAES))
+      .then(() => callback(passwords, selfUID))
+      .catch((err) => {
+        backdropClose();
+        snackWindowToggle("error", `${err}`)
+      });
   };
+  
+  const encryptTuple = (item, tableName, keyAES) => {
+    const AES = (value) => CryptoJS.AES.encrypt(value, keyAES).toString();
+    if (tableName === "profile") {
+      return {
+        uid: item.userid.toString(),
+        username: AES(item.nickname),
+        email: AES(item.email),
+        tel: AES(item.tel),
+        birth: AES(item.birth),
+        gender: AES(item.gender),
+        avatar: {
+          extension: AES(item.avatarsuffix),
+          hash: AES(item.avatarhash)
+        }
+      };
+    } else if (tableName === "group") {
+      // TODO
+    } else if (tableName === "record") {
+      // TODO
+    }
+  }
+  const insertSingleTuple = (item, tableName, keyAES, callback, onerror) => {
+    let insertRequest = db.transaction([tableName], 'readwrite')
+      .objectStore(tableName)
+      .put(encryptTuple(item, tableName, keyAES));
+    insertRequest.onsuccess = () => callback();
+    insertRequest.onerror = event => onerror(event.target.error);
+  }
+  const insertTuples = (tupleObject, tupleName, keyAES) => (
+    tupleObject[tupleName].reduce((promiseChain, item) => (
+      promiseChain.then(() => new Promise((resolve, reject) => (
+        insertSingleTuple(item, tupleName, keyAES, resolve, reject)
+  )))),Promise.resolve()))
 
   // the backdrop when communicate with server
   const [backdrop, setBackdrop] = React.useState(false);
