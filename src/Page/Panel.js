@@ -345,7 +345,6 @@ export default function Panel(props) {
     objectStore.openCursor().onsuccess = (event) => {
       let cursor = event.target.result;
       if (cursor) {
-        console.log(cursor.value.uid);
         primaryProfile[cursor.value.uid] = {
           username: DAES(cursor.value.username),
           avatar: DAES(cursor.value.avatar.extension)
@@ -390,11 +389,44 @@ export default function Panel(props) {
               }
               cursor.continue();
             } else if (type === "G") {
-              // group chat
-              // dst: "1"  img: []  rid: "1"  src: "2"  type: "G"
-              // text: "U2Fsd"
-              // time: "U2Fsd"
               tagID = cursor.value.dst;
+              targetObject = tempRecord.find((item) => (item.accessInfo.id === `${tagID}G`));
+              atomRecord = {
+                rid: cursor.value.rid,
+                senderID: `${cursor.value.src}U`,
+                sender: primaryProfile[cursor.value.src]
+                  ? primaryProfile[cursor.value.src].username
+                  : "",
+                senderAvatar: primaryProfile[cursor.value.src]
+                  ? primaryProfile[cursor.value.src].avatar
+                  : "",
+                text: DAES(cursor.value.text),
+                time: DAES(cursor.value.time)
+              };
+              if (targetObject !== undefined) {
+                targetObject.log.push(atomRecord);
+              } else {
+                queryDatabaseByKey("group", tagID)
+                  .then((groupProfile) => {
+                    tempRecord.push({
+                      accessInfo: {
+                        id: `${tagID}G`,
+                        name: DAES(groupProfile.groupName),
+                        avatar: DAES(groupProfile.avatar.extension),
+                      },
+                      status: {
+                        unread: 0,
+                        all: true,
+                        textInput: "",
+                        img: []
+                      },
+                      log: [atomRecord]
+                    })
+                  }).catch((err) => {
+                    toggleSnackWindow("error", `${err}`);
+                  });
+              }
+              cursor.continue();
             } else if (type === "A") {
               // apply for friends
             } else if (type === "N") {
@@ -409,7 +441,7 @@ export default function Panel(props) {
             tempRecord.sort((left, right) => {
               let leftTime = left.log[left.log.length - 1].time;
               let rightTime = right.log[right.log.length - 1].time;
-              return (leftTime < rightTime) ? -1 : ((leftTime > rightTime) ? 1 : 0);
+              return (leftTime > rightTime) ? -1 : ((leftTime < rightTime) ? 1 : 0);
             });
             setPanelInfo((panelInfo) => ({
               ...panelInfo,
@@ -432,7 +464,7 @@ export default function Panel(props) {
     let objectStore = props.DB.transaction([tableName]).objectStore(tableName);
     let dbRequest = objectStore.get(key);
 
-    return Promise((resolve, reject) => {
+    return new Promise((resolve, reject) => {
       dbRequest.onerror = (event) => {
         reject(`${event.target.error}`)
       };
