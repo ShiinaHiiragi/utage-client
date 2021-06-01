@@ -1571,6 +1571,7 @@ export default function Panel(props) {
                     handleMenuProfileChange(event, "gender");
                   }}
                 >
+                  <MenuItem value={"U"}>Unknown</MenuItem>
                   <MenuItem value={"F"}>Female</MenuItem>
                   <MenuItem value={"M"}>Male</MenuItem>
                 </Select>
