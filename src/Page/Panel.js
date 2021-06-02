@@ -332,6 +332,13 @@ export default function Panel(props) {
   const classes = useStyles();
   const AES = (value) => CryptoJS.AES.encrypt(value, props.KEY.passwordAES).toString();
   const DAES = (value) => CryptoJS.AES.decrypt(value, props.KEY.passwordAES).toString(CryptoJS.enc.Utf8);
+  const asyncInsertTuple = (item, tableName, callback, onerror) => {
+    let insertRequest = props.DB.transaction([tableName], 'readwrite')
+      .objectStore(tableName)
+      .put(item);
+    insertRequest.onsuccess = () => callback();
+    insertRequest.onerror = event => onerror(event.target.error);
+  }
 
   // equals to componentDidmount
   React.useEffect(() => {
@@ -587,15 +594,18 @@ export default function Panel(props) {
           rowsInfo = [
             ["GID", targetProfile.gid],
             ["UID of Group Holder", DAES(targetProfile.groupHolderID)],
-            ["Username of Group Holder", groupHolder],
+            ["Group Holder", groupHolder],
             ["Joining Time", formatSideTime(DAES(targetProfile.joinTime))],
             ["Created Time", formatSideTime(DAES(targetProfile.createTime))],
           ];
           if (!groupHolder) {
             queryDatabaseByKey("profile", DAES(targetProfile.groupHolderID))
               .then((holderProfile) => {
-                rowsInfo.find((value) => value[0] === "Username of Group Holder")[1] = DAES(holderProfile.username);
-                // TODO: save the data
+                rowsInfo.find((value) => value[0] === "Group Holder")[1] = DAES(holderProfile.username);
+                targetProfile.groupHolder = holderProfile.username;
+                asyncInsertTuple(targetProfile, "group", () => {}, (err) => {
+                  toggleSnackWindow("error", `${err}`);
+                });
                 handleMoreInfoRender(
                   rowsInfo,
                   target,
