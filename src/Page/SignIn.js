@@ -348,6 +348,7 @@ export default function SignIn(props) {
         uid: item.userid.toString(),
         username: AES(item.nickname),
         email: AES(item.email),
+        city: AES(item.city),
         tel: AES(item.tel),
         birth: AES(item.birth),
         gender: AES(item.gender),

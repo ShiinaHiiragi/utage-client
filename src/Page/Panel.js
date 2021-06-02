@@ -87,7 +87,7 @@ const markdownOverride = {
 
 // panelReading's record and log should be sorted chronologically
 let globalSetting = JSON.parse(fs.readFileSync(settingPath));
-let serverClock, imageCounter, tempRecord = [], tempApply = [];
+let serverClock, imageCounter, tempRecord = [], tempApply = [], selfUID;
 
 const drawerWidth = 300;
 const useStyles = makeStyles((theme) => ({
@@ -340,7 +340,9 @@ export default function Panel(props) {
     globalSetting = JSON.parse(fs.readFileSync(settingPath));
 
     // temp of profile object
-    let selfUID = panelInfo.usrInfo.uid, primaryProfile = {};
+    selfUID = panelInfo.usrInfo.uid;
+    selfUID = selfUID.substr(0, selfUID.length - 1);
+    let primaryProfile = {};
     let objectStore = props.DB.transaction("profile").objectStore("profile");
     objectStore.openCursor().onsuccess = (event) => {
       let cursor = event.target.result;
@@ -352,7 +354,6 @@ export default function Panel(props) {
         cursor.continue();
       } else {
         // complete record array
-        selfUID = selfUID.substr(0, selfUID.length - 1);
         objectStore = props.DB.transaction("record").objectStore("record");
         objectStore.openCursor().onsuccess = (event) => {
           let cursor = event.target.result;
@@ -657,22 +658,27 @@ export default function Panel(props) {
 
   // about profile of the menu button
   const handleMenuProfileClick = () => {
-    handleMenuClose();
-    setPanelPopup((panelPopup) => ({
-      ...panelPopup,
-      self: {
-        ...panelPopup.self,
-        open: true,
-        uid: "1024",
-        username: "Koishi",
-        email: "abc@xyz.com",
-        tel: "0731-84802110",
-        city: "Shanghai",
-        birth: "2019-12-31T16:00:00.000Z",
-        gender: "F",
-        avatar: "png"
-      }
-    }));
+    queryDatabaseByKey("profile", selfUID)
+      .then((selfProfile) => {
+        handleMenuClose();
+        setPanelPopup((panelPopup) => ({
+          ...panelPopup,
+          self: {
+            ...panelPopup.self,
+            open: true,
+            uid: selfProfile.uid,
+            username: DAES(selfProfile.username),
+            email: DAES(selfProfile.email),
+            tel: DAES(selfProfile.tel),
+            city: DAES(selfProfile.city),
+            birth: DAES(selfProfile.birth),
+            gender: DAES(selfProfile.gender),
+            avatar: DAES(selfProfile.avatar.extension)
+          }
+        }));
+      }).catch((err) => {
+        toggleSnackWindow("error", `${err}`);
+      });
   };
   const handleMenuProfileClose = () => {
     setPanelPopup((panelPopup) => ({
