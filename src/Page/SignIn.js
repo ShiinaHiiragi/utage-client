@@ -361,7 +361,7 @@ export default function SignIn(props) {
       return {
         gid: item.groupid.toString(),
         groupName: AES(item.groupname),
-        groupHolder: AES(item.groupholdername),
+        groupHolder: "",
         groupHolderID: AES(item.groupholderid.toString()),
         joinTime: AES(item.jointime),
         createTime: AES(item.createtime),

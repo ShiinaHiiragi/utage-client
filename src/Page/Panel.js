@@ -557,23 +557,79 @@ export default function Panel(props) {
 
   // about more info in app bar
   const createData = (props, value) => ({ props, value });
-  const handleMoreInfoClick = () => {
+  const handleMoreInfoClick = (target) => {
+    let targetID = target.substr(0, target.length - 1);
+    let targetType = target.charAt(target.length - 1);
+    let rowsInfo = [];
+    queryDatabaseByKey(targetType === "U" ? "profile" : "group", targetID)
+      .then((targetProfile) => {
+        if (targetType === "U") {
+          let gender = DAES(targetProfile.gender);
+          if (gender === "U") gender = "Unknown";
+          else if (gender === "F") gender = "Female";
+          else if (gender === "M") gender = "Male";
+          rowsInfo = [
+            ["UID", targetProfile.uid],
+            ["E-mail", DAES(targetProfile.email)],
+            ["TEL", DAES(targetProfile.tel)],
+            ["City", DAES(targetProfile.city)],
+            ["Birthday", formatSideTime(DAES(targetProfile.birth))],
+            ["Gender", gender],
+          ];
+          handleMoreInfoRender(
+            rowsInfo,
+            target,
+            DAES(targetProfile.avatar.extension),
+            DAES(targetProfile.username)
+          );
+        } else {
+          let groupHolder = DAES(targetProfile.groupHolder);
+          rowsInfo = [
+            ["GID", targetProfile.gid],
+            ["UID of Group Holder", DAES(targetProfile.groupHolderID)],
+            ["Username of Group Holder", groupHolder],
+            ["Joining Time", formatSideTime(DAES(targetProfile.joinTime))],
+            ["Created Time", formatSideTime(DAES(targetProfile.createTime))],
+          ];
+          if (!groupHolder) {
+            queryDatabaseByKey("profile", DAES(targetProfile.groupHolderID))
+              .then((holderProfile) => {
+                rowsInfo.find((value) => value[0] === "Username of Group Holder")[1] = DAES(holderProfile.username);
+                // TODO: save the data
+                handleMoreInfoRender(
+                  rowsInfo,
+                  target,
+                  DAES(targetProfile.avatar.extension),
+                  DAES(targetProfile.groupName)
+                );
+              }).catch((err) => {
+                toggleSnackWindow("error", `${err}`);
+              });
+          } else {
+            handleMoreInfoRender(
+              rowsInfo,
+              target,
+              DAES(targetProfile.avatar.extension),
+              DAES(targetProfile.groupName)
+            );
+          }
+        }
+      }).catch((err) => {
+        toggleSnackWindow("error", `${err}`);
+      });
+  };
+  const handleMoreInfoRender = (rowsInfo, id, avatar, name) => {
     setPanelPopup((panelPopup) => ({
       ...panelPopup,
       profile: {
         open: true,
-        rows: [
-          createData("UID", "8192"),
-          createData("E-mail", "abc@xyz.com"),
-          createData("TEL", "0731-84802007"),
-          createData("City", "Shanghai")
-        ],
-        id: "8192U",
-        avatar: "png",
-        name: "Koishi"
+        rows: rowsInfo.map((value) => createData(value[0], value[1])),
+        id: id,
+        avatar: avatar,
+        name: name
       }
     }));
-  };
+  }
   const handleMoreInfoClose = () => {
     setPanelPopup((panelPopup) => ({
       ...panelPopup,
@@ -1155,7 +1211,9 @@ export default function Panel(props) {
             <IconButton
               color="inherit"
               edge="end"
-              onClick={handleMoreInfoClick}
+              onClick={() => {
+                handleMoreInfoClick(panelInfo.state.selectedRecord)
+              }}
             >
               <Tooltip title="Info" placement="bottom">
                 <InfoOutlinedIcon />
