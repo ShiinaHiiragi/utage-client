@@ -69,7 +69,7 @@ import SignIn from "./SignIn";
 const electron = window.require("electron");
 const fs = window.require("fs");
 const path = window.require("path");
-const nodeRSA = window.require("node-rsa");
+const request = window.require("request");
 const app = electron.remote.app;
 const dialog = electron.remote.dialog;
 
@@ -340,12 +340,54 @@ export default function Panel(props) {
     CryptoJS.AES.decrypt(value, props.KEY.passwordAES).toString(
       CryptoJS.enc.Utf8
     );
-  const asyncInsertTuple = (item, tableName, callback, onerror) => {
+  const asyncInsertTuple = (item, tableName) => {
     let insertRequest = props.DB.transaction([tableName], "readwrite")
       .objectStore(tableName)
       .put(item);
-    insertRequest.onsuccess = () => callback();
-    insertRequest.onerror = (event) => onerror(event.target.error);
+    return new Promise((resolve, reject) => {
+      insertRequest.onsuccess = () => resolve();
+      insertRequest.onerror = (event) => reject(event.target.error);
+    });
+    
+  };
+  const encryptTuple = (item, tableName) => {
+    if (tableName === "profile")
+      return {
+        uid: item.userid.toString(),
+        username: AES(item.nickname),
+        email: AES(item.email),
+        city: AES(item.city),
+        tel: AES(item.tel),
+        birth: AES(item.birth),
+        gender: AES(item.gender),
+        avatar: {
+          extension: AES(item.avatarsuffix),
+          hash: AES(item.avatarhash)
+        }
+      };
+    else if (tableName === "group")
+      return {
+        gid: item.groupid.toString(),
+        groupName: AES(item.groupname),
+        groupHolder: "",
+        groupHolderID: AES(item.groupholderid.toString()),
+        joinTime: AES(item.jointime),
+        createTime: AES(item.createtime),
+        avatar: {
+          extension: AES(item.groupavatarsuffix),
+          hash: AES(item.groupavatarhash)
+        }
+      };
+    else if (tableName === "record")
+      return {
+        type: item.type,
+        rid: item.recordid.toString(),
+        src: item.userid.toString(),
+        dst: item.receiverid.toString(),
+        text: AES(item.text),
+        img: item.hash.map((value) => AES(value)),
+        time: AES(item.time)
+      };
   };
 
   // equals to componentDidmount
@@ -432,7 +474,7 @@ export default function Panel(props) {
               if (targetObject !== undefined) {
                 targetObject.log.push(atomRecord);
               } else {
-                queryDatabaseByKey("group", tagID)
+                queryProfileByKey("group", tagID)
                   .then((groupProfile) => {
                     tempRecord.push({
                       accessInfo: {
@@ -491,7 +533,7 @@ export default function Panel(props) {
     };
   }, []);
 
-  const queryDatabaseByKey = (tableName, key) => {
+  const queryProfileByKey = (tableName, key) => {
     let objectStore = props.DB.transaction([tableName]).objectStore(tableName);
     let dbRequest = objectStore.get(key);
 
@@ -500,8 +542,36 @@ export default function Panel(props) {
         reject(`${event.target.error}`);
       };
       dbRequest.onsuccess = (event) => {
-        // TODO: ask server for profile
-        resolve(event.target.result);
+        if (event.target.result)
+          resolve(event.target.result);
+        else {
+          // only profile and group will request in this way
+          request({
+            url: `${globalSetting.proxy}profile/get?userid=${selfUID}&getid=${key}&type=${tableName === "profile" ? "U" : "G"}`,
+            method: "GET",
+            json: true,
+            headers: {
+              "content-type": "text/plain",
+            },
+            timeout: 10000,
+          }, (err, response) => {
+            if (!err && response.statusCode === 200) {
+              let getProfile = JSON.parse(props.KEY.keyClient.decrypt(response.body));
+              // do searching one more time after inserting
+              asyncInsertTuple(encryptTuple(getProfile, tableName), tableName)
+                .then(() => {
+                  queryProfileByKey(tableName, key).then(resolve);
+                }).catch((err) => {
+                  toggleSnackWindow("error", `${err}`);
+                });
+            }
+            else {
+              reject(`${err ? err : `ServerError: ${response.body}`}`);
+              console.log(err);
+              console.log(response.body);
+            }
+          });
+        }
       };
     });
   };
@@ -592,7 +662,7 @@ export default function Panel(props) {
     let targetID = target.substr(0, target.length - 1);
     let targetType = target.charAt(target.length - 1);
     let rowsInfo = [];
-    queryDatabaseByKey(targetType === "U" ? "profile" : "group", targetID)
+    queryProfileByKey(targetType === "U" ? "profile" : "group", targetID)
       .then((targetProfile) => {
         if (targetType === "U") {
           let gender = DAES(targetProfile.gender);
@@ -625,20 +695,15 @@ export default function Panel(props) {
             ["Created Time", formatSideTime(DAES(targetProfile.createTime))]
           ];
           if (!groupHolder) {
-            queryDatabaseByKey("profile", DAES(targetProfile.groupHolderID))
+            queryProfileByKey("profile", DAES(targetProfile.groupHolderID))
               .then((holderProfile) => {
                 rowsInfo.find((value) => value[0] === "Group Holder")[1] = DAES(
                   holderProfile.username
                 );
                 targetProfile.groupHolder = holderProfile.username;
-                asyncInsertTuple(
-                  targetProfile,
-                  "group",
-                  () => {},
-                  (err) => {
-                    toggleSnackWindow("error", `${err}`);
-                  }
-                );
+                asyncInsertTuple(targetProfile, "group").catch((err) => {
+                  toggleSnackWindow("error", `${err}`);
+                });
                 handleMoreInfoRender(
                   rowsInfo,
                   target,
@@ -759,7 +824,7 @@ export default function Panel(props) {
 
   // about profile of the menu button
   const handleMenuProfileClick = () => {
-    queryDatabaseByKey("profile", selfUID)
+    queryProfileByKey("profile", selfUID)
       .then((selfProfile) => {
         handleMenuClose();
         setPanelPopup((panelPopup) => ({
