@@ -31,7 +31,8 @@ const fs = window.require("fs");
 const request = window.require("request");
 const nodeRSA = window.require("node-rsa");
 const settingPath = "./data/setting.json";
-let db, globalSetting = JSON.parse(fs.readFileSync(settingPath));
+let db,
+  globalSetting = JSON.parse(fs.readFileSync(settingPath));
 
 const useStyles = makeStyles((theme) => ({
   noneSelect: {
@@ -124,8 +125,7 @@ export default function SignIn(props) {
   };
   const saveProxySetting = (changed) => {
     saveSetting((err) => {
-      if (err)
-        snackWindowToggle("error", `${err}`);
+      if (err) snackWindowToggle("error", `${err}`);
       else if (changed)
         snackWindowToggle(
           "success",
@@ -209,11 +209,7 @@ export default function SignIn(props) {
       initDB(passwords, selfUID, serverRaw, (passwords, selfUID) => {
         backdropClose();
         ReactDOM.render(
-          <Panel
-            KEY={passwords}
-            SELF={self}
-            DB={db}
-          />,
+          <Panel KEY={passwords} SELF={self} DB={db} />,
           document.getElementById("root")
         );
       });
@@ -268,15 +264,15 @@ export default function SignIn(props) {
                       pubServer: pubServer
                     };
                     let serverRaw = {
-                      profile: response.body.userProfiles.map((item) => (
+                      profile: response.body.userProfiles.map((item) =>
                         JSON.parse(keyClient.decrypt(item))
-                      )),
-                      group: response.body.groupProfile.map((item) => (
+                      ),
+                      group: response.body.groupProfile.map((item) =>
                         JSON.parse(keyClient.decrypt(item))
-                      )),
-                      record: response.body.record.map((item) => (
+                      ),
+                      record: response.body.record.map((item) =>
                         JSON.parse(keyClient.decrypt(item))
-                      ))
+                      )
                     };
                     const selfProfile = serverRaw.profile[0];
                     const selfUID = selfProfile.userid.toString();
@@ -337,10 +333,10 @@ export default function SignIn(props) {
       .then(() => callback(passwords, selfUID))
       .catch((err) => {
         backdropClose();
-        snackWindowToggle("error", `${err}`)
+        snackWindowToggle("error", `${err}`);
       });
   };
-  
+
   const encryptTuple = (item, tableName, keyAES) => {
     const AES = (value) => CryptoJS.AES.encrypt(value, keyAES).toString();
     if (tableName === "profile")
@@ -378,21 +374,28 @@ export default function SignIn(props) {
         dst: item.receiverid.toString(),
         text: AES(item.text),
         img: item.hash.map((value) => AES(value)),
-        time: AES(item.time),
+        time: AES(item.time)
       };
-  }
+  };
   const insertSingleTuple = (item, tableName, keyAES, callback, onerror) => {
-    let insertRequest = db.transaction([tableName], 'readwrite')
+    let insertRequest = db
+      .transaction([tableName], "readwrite")
       .objectStore(tableName)
       .put(encryptTuple(item, tableName, keyAES));
     insertRequest.onsuccess = () => callback();
-    insertRequest.onerror = event => onerror(event.target.error);
-  }
-  const insertTuples = (tupleObject, tupleName, keyAES) => (
-    tupleObject[tupleName].reduce((promiseChain, item) => (
-      promiseChain.then(() => new Promise((resolve, reject) => (
-        insertSingleTuple(item, tupleName, keyAES, resolve, reject)
-  )))),Promise.resolve()))
+    insertRequest.onerror = (event) => onerror(event.target.error);
+  };
+  const insertTuples = (tupleObject, tupleName, keyAES) =>
+    tupleObject[tupleName].reduce(
+      (promiseChain, item) =>
+        promiseChain.then(
+          () =>
+            new Promise((resolve, reject) =>
+              insertSingleTuple(item, tupleName, keyAES, resolve, reject)
+            )
+        ),
+      Promise.resolve()
+    );
 
   // the backdrop when communicate with server
   const [backdrop, setBackdrop] = React.useState(false);

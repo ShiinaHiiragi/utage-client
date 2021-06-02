@@ -87,7 +87,11 @@ const markdownOverride = {
 
 // panelReading's record and log should be sorted chronologically
 let globalSetting = JSON.parse(fs.readFileSync(settingPath));
-let serverClock, imageCounter, tempRecord = [], tempApply = [], selfUID;
+let serverClock,
+  imageCounter,
+  tempRecord = [],
+  tempApply = [],
+  selfUID;
 
 const drawerWidth = 300;
 const useStyles = makeStyles((theme) => ({
@@ -330,15 +334,19 @@ function Alert(props) {
 
 export default function Panel(props) {
   const classes = useStyles();
-  const AES = (value) => CryptoJS.AES.encrypt(value, props.KEY.passwordAES).toString();
-  const DAES = (value) => CryptoJS.AES.decrypt(value, props.KEY.passwordAES).toString(CryptoJS.enc.Utf8);
+  const AES = (value) =>
+    CryptoJS.AES.encrypt(value, props.KEY.passwordAES).toString();
+  const DAES = (value) =>
+    CryptoJS.AES.decrypt(value, props.KEY.passwordAES).toString(
+      CryptoJS.enc.Utf8
+    );
   const asyncInsertTuple = (item, tableName, callback, onerror) => {
-    let insertRequest = props.DB.transaction([tableName], 'readwrite')
+    let insertRequest = props.DB.transaction([tableName], "readwrite")
       .objectStore(tableName)
       .put(item);
     insertRequest.onsuccess = () => callback();
-    insertRequest.onerror = event => onerror(event.target.error);
-  }
+    insertRequest.onerror = (event) => onerror(event.target.error);
+  };
 
   // equals to componentDidmount
   React.useEffect(() => {
@@ -365,10 +373,18 @@ export default function Panel(props) {
         objectStore.openCursor().onsuccess = (event) => {
           let cursor = event.target.result;
           if (cursor) {
-            let type = cursor.value.type, tagID, targetObject, atomRecord;
+            let type = cursor.value.type,
+              tagID,
+              targetObject,
+              atomRecord;
             if (type === "U") {
-              tagID = (cursor.value.src === selfUID ? cursor.value.dst : cursor.value.src);
-              targetObject = tempRecord.find((item) => (item.accessInfo.id === `${tagID}U`));
+              tagID =
+                cursor.value.src === selfUID
+                  ? cursor.value.dst
+                  : cursor.value.src;
+              targetObject = tempRecord.find(
+                (item) => item.accessInfo.id === `${tagID}U`
+              );
               atomRecord = {
                 rid: cursor.value.rid,
                 senderID: `${cursor.value.src}U`,
@@ -398,7 +414,9 @@ export default function Panel(props) {
               cursor.continue();
             } else if (type === "G") {
               tagID = cursor.value.dst;
-              targetObject = tempRecord.find((item) => (item.accessInfo.id === `${tagID}G`));
+              targetObject = tempRecord.find(
+                (item) => item.accessInfo.id === `${tagID}G`
+              );
               atomRecord = {
                 rid: cursor.value.rid,
                 senderID: `${cursor.value.src}U`,
@@ -420,7 +438,7 @@ export default function Panel(props) {
                       accessInfo: {
                         id: `${tagID}G`,
                         name: DAES(groupProfile.groupName),
-                        avatar: DAES(groupProfile.avatar.extension),
+                        avatar: DAES(groupProfile.avatar.extension)
                       },
                       status: {
                         unread: 0,
@@ -429,8 +447,9 @@ export default function Panel(props) {
                         img: []
                       },
                       log: [atomRecord]
-                    })
-                  }).catch((err) => {
+                    });
+                  })
+                  .catch((err) => {
                     toggleSnackWindow("error", `${err}`);
                   });
               }
@@ -443,13 +462,17 @@ export default function Panel(props) {
           } else {
             tempRecord.forEach((item) => {
               item.log.sort((left, right) => {
-                return (left.time < right.time) ? -1 : ((left.time > right.time) ? 1 : 0);
+                return left.time < right.time
+                  ? -1
+                  : left.time > right.time
+                  ? 1
+                  : 0;
               });
             });
             tempRecord.sort((left, right) => {
               let leftTime = left.log[left.log.length - 1].time;
               let rightTime = right.log[right.log.length - 1].time;
-              return (leftTime > rightTime) ? -1 : ((leftTime < rightTime) ? 1 : 0);
+              return leftTime > rightTime ? -1 : leftTime < rightTime ? 1 : 0;
             });
             setPanelInfo((panelInfo) => ({
               ...panelInfo,
@@ -462,10 +485,10 @@ export default function Panel(props) {
           }
         };
       }
-    }
+    };
     return () => {
       clearInterval(serverClock);
-    }
+    };
   }, []);
 
   const queryDatabaseByKey = (tableName, key) => {
@@ -474,29 +497,29 @@ export default function Panel(props) {
 
     return new Promise((resolve, reject) => {
       dbRequest.onerror = (event) => {
-        reject(`${event.target.error}`)
+        reject(`${event.target.error}`);
       };
       dbRequest.onsuccess = (event) => {
         resolve(event.target.result);
       };
     });
-  }
+  };
 
   const requestNewRecord = () => {
     // TODO: ask server for new record
-  }
+  };
 
   // the state info need by user interface
   const [panelInfo, setPanelInfo] = React.useState(() => ({
-      usrInfo: props.SELF,
-      record: [],
-      state: {
-        focus: false,
-        justSignIn: true,
-        selectedRecord: "",
-        selectedName: "Utage",
-        textIndex: [0, 0]
-      }
+    usrInfo: props.SELF,
+    record: [],
+    state: {
+      focus: false,
+      justSignIn: true,
+      selectedRecord: "",
+      selectedName: "Utage",
+      textIndex: [0, 0]
+    }
   }));
 
   // the info that all popup window needs
@@ -581,7 +604,7 @@ export default function Panel(props) {
             ["TEL", DAES(targetProfile.tel)],
             ["City", DAES(targetProfile.city)],
             ["Birthday", formatSideTime(DAES(targetProfile.birth))],
-            ["Gender", gender],
+            ["Gender", gender]
           ];
           handleMoreInfoRender(
             rowsInfo,
@@ -596,23 +619,31 @@ export default function Panel(props) {
             ["UID of Group Holder", DAES(targetProfile.groupHolderID)],
             ["Group Holder", groupHolder],
             ["Joining Time", formatSideTime(DAES(targetProfile.joinTime))],
-            ["Created Time", formatSideTime(DAES(targetProfile.createTime))],
+            ["Created Time", formatSideTime(DAES(targetProfile.createTime))]
           ];
           if (!groupHolder) {
             queryDatabaseByKey("profile", DAES(targetProfile.groupHolderID))
               .then((holderProfile) => {
-                rowsInfo.find((value) => value[0] === "Group Holder")[1] = DAES(holderProfile.username);
+                rowsInfo.find((value) => value[0] === "Group Holder")[1] = DAES(
+                  holderProfile.username
+                );
                 targetProfile.groupHolder = holderProfile.username;
-                asyncInsertTuple(targetProfile, "group", () => {}, (err) => {
-                  toggleSnackWindow("error", `${err}`);
-                });
+                asyncInsertTuple(
+                  targetProfile,
+                  "group",
+                  () => {},
+                  (err) => {
+                    toggleSnackWindow("error", `${err}`);
+                  }
+                );
                 handleMoreInfoRender(
                   rowsInfo,
                   target,
                   DAES(targetProfile.avatar.extension),
                   DAES(targetProfile.groupName)
                 );
-              }).catch((err) => {
+              })
+              .catch((err) => {
                 toggleSnackWindow("error", `${err}`);
               });
           } else {
@@ -624,7 +655,8 @@ export default function Panel(props) {
             );
           }
         }
-      }).catch((err) => {
+      })
+      .catch((err) => {
         toggleSnackWindow("error", `${err}`);
       });
   };
@@ -639,7 +671,7 @@ export default function Panel(props) {
         name: name
       }
     }));
-  }
+  };
   const handleMoreInfoClose = () => {
     setPanelPopup((panelPopup) => ({
       ...panelPopup,
@@ -742,7 +774,8 @@ export default function Panel(props) {
             avatar: DAES(selfProfile.avatar.extension)
           }
         }));
-      }).catch((err) => {
+      })
+      .catch((err) => {
         toggleSnackWindow("error", `${err}`);
       });
   };
@@ -861,8 +894,7 @@ export default function Panel(props) {
     if (panelPopup.newFriend.find.textInput === "") {
       toggleSnackWindow("warning", "The id input is vacant.");
       return;
-    }
-    else if (!/^[0-9]*$/.test(panelPopup.newFriend.find.textInput)) {
+    } else if (!/^[0-9]*$/.test(panelPopup.newFriend.find.textInput)) {
       toggleSnackWindow("warning", "The id contains illegal characters.");
       return;
     }
@@ -983,45 +1015,42 @@ export default function Panel(props) {
   // about image inserting
   const handleTextImageClick = () => {
     if (panelInfo.state.focus) {
-      dialog.showOpenDialog({
-        title: "Insert a Image",
-        filters: [
-          { name: 'Images', extensions: ["jpg", "png", "gif"] },
-          { name: "All Files", extensions: ["*"] }
-        ]
-      }).then(result => {
-        if (!result.canceled) {
-          let srcPath = result.filePaths[0];
-          let fileName = `${++imageCounter}${path.extname(srcPath)}`;
-          let dstPath = `${imgPath}static/temp/${fileName}`;
-          fs.copyFileSync(srcPath, dstPath);
-          setPanelInfo((panelInfo) => ({
-            ...panelInfo,
-            record: panelInfo.record.map((value) =>
-              value.accessInfo.id === panelInfo.state.selectedRecord
-                ? {
-                    ...value,
-                    status: {
-                      ...value.status,
-                      img: [...value.status.img, fileName]
+      dialog
+        .showOpenDialog({
+          title: "Insert a Image",
+          filters: [
+            { name: "Images", extensions: ["jpg", "png", "gif"] },
+            { name: "All Files", extensions: ["*"] }
+          ]
+        })
+        .then((result) => {
+          if (!result.canceled) {
+            let srcPath = result.filePaths[0];
+            let fileName = `${++imageCounter}${path.extname(srcPath)}`;
+            let dstPath = `${imgPath}static/temp/${fileName}`;
+            fs.copyFileSync(srcPath, dstPath);
+            setPanelInfo((panelInfo) => ({
+              ...panelInfo,
+              record: panelInfo.record.map((value) =>
+                value.accessInfo.id === panelInfo.state.selectedRecord
+                  ? {
+                      ...value,
+                      status: {
+                        ...value.status,
+                        img: [...value.status.img, fileName]
+                      }
                     }
-                  }
-                : value
-            )
-          }));
-          toggleSnackWindow(
-            "info",
-            `Your image is copied to ${`static/temp/${fileName}`}.`
-          );
-          richTextMark(
-            "",
-            "",
-            `![](static/temp/${fileName})`
-          );
-        }
-      });
-    }
-    else
+                  : value
+              )
+            }));
+            toggleSnackWindow(
+              "info",
+              `Your image is copied to ${`static/temp/${fileName}`}.`
+            );
+            richTextMark("", "", `![](static/temp/${fileName})`);
+          }
+        });
+    } else
       toggleSnackWindow(
         "warning",
         "Please focus on text area to insert image."
@@ -1142,10 +1171,13 @@ export default function Panel(props) {
     }
     // preprocess of sending image
     let imgSequence = [];
-    nowTextInput = nowTextInput.replace(/!\[(.*?)\]\((.*?)\)/gm, (_0, _1, _2) => {
-      imgSequence.push(_2);
-      return `![${_1}](${path.extname(_2)})`;
-    });
+    nowTextInput = nowTextInput.replace(
+      /!\[(.*?)\]\((.*?)\)/gm,
+      (_0, _1, _2) => {
+        imgSequence.push(_2);
+        return `![${_1}](${path.extname(_2)})`;
+      }
+    );
     // TODO: send the text to the server
     // post the image to server using the imgSequence array
     // delete the temp image file using the status.img array
@@ -1222,7 +1254,7 @@ export default function Panel(props) {
               color="inherit"
               edge="end"
               onClick={() => {
-                handleMoreInfoClick(panelInfo.state.selectedRecord)
+                handleMoreInfoClick(panelInfo.state.selectedRecord);
               }}
             >
               <Tooltip title="Info" placement="bottom">
