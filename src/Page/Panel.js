@@ -500,6 +500,7 @@ export default function Panel(props) {
         reject(`${event.target.error}`);
       };
       dbRequest.onsuccess = (event) => {
+        // TODO: ask server for profile
         resolve(event.target.result);
       };
     });
@@ -601,11 +602,13 @@ export default function Panel(props) {
           rowsInfo = [
             ["UID", targetProfile.uid],
             ["E-mail", DAES(targetProfile.email)],
-            ["TEL", DAES(targetProfile.tel)],
-            ["City", DAES(targetProfile.city)],
-            ["Birthday", formatSideTime(DAES(targetProfile.birth))],
+            ["Birthday", new Date(DAES(targetProfile.birth)).format("yyyy-MM-dd")],
             ["Gender", gender]
           ];
+          if (DAES(targetProfile.tel))
+            rowsInfo.push(["TEL", DAES(targetProfile.tel)]);
+          if (DAES(targetProfile.city))
+            rowsInfo.push(["City", DAES(targetProfile.city)]);
           handleMoreInfoRender(
             rowsInfo,
             target,
@@ -899,6 +902,7 @@ export default function Panel(props) {
       return;
     }
     handleMenuNewClose();
+    handleMoreInfoClick(`${panelPopup.newFriend.find.textInput}${panelPopup.newFriend.find.box === "0" ? "U" : "G"}`);
     // TODO: find a user/group by id
   };
   const menuNewApplicationRemove = (uid, gid) => {
@@ -1645,22 +1649,6 @@ export default function Panel(props) {
               />
             </div>
             <div>
-              <TextField
-                label="TEL"
-                defaultValue={panelPopup.self.tel}
-                onChange={(event) => {
-                  handleMenuProfileChange(event, "tel");
-                }}
-              />
-              <TextField
-                label="City"
-                defaultValue={panelPopup.self.city}
-                onChange={(event) => {
-                  handleMenuProfileChange(event, "city");
-                }}
-              />
-            </div>
-            <div>
               <MuiPickersUtilsProvider utils={DateFnsUtils}>
                 <DatePicker
                   disableFuture
@@ -1696,6 +1684,22 @@ export default function Panel(props) {
                   <MenuItem value={"M"}>Male</MenuItem>
                 </Select>
               </FormControl>
+            </div>
+            <div>
+              <TextField
+                label="TEL"
+                defaultValue={panelPopup.self.tel}
+                onChange={(event) => {
+                  handleMenuProfileChange(event, "tel");
+                }}
+              />
+              <TextField
+                label="City"
+                defaultValue={panelPopup.self.city}
+                onChange={(event) => {
+                  handleMenuProfileChange(event, "city");
+                }}
+              />
             </div>
           </div>
         </DialogContent>
