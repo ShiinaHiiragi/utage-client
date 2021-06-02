@@ -567,8 +567,6 @@ export default function Panel(props) {
             }
             else {
               reject(`${err ? err : `ServerError: ${response.body}`}`);
-              console.log(err);
-              console.log(response.body);
             }
           });
         }
@@ -658,7 +656,7 @@ export default function Panel(props) {
 
   // about more info in app bar
   const createData = (props, value) => ({ props, value });
-  const handleMoreInfoClick = (target) => {
+  const handleMoreInfoClick = (target, callback) => {
     let targetID = target.substr(0, target.length - 1);
     let targetType = target.charAt(target.length - 1);
     let rowsInfo = [];
@@ -685,6 +683,7 @@ export default function Panel(props) {
             DAES(targetProfile.avatar.extension),
             DAES(targetProfile.username)
           );
+          if (typeof callback === "function") callback();
         } else {
           let groupHolder = DAES(targetProfile.groupHolder);
           rowsInfo = [
@@ -710,6 +709,7 @@ export default function Panel(props) {
                   DAES(targetProfile.avatar.extension),
                   DAES(targetProfile.groupName)
                 );
+                if (typeof callback === "function") callback();
               })
               .catch((err) => {
                 toggleSnackWindow("error", `${err}`);
@@ -721,6 +721,7 @@ export default function Panel(props) {
               DAES(targetProfile.avatar.extension),
               DAES(targetProfile.groupName)
             );
+            if (typeof callback === "function") callback();
           }
         }
       })
@@ -966,9 +967,10 @@ export default function Panel(props) {
       toggleSnackWindow("warning", "The id contains illegal characters.");
       return;
     }
-    handleMenuNewClose();
-    handleMoreInfoClick(`${panelPopup.newFriend.find.textInput}${panelPopup.newFriend.find.box === "0" ? "U" : "G"}`);
-    // TODO: find a user/group by id
+    handleMoreInfoClick(
+      `${panelPopup.newFriend.find.textInput}${panelPopup.newFriend.find.box === "0" ? "U" : "G"}`,
+      handleMenuNewClose
+    );
   };
   const menuNewApplicationRemove = (uid, gid) => {
     panelPopup.application.splice(

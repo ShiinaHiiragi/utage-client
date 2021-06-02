@@ -267,7 +267,7 @@ export default function SignIn(props) {
                       profile: response.body.userProfiles.map((item) =>
                         JSON.parse(keyClient.decrypt(item))
                       ),
-                      group: response.body.groupProfile.map((item) =>
+                      group: response.body.groupProfiles.map((item) =>
                         JSON.parse(keyClient.decrypt(item))
                       ),
                       record: response.body.record.map((item) =>
