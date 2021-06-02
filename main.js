@@ -9,6 +9,11 @@ const app = electron.app;
 // be closed automatically when the JavaScript object is garbage collected.
 let mainWindow;
 Menu.setApplicationMenu(null);
+global.environ = electron.app.isPackaged
+  ? "release"
+  : process.argv[2] === "--build"
+  ? "build"
+  : "dev";
 
 function createWindow() {
   // Create the browser window.

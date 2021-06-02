@@ -32,8 +32,17 @@ import cryptoJS from "crypto-js";
 import SignIn from "./SignIn";
 
 const fs = window.require("fs");
+const path = window.require("path");
 const request = window.require("request");
-const settingPath = "./data/setting.json";
+const electron = window.require("electron");
+const environ = electron.remote.getGlobal("environ");
+
+const staticPath = environ === "release"
+  ? "./resources/app/build/"
+  : environ === "build"
+  ? "./build/"
+  : "./";
+const settingPath = path.join(staticPath, "./static/setting.json");
 let globalSetting = JSON.parse(fs.readFileSync(settingPath));
 
 const useStyles = makeStyles((theme) => ({

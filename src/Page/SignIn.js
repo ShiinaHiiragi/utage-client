@@ -28,9 +28,17 @@ import SignUp from "./SignUp";
 import CryptoJS from "crypto-js";
 
 const fs = window.require("fs");
+const path = window.require("path");
 const request = window.require("request");
 const nodeRSA = window.require("node-rsa");
-const settingPath = "./data/setting.json";
+const electron = window.require("electron");
+const environ = electron.remote.getGlobal("environ");
+const staticPath = environ === "release"
+  ? "./resources/app/build/"
+  : environ === "build"
+  ? "./build/"
+  : "./";
+const settingPath = path.join(staticPath, "./static/setting.json");
 let db,
   globalSetting = JSON.parse(fs.readFileSync(settingPath));
 
@@ -287,7 +295,7 @@ export default function SignIn(props) {
                       snackWindowToggle("error", `${event.target.error}`);
                     };
                     // TEMP: delete this later
-                    serverRaw = JSON.parse(fs.readFileSync("data/res.json"));
+                    serverRaw = JSON.parse(fs.readFileSync("static/res.json"));
                     dbRequest.onsuccess = () => {
                       db = dbRequest.result;
                       callback(passwords, selfUID, self, serverRaw);

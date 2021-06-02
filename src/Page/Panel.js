@@ -72,9 +72,14 @@ const path = window.require("path");
 const request = window.require("request");
 const app = electron.remote.app;
 const dialog = electron.remote.dialog;
+const environ = electron.remote.getGlobal("environ");
 
-const imgPath = app.isPackaged ? "./resources/app/build/" : "./build/";
-const settingPath = "./data/setting.json";
+const staticPath = environ === "release"
+  ? "./resources/app/build/"
+  : environ === "build"
+  ? "./build/"
+  : "./";
+const settingPath = path.join(staticPath, "./static/setting.json");
 const markdownOverride = {
   img: {
     props: {
@@ -1098,7 +1103,7 @@ export default function Panel(props) {
           if (!result.canceled) {
             let srcPath = result.filePaths[0];
             let fileName = `${++imageCounter}${path.extname(srcPath)}`;
-            let dstPath = `${imgPath}static/temp/${fileName}`;
+            let dstPath = `${staticPath}static/temp/${fileName}`;
             fs.copyFileSync(srcPath, dstPath);
             setPanelInfo((panelInfo) => ({
               ...panelInfo,
@@ -1222,7 +1227,7 @@ export default function Panel(props) {
     if (nowTextInput === "") return "The input panel is vacant.";
     while ((matcher = pattern.exec(nowTextInput)) !== null)
       try {
-        fs.accessSync(path.join(imgPath, matcher[2]));
+        fs.accessSync(path.join(staticPath, matcher[2]));
       } catch (err) {
         return `${err}`;
       }
