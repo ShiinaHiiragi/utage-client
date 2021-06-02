@@ -1226,11 +1226,8 @@ export default function Panel(props) {
       matcher;
     if (nowTextInput === "") return "The input panel is vacant.";
     while ((matcher = pattern.exec(nowTextInput)) !== null)
-      try {
-        fs.accessSync(path.join(staticPath, matcher[2]));
-      } catch (err) {
-        return `${err}`;
-      }
+      if (!fs.existsSync(path.join(staticPath, matcher[2])))
+        return `The file ${matcher[2]} does not exist.`
     return "";
   };
   const handleTextSend = (hasChecked) => {
