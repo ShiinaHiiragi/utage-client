@@ -170,7 +170,7 @@ export default function SignIn(props) {
     globalSetting.remember = event.target.checked;
     saveSetting(() => {
       if (globalSetting.remember)
-        snackWindowToggle("success", "The account will be remembered.");
+        snackWindowToggle("info", "The account will be remembered.");
     });
   };
 
@@ -295,7 +295,7 @@ export default function SignIn(props) {
                       snackWindowToggle("error", `${event.target.error}`);
                     };
                     // TEMP: delete this later
-                    serverRaw = JSON.parse(fs.readFileSync("static/res.json"));
+                    // serverRaw = JSON.parse(fs.readFileSync("static/res.json"));
                     dbRequest.onsuccess = () => {
                       db = dbRequest.result;
                       callback(passwords, selfUID, self, serverRaw);

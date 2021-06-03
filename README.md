@@ -54,16 +54,21 @@ Electron 和 React 混用时，其文件结构相差很大
 ### 延迟填充
 
 1. IndexedDB 查询 `profile`
-    - 如果没有 `profile` 那么向 `server` 搜索，返回结果存到 DB，之后重新执行查询；
-    - 如果有 `profile` ，直接返回 `profile`， 同时异步向 `server` 搜索 hash
-        - 如果值不同，那么重新申请 `profile` 并替换
-        - 如果值相同，那么什么也不做
+    - 如果没有 `profile`，那么向 `server` 搜索，返回结果存到 DB，之后重新执行查询；
+    - 如果有 `profile` ，直接返回 `profile`， 同时异步向 `server` 搜索 `hash`
+        - 同时异步向 `server` 搜索 `hash` 的过程
+            - 如果值不同，那么重新申请 `profile` 并替换
+            - 如果值相同，那么什么也不做
+        - 直接返回 `profile` 之后的过程：显示出来
 2. IndexedDB 查询 `group`
-    - 如果没有 `group` 那么向 `server` 搜索，返回结果存到 DB，之后重新执行查询；
-    - 如果有 `profile` ，直接返回 `profile`， 同时异步向 `server` 搜索 hash
-        - 如果值不同，那么重新申请 `profile` 并替换
-        - 如果值相同，查询 `groupHolderName` 字段是否有值
+    - 如果没有 `profile`，那么向 `server` 搜索，返回结果存到 DB，之后重新执行查询；
+    - 如果有 `profile` ，直接返回 `profile`， 同时异步向 `server` 搜索 `hash`
+        - 异步向 `server` 搜索 `hash` 的过程
+            - 如果值不同，那么重新申请 `profile` 并替换
+            - 如果值相同，什么也不做
+        - 直接返回 `profile` 之后的过程：查询 `groupHolderName` 字段是否有值
             - 如果有值，什么也不做
             - 如果没有值，查询 UID 对应的 `profile`（上述），得到名字，填进 `groupHolderName` 里面
+3. `profile` 更新后，重新渲染页面
 
 <p align="right">2021 5/9</p> 

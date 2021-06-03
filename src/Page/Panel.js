@@ -70,7 +70,6 @@ const electron = window.require("electron");
 const fs = window.require("fs");
 const path = window.require("path");
 const request = window.require("request");
-const app = electron.remote.app;
 const dialog = electron.remote.dialog;
 const environ = electron.remote.getGlobal("environ");
 
@@ -568,12 +567,12 @@ export default function Panel(props) {
           // TODO: check hash for update
           // request => update profile
         } else {
-          updateDatebaseProfile(tableName, key, resolve, reject);
+          updateDatebaseProfile(tableName, key, true, resolve, reject);
         }
       };
     });
   };
-  const updateDatebaseProfile = (tableName, key, onsuccess, onerror) => {
+  const updateDatebaseProfile = (tableName, key, reQuery, onsuccess, onerror) => {
     const typeLetter = tableName === "profile" ? "U" : "G";
     request({
       url: `${globalSetting.proxy}profile/get?userid=${selfUID}&getid=${key}&type=${typeLetter}`,
@@ -601,11 +600,21 @@ export default function Panel(props) {
             toggleSnackWindow("error", `${err}`);
           })
           .on("response", (res) => {
-            updateInfoAvatar(avatarID, avatarExtension);
+            updateInfoAvatar(
+              avatarID,
+              avatarExtension,
+              typeLetter === "U"
+                ? getProfile.nickname
+                : getProfile.groupname,
+              typeLetter === "U"
+                ? getProfile.email
+                : undefined
+            );
           })
           .pipe(fs.createWriteStream(avatarPath));
         asyncInsertTuple(encryptTuple(getProfile, tableName), tableName).then(() => {
-          queryProfileByKey(tableName, key).then(onsuccess);
+          if (reQuery)
+            queryProfileByKey(tableName, key).then(onsuccess);
         }).catch((err) => onerror(err));
       }
       else {
@@ -613,33 +622,54 @@ export default function Panel(props) {
       }
     });
   }
-  // FIX: why avatar?
-  const updateInfoAvatar = (avatarID, avatarExtension) => {
+
+  const updateInfoAvatar = (targetID, targetExtension, targetName, targetEmail) => {
     setPanelInfo((panelInfo) => ({
       ...panelInfo,
+      usrInfo: panelInfo.usrInfo.uid === targetID
+        ? {
+          ...panelInfo.usrInfo,
+          username: targetName,
+          email: targetEmail,
+          avatar: targetExtension
+        }: panelInfo.usrInfo,
       record: panelInfo.record.map((item) => {
-        return item.accessInfo.id === avatarID
+        return panelInfo.usrInfo.uid === targetID
+          ? {
+            ...item,
+            log: item.log.map((value) => {
+              return value.senderID === targetID
+                ? {
+                  ...value,
+                  sender: targetName,
+                  senderAvatar: targetExtension
+                } : value
+            })
+          } : item.accessInfo.id === targetID
           ? {
             ...item,
             accessInfo: {
               ...item.accessInfo,
-              avatar: avatarExtension
+              name: targetName,
+              avatar: targetExtension
             },
             log: item.log.map((value) => {
-              return value.senderID === avatarID
+              return value.senderID === targetID
                 ? {
                   ...value,
-                  senderAvatar: avatarExtension
+                  sender: targetName,
+                  senderAvatar: targetExtension
                 } : value
             })
           } : item.accessInfo.id.search(/[0-9]+G/) !== -1
           ? {
             ...item,
             log: item.log.map((value) => {
-              return value.senderID === avatarID
+              return value.senderID === targetID
                 ? {
                   ...value,
-                  senderAvatar: avatarExtension
+                  sender: targetName,
+                  senderAvatar: targetExtension
                 } : value
             })
           } : item
@@ -976,7 +1006,7 @@ export default function Panel(props) {
                 asyncInsertTuple(selfProfile, "profile").catch((err) => {
                   toggleSnackWindow("error", `${err}`);
                 });
-                if (!err && response.statusCode == 200) {
+                if (!err && response.statusCode === 200) {
                   fs.copyFileSync(srcPath, dstPath);
                   setPanelInfo((panelInfo) => ({
                     ...panelInfo,
@@ -985,6 +1015,12 @@ export default function Panel(props) {
                       avatar: extension
                     }
                   }));
+                  updateInfoAvatar(
+                    panelInfo.usrInfo.uid,
+                    extension,
+                    panelInfo.usrInfo.username,
+                    panelInfo.usrInfo.email
+                  );
                   setPanelPopup((panelPopup) => ({
                     ...panelPopup,
                     self: {
