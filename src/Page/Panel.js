@@ -553,56 +553,58 @@ export default function Panel(props) {
   const queryProfileByKey = (tableName, key) => {
     let objectStore = props.DB.transaction([tableName]).objectStore(tableName);
     let dbRequest = objectStore.get(key);
-
     return new Promise((resolve, reject) => {
       dbRequest.onerror = (event) => {
         reject(`${event.target.error}`);
       };
       dbRequest.onsuccess = (event) => {
-        if (event.target.result)
+        if (event.target.result) {
           resolve(event.target.result);
-        else {
-          // only profile and group will request in this way
-          const typeLetter = tableName === "profile" ? "U" : "G";
-          request({
-            url: `${globalSetting.proxy}profile/get?userid=${selfUID}&getid=${key}&type=${typeLetter}`,
-            method: "GET",
-            json: true,
-            headers: {
-              "content-type": "text/plain",
-            },
-            timeout: 10000,
-          }, (err, response) => {
-            if (!err && response.statusCode === 200) {
-              // do searching one more time after inserting
-              let getProfile = JSON.parse(DRSA(response.body));
-              // let avatarPath = path.join(
-              //   staticPath,
-              //   `avatar/avatar-${key}${typeLetter}.${typeLetter === "U"
-              //     ? getProfile.avatarsuffix
-              //     : getProfile.groupavatarsuffix}`
-              // );
-              // if (!fs.existsSync(avatarPath))
-              //   request.get(`${globalSetting.proxy}image/avatars?userid=${key}&type=${typeLetter}`)
-              //   .on("error", (err) => {
-              //     toggleSnackWindow("Error", `${err}`);
-              //   })
-              //   .pipe(fs.createWriteStream(avatarPath));
-              asyncInsertTuple(encryptTuple(getProfile, tableName), tableName)
-                .then(() => {
-                  queryProfileByKey(tableName, key).then(resolve);
-                }).catch((err) => {
-                  toggleSnackWindow("error", `${err}`);
-                });
-            }
-            else {
-              reject(`${err ? err : `ServerError: ${response.body}`}`);
-            }
-          });
+          // request => update profile
+        } else {
+          updateDatebaseProfile(tableName, key, resolve, reject);
         }
       };
     });
   };
+
+  // let avatarPath = path.join(
+  //   staticPath,
+  //   `avatar/avatar-${key}${typeLetter}.${typeLetter === "U"
+  //     ? getProfile.avatarsuffix
+  //     : getProfile.groupavatarsuffix}`
+  // );
+  // if (!fs.existsSync(avatarPath))
+  //   request.get(`${globalSetting.proxy}image/avatars?userid=${key}&type=${typeLetter}`)
+  //   .on("error", (err) => {
+  //     toggleSnackWindow("Error", `${err}`);
+  //   })
+  //   .pipe(fs.createWriteStream(avatarPath));
+
+  // only profile and group will request in this way
+  const updateDatebaseProfile = (tableName, key, onsuccess, onerror) => {
+    const typeLetter = tableName === "profile" ? "U" : "G";
+    request({
+      url: `${globalSetting.proxy}profile/get?userid=${selfUID}&getid=${key}&type=${typeLetter}`,
+      method: "GET",
+      json: true,
+      headers: {
+        "content-type": "text/plain",
+      },
+      timeout: 10000,
+    }, (err, response) => {
+      if (!err && response.statusCode === 200) {
+        // do searching one more time after inserting
+        let getProfile = JSON.parse(DRSA(response.body));
+        asyncInsertTuple(encryptTuple(getProfile, tableName), tableName).then(() => {
+          queryProfileByKey(tableName, key).then(onsuccess);
+        }).catch((err) => onerror(err));
+      }
+      else {
+        onerror(`${err ? err : `ServerError: ${response.body}`}`);
+      }
+    });
+  }
 
   const requestNewRecord = () => {
     // TODO: ask server for new record
