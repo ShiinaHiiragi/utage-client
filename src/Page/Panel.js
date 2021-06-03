@@ -600,15 +600,12 @@ export default function Panel(props) {
             toggleSnackWindow("error", `${err}`);
           })
           .on("response", (res) => {
-            updateInfoAvatar(
+            updateInfoPanel(
               avatarID,
               avatarExtension,
               typeLetter === "U"
                 ? getProfile.nickname
-                : getProfile.groupname,
-              typeLetter === "U"
-                ? getProfile.email
-                : undefined
+                : getProfile.groupname
             );
           })
           .pipe(fs.createWriteStream(avatarPath));
@@ -623,14 +620,13 @@ export default function Panel(props) {
     });
   }
 
-  const updateInfoAvatar = (targetID, targetExtension, targetName, targetEmail) => {
+  const updateInfoPanel = (targetID, targetExtension, targetName) => {
     setPanelInfo((panelInfo) => ({
       ...panelInfo,
       usrInfo: panelInfo.usrInfo.uid === targetID
         ? {
           ...panelInfo.usrInfo,
           username: targetName,
-          email: targetEmail,
           avatar: targetExtension
         }: panelInfo.usrInfo,
       record: panelInfo.record.map((item) => {
@@ -1003,23 +999,15 @@ export default function Panel(props) {
                 },
                 timeout: 10000,
               }, (err, response) => {
-                asyncInsertTuple(selfProfile, "profile").catch((err) => {
-                  toggleSnackWindow("error", `${err}`);
-                });
                 if (!err && response.statusCode === 200) {
+                  asyncInsertTuple(selfProfile, "profile").catch((err) => {
+                    toggleSnackWindow("error", `${err}`);
+                  });
                   fs.copyFileSync(srcPath, dstPath);
-                  setPanelInfo((panelInfo) => ({
-                    ...panelInfo,
-                    usrInfo: {
-                      ...panelInfo.usrInfo,
-                      avatar: extension
-                    }
-                  }));
-                  updateInfoAvatar(
+                  updateInfoPanel(
                     panelInfo.usrInfo.uid,
                     extension,
-                    panelInfo.usrInfo.username,
-                    panelInfo.usrInfo.email
+                    panelInfo.usrInfo.username
                   );
                   setPanelPopup((panelPopup) => ({
                     ...panelPopup,
@@ -1052,8 +1040,65 @@ export default function Panel(props) {
     }));
   };
   const handleMenuProfileApply = () => {
-    handleMenuProfileClose();
-    // TODO: change the profile (except avatar)
+    checkURL((err, response) => {
+      if (!err && response.statusCode === 200 && response.body === "utage") {
+        let avatarHash = CryptoJS.SHA256(new Date().toISOString()).toString();
+        request({
+          url: `${globalSetting.proxy}profile/set`,
+          method: "POST",
+          json: true,
+          headers: {
+            "content-type": "multipart/form-data",
+          },
+          formData: {
+            userid: panelPopup.self.uid,
+            email: RSA(panelPopup.self.email),
+            nickname: RSA(panelPopup.self.username),
+            tel: RSA(panelPopup.self.tel),
+            city: RSA(panelPopup.self.city),
+            birth: RSA(panelPopup.self.birth),
+            gender: RSA(panelPopup.self.gender),
+            avatarhash: RSA(avatarHash),
+            avatarsuffix: RSA(panelPopup.self.avatar),
+            avatar: panelPopup.self.avatar !== ""
+              ? fs.createReadStream(path.join(
+                staticPath,
+                `static/avatar/avatar-${panelPopup.self.uid}U.${panelPopup.self.avatar}`
+              )) : ""
+          },
+          timeout: 10000,
+        }, (err, response) => {
+          if (!err && response.statusCode === 200) {
+            asyncInsertTuple({
+              uid: panelPopup.self.uid,
+              username: AES(panelPopup.self.username),
+              email: AES(panelPopup.self.email),
+              city: AES(panelPopup.self.city),
+              tel: AES(panelPopup.self.tel),
+              birth: AES(panelPopup.self.birth),
+              gender: AES(panelPopup.self.gender),
+              avatar: {
+                extension: AES(panelPopup.self.avatar),
+                hash: AES(avatarHash)
+              }
+            }, "profile").catch((err) => {
+              toggleSnackWindow("error", `${err}`);
+            });
+            updateInfoPanel(
+              panelInfo.usrInfo.uid,
+              panelInfo.usrInfo.avatar,
+              panelPopup.self.username
+            );
+            closeBackdrop();
+            toggleSnackWindow("success", "The profile has been changed.");
+          } else {
+            toggleSnackWindow("error", err ? `${err}` : `ServerError: ${response.body}.`);
+          }
+        })
+      } else {
+        toggleSnackWindow("error", err ? `${err}` : `ServerError: ${response.body}.`);
+      }
+    });
   };
 
   // about log out of menu button
