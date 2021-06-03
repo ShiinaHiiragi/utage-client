@@ -347,16 +347,13 @@ export default function Panel(props) {
     );
   const RSA = (value) => props.KEY.pubServer.encrypt(value, "base64");
   const DRSA = (value) => props.KEY.keyClient.decrypt(value);
+
   const checkURL = (callback) => {
     request({
         url: `${globalSetting.proxy}who`,
         timeout: 10000
       }, (err, response) => {
-        return new Promise((resolve, reject) => {
-          if (!err && response.statusCode === 200 && response.body === "utage")
-            resolve();
-          else reject(err ? `${err}` : `ServerError: ${response.body}.`);
-        })
+        callback(err, response);
       }
     );
   }
@@ -891,52 +888,77 @@ export default function Panel(props) {
     }));
   };
   const handleMenuProfileAvatarChange = () => {
-    dialog.showOpenDialog({
-      title: "Choose an Avatar",
-      filters: [
-        { name: "Images", extensions: ["jpg", "png", "gif"] },
-        { name: "All Files", extensions: ["*"] }
-      ]
-    })
-    .then((result) => {
-      if (!result.canceled) {
-        toggleBackdrop();
-        let srcPath = result.filePaths[0];
-        let extension = path.extname(srcPath).slice(1);
-        let dstPath = path.join(staticPath, `static/avatar/avatar-${selfUID}U.${extension}`);
-        queryProfileByKey("profile", selfUID).then((selfProfile) => {
-          request({
-            url: `${globalSetting.proxy}profile/set`,
-            method: "POST",
-            json: true,
-            headers: {
-              "content-type": "multipart/form-data",
-            },
-            formData: {
-              userid: selfUID,
-              email: RSA(DAES(selfProfile.email)),
-              nickname: RSA(DAES(selfProfile.username)),
-              tel: RSA(DAES(selfProfile.tel)),
-              city: RSA(DAES(selfProfile.city)),
-              birth: RSA(DAES(selfProfile.birth)),
-              gender: RSA(DAES(selfProfile.gender)),
-              avatarhash: RSA(CryptoJS.SHA256(new Date().toISOString()).toString()),
-              avatarsuffix: RSA(extension),
-              avatar: fs.createReadStream(srcPath)
-            },
-            timeout: 10000,
-          }, (err, response) => {
-            closeBackdrop();
-            panelInfo.usrInfo.avatar = extension;
-            console.log(panelInfo.usrInfo);
-            if (!err && response.statusCode == 200) {
-              fs.copyFileSync(srcPath, dstPath);
-              toggleSnackWindow("success", "The avatar has been changed.");
-            } else {
-              toggleSnackWindow("error", err ? `${err}` : `ServerError: ${response.body}.`);
-            }
-          })
+    checkURL((err, response) => {
+      if (!err && response.statusCode === 200 && response.body === "utage") {
+        dialog.showOpenDialog({
+          title: "Choose an Avatar",
+          filters: [
+            { name: "Images", extensions: ["jpg", "png", "gif"] },
+            { name: "All Files", extensions: ["*"] }
+          ]
+        })
+        .then((result) => {
+          if (!result.canceled) {
+            toggleBackdrop();
+            let srcPath = result.filePaths[0];
+            let extension = path.extname(srcPath).slice(1);
+            let dstPath = path.join(staticPath, `static/avatar/avatar-${selfUID}U.${extension}`);
+            queryProfileByKey("profile", selfUID).then((selfProfile) => {
+              selfProfile.avatar = {
+                hash: AES(CryptoJS.SHA256(new Date().toISOString()).toString()),
+                extension: AES(extension)
+              }
+              request({
+                url: `${globalSetting.proxy}profile/set`,
+                method: "POST",
+                json: true,
+                headers: {
+                  "content-type": "multipart/form-data",
+                },
+                formData: {
+                  userid: selfUID,
+                  email: RSA(DAES(selfProfile.email)),
+                  nickname: RSA(DAES(selfProfile.username)),
+                  tel: RSA(DAES(selfProfile.tel)),
+                  city: RSA(DAES(selfProfile.city)),
+                  birth: RSA(DAES(selfProfile.birth)),
+                  gender: RSA(DAES(selfProfile.gender)),
+                  avatarhash: RSA(DAES(CryptoJS.SHA256(new Date().toISOString()).toString())),
+                  avatarsuffix: RSA(DAES(extension)),
+                  avatar: fs.createReadStream(srcPath)
+                },
+                timeout: 10000,
+              }, (err, response) => {
+                asyncInsertTuple(selfProfile, "profile").catch((err) => {
+                  toggleSnackWindow("error", `${err}`);
+                });
+                if (!err && response.statusCode == 200) {
+                  fs.copyFileSync(srcPath, dstPath);
+                  setPanelInfo((panelInfo) => ({
+                    ...panelInfo,
+                    usrInfo: {
+                      ...panelInfo.usrInfo,
+                      avatar: extension
+                    }
+                  }));
+                  setPanelPopup((panelPopup) => ({
+                    ...panelPopup,
+                    self: {
+                      ...panelPopup.self,
+                      avatar: extension
+                    }
+                  }));
+                  closeBackdrop();
+                  toggleSnackWindow("success", "The avatar has been changed.");
+                } else {
+                  toggleSnackWindow("error", err ? `${err}` : `ServerError: ${response.body}.`);
+                }
+              })
+            });
+          }
         });
+      } else {
+        toggleSnackWindow("error", err ? `${err}` : `ServerError: ${response.body}.`);
       }
     });
   };
@@ -1761,7 +1783,7 @@ export default function Panel(props) {
         <DialogContent>
           <div className={classes.avatarProfile}>
             <Avatar
-              src={`static/avatar/avatar-${panelPopup.self.uid}.${panelPopup.self.avatar}`}
+              src={`static/avatar/avatar-${panelPopup.self.uid}U.${panelPopup.self.avatar}`}
               className={classes.largeAvatar}
             >
               <PersonIcon className={classes.notLargeAvatar} />
