@@ -615,7 +615,7 @@ export default function Panel(props) {
                 toggleSnackWindow("error", `${err}`);
               })
               .on("response", (res) => {
-                updateInfoPanel(
+                forceUpdateInfoPanel(
                   avatarID,
                   avatarExtension,
                   typeLetter === "U"
@@ -696,6 +696,10 @@ export default function Panel(props) {
       })
     }));
   };
+  const forceUpdateInfoPanel = (targetID, targetExtension, targetName) => {
+    updateInfoPanel(targetID, "", targetName);
+    updateInfoPanel(targetID, targetExtension, targetName);
+  }
 
   const requestNewRecord = () => {
     // TODO: ask server for new record
@@ -771,6 +775,9 @@ export default function Panel(props) {
     }));
   };
   const handleSideListItemClose = () => {
+    // TEMP: for debugging
+    console.log(panelInfo);
+    console.log(panelPopup);
     setPanelPopup((panelPopup) => ({
       ...panelPopup,
       sideListItem: false
@@ -1039,18 +1046,12 @@ export default function Panel(props) {
                         toggleSnackWindow("error", `${err}`);
                       });
                       fs.copyFileSync(srcPath, dstPath);
-                      updateInfoPanel(
+                      forceUpdateInfoPanel(
                         panelInfo.usrInfo.uid,
                         extension,
                         panelInfo.usrInfo.username
                       );
-                      setPanelPopup((panelPopup) => ({
-                        ...panelPopup,
-                        self: {
-                          ...panelPopup.self,
-                          avatar: extension
-                        }
-                      }));
+                      forceUpdatePopupAvatar(extension);
                       closeBackdrop();
                       toggleSnackWindow(
                         "success",
@@ -1075,6 +1076,22 @@ export default function Panel(props) {
       }
     });
   };
+  const forceUpdatePopupAvatar = (extension) => {
+    setPanelPopup((panelPopup) => ({
+      ...panelPopup,
+      self: {
+        ...panelPopup.self,
+        avatar: ""
+      }
+    }));
+    setPanelPopup((panelPopup) => ({
+      ...panelPopup,
+      self: {
+        ...panelPopup.self,
+        avatar: extension
+      }
+    }));
+  }
   const handleMenuProfileChange = (event, prop) => {
     setPanelPopup((panelPopup) => ({
       ...panelPopup,
@@ -1138,6 +1155,7 @@ export default function Panel(props) {
               ).catch((err) => {
                 toggleSnackWindow("error", `${err}`);
               });
+              // the avatar would not change
               updateInfoPanel(
                 panelInfo.usrInfo.uid,
                 panelInfo.usrInfo.avatar,
