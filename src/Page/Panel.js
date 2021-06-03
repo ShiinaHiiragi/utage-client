@@ -345,6 +345,22 @@ export default function Panel(props) {
     CryptoJS.AES.decrypt(value, props.KEY.passwordAES).toString(
       CryptoJS.enc.Utf8
     );
+  const RSA = (value) => props.KEY.pubServer.encrypt(value, "base64");
+  const DRSA = (value) => props.KEY.keyClient.decrypt(value);
+  const checkURL = (callback) => {
+    request({
+        url: `${globalSetting.proxy}who`,
+        timeout: 10000
+      }, (err, response) => {
+        return new Promise((resolve, reject) => {
+          if (!err && response.statusCode === 200 && response.body === "utage")
+            resolve();
+          else reject(err ? `${err}` : `ServerError: ${response.body}.`);
+        })
+      }
+    );
+  }
+
   const asyncInsertTuple = (item, tableName) => {
     let insertRequest = props.DB.transaction([tableName], "readwrite")
       .objectStore(tableName)
@@ -353,7 +369,6 @@ export default function Panel(props) {
       insertRequest.onsuccess = () => resolve();
       insertRequest.onerror = (event) => reject(event.target.error);
     });
-    
   };
   const encryptTuple = (item, tableName) => {
     if (tableName === "profile")
@@ -551,8 +566,9 @@ export default function Panel(props) {
           resolve(event.target.result);
         else {
           // only profile and group will request in this way
+          const typeLetter = tableName === "profile" ? "U" : "G";
           request({
-            url: `${globalSetting.proxy}profile/get?userid=${selfUID}&getid=${key}&type=${tableName === "profile" ? "U" : "G"}`,
+            url: `${globalSetting.proxy}profile/get?userid=${selfUID}&getid=${key}&type=${typeLetter}`,
             method: "GET",
             json: true,
             headers: {
@@ -561,8 +577,20 @@ export default function Panel(props) {
             timeout: 10000,
           }, (err, response) => {
             if (!err && response.statusCode === 200) {
-              let getProfile = JSON.parse(props.KEY.keyClient.decrypt(response.body));
               // do searching one more time after inserting
+              let getProfile = JSON.parse(DRSA(response.body));
+              // let avatarPath = path.join(
+              //   staticPath,
+              //   `avatar/avatar-${key}${typeLetter}.${typeLetter === "U"
+              //     ? getProfile.avatarsuffix
+              //     : getProfile.groupavatarsuffix}`
+              // );
+              // if (!fs.existsSync(avatarPath))
+              //   request.get(`${globalSetting.proxy}image/avatars?userid=${key}&type=${typeLetter}`)
+              //   .on("error", (err) => {
+              //     toggleSnackWindow("Error", `${err}`);
+              //   })
+              //   .pipe(fs.createWriteStream(avatarPath));
               asyncInsertTuple(encryptTuple(getProfile, tableName), tableName)
                 .then(() => {
                   queryProfileByKey(tableName, key).then(resolve);
@@ -863,7 +891,54 @@ export default function Panel(props) {
     }));
   };
   const handleMenuProfileAvatarChange = () => {
-    // TODO: upload a new avatar
+    dialog.showOpenDialog({
+      title: "Choose an Avatar",
+      filters: [
+        { name: "Images", extensions: ["jpg", "png", "gif"] },
+        { name: "All Files", extensions: ["*"] }
+      ]
+    })
+    .then((result) => {
+      if (!result.canceled) {
+        toggleBackdrop();
+        let srcPath = result.filePaths[0];
+        let extension = path.extname(srcPath).slice(1);
+        let dstPath = path.join(staticPath, `static/avatar/avatar-${selfUID}U.${extension}`);
+        queryProfileByKey("profile", selfUID).then((selfProfile) => {
+          request({
+            url: `${globalSetting.proxy}profile/set`,
+            method: "POST",
+            json: true,
+            headers: {
+              "content-type": "multipart/form-data",
+            },
+            formData: {
+              userid: selfUID,
+              email: RSA(DAES(selfProfile.email)),
+              nickname: RSA(DAES(selfProfile.username)),
+              tel: RSA(DAES(selfProfile.tel)),
+              city: RSA(DAES(selfProfile.city)),
+              birth: RSA(DAES(selfProfile.birth)),
+              gender: RSA(DAES(selfProfile.gender)),
+              avatarhash: RSA(CryptoJS.SHA256(new Date().toISOString()).toString()),
+              avatarsuffix: RSA(extension),
+              avatar: fs.createReadStream(srcPath)
+            },
+            timeout: 10000,
+          }, (err, response) => {
+            closeBackdrop();
+            panelInfo.usrInfo.avatar = extension;
+            console.log(panelInfo.usrInfo);
+            if (!err && response.statusCode == 200) {
+              fs.copyFileSync(srcPath, dstPath);
+              toggleSnackWindow("success", "The avatar has been changed.");
+            } else {
+              toggleSnackWindow("error", err ? `${err}` : `ServerError: ${response.body}.`);
+            }
+          })
+        });
+      }
+    });
   };
   const handleMenuProfileChange = (event, prop) => {
     setPanelPopup((panelPopup) => ({
@@ -1233,7 +1308,6 @@ export default function Panel(props) {
   const handleTextSend = (hasChecked) => {
     // IMPORTANT: DO NOT WRITE AS `!hasChecked`
     // because hasChecked is either `true` or a event Object
-    // TEMP: change the logic later
     let nowTextInput = panelInfo.record.find(
       (value) => value.accessInfo.id === panelInfo.state.selectedRecord
     ).status.textInput;
@@ -1687,7 +1761,7 @@ export default function Panel(props) {
         <DialogContent>
           <div className={classes.avatarProfile}>
             <Avatar
-              src={`static/avatar/avatar-${panelPopup.self.uid}U.${panelPopup.self.avatar}`}
+              src={`static/avatar/avatar-${panelPopup.self.uid}.${panelPopup.self.avatar}`}
               className={classes.largeAvatar}
             >
               <PersonIcon className={classes.notLargeAvatar} />

@@ -14,7 +14,7 @@
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
-    "build-copy": "ROBOCOPY ./static/avatar ./build/static/avatar",
+    "build-copy": "ROBOCOPY ./static/ ./build/static/ setting.json || ROBOCOPY ./static/ ./build/static/ setting.json res.json || ROBOCOPY ./static/avatar ./build/static/avatar",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "package": "npm run build && electron-packager . UtageClient --electron-version=11.2.0 --icon='public/icon.ico' --platform=win32 --overwrite --ignore=^/\\.gitignore --ignore=^/README.md"
