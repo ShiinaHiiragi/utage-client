@@ -51,4 +51,19 @@ Electron 和 React 混用时，其文件结构相差很大
 2. 在 React 环境下， `import` 依赖会被自动整合，不需要额外关注。 React 经过 `npm run build` 后得到的文件夹 `build` 作为打包后 `main.js` 的入口，可以将图片放在 React 路径下的 `static/img`，这在 Electron 下环境是 `./resources/app/build/static/img`
 3. 打包时，将 `data`复制到 `UtageClient-win32-x64`，删除 `UtageClient-win32-x64/resources/app/` 下的 `src`，`data`，和 `static`（如果有的话）
 
-<p align="right">2021 5/9</p>
+### 延迟填充
+
+1. IndexedDB 查询 `profile`
+    - 如果没有 `profile` 那么向 `server` 搜索，返回结果存到 DB，之后重新执行查询；
+    - 如果有 `profile` ，直接返回 `profile`， 同时异步向 `server` 搜索 hash
+        - 如果值不同，那么重新申请 `profile` 并替换
+        - 如果值相同，那么什么也不做
+2. IndexedDB 查询 `group`
+    - 如果没有 `group` 那么向 `server` 搜索，返回结果存到 DB，之后重新执行查询；
+    - 如果有 `profile` ，直接返回 `profile`， 同时异步向 `server` 搜索 hash
+        - 如果值不同，那么重新申请 `profile` 并替换
+        - 如果值相同，查询 `groupHolderName` 字段是否有值
+            - 如果有值，什么也不做
+            - 如果没有值，查询 UID 对应的 `profile`（上述），得到名字，填进 `groupHolderName` 里面
+
+<p align="right">2021 5/9</p> 

@@ -339,6 +339,8 @@ function Alert(props) {
 
 export default function Panel(props) {
   const classes = useStyles();
+
+  // encrypt and decrypt
   const AES = (value) =>
     CryptoJS.AES.encrypt(value, props.KEY.passwordAES).toString();
   const DAES = (value) =>
@@ -348,6 +350,7 @@ export default function Panel(props) {
   const RSA = (value) => props.KEY.pubServer.encrypt(value, "base64");
   const DRSA = (value) => props.KEY.keyClient.decrypt(value);
 
+  // check for access
   const checkURL = (callback) => {
     request({
         url: `${globalSetting.proxy}who`,
@@ -358,6 +361,7 @@ export default function Panel(props) {
     );
   }
 
+  // insert tuple to database, return promise
   const asyncInsertTuple = (item, tableName) => {
     let insertRequest = props.DB.transaction([tableName], "readwrite")
       .objectStore(tableName)
@@ -550,6 +554,7 @@ export default function Panel(props) {
     };
   }, []);
 
+  // only profile and group will request in this way
   const queryProfileByKey = (tableName, key) => {
     let objectStore = props.DB.transaction([tableName]).objectStore(tableName);
     let dbRequest = objectStore.get(key);
@@ -560,6 +565,7 @@ export default function Panel(props) {
       dbRequest.onsuccess = (event) => {
         if (event.target.result) {
           resolve(event.target.result);
+          // TODO: check hash for update
           // request => update profile
         } else {
           updateDatebaseProfile(tableName, key, resolve, reject);
@@ -567,21 +573,6 @@ export default function Panel(props) {
       };
     });
   };
-
-  // let avatarPath = path.join(
-  //   staticPath,
-  //   `avatar/avatar-${key}${typeLetter}.${typeLetter === "U"
-  //     ? getProfile.avatarsuffix
-  //     : getProfile.groupavatarsuffix}`
-  // );
-  // if (!fs.existsSync(avatarPath))
-  //   request.get(`${globalSetting.proxy}image/avatars?userid=${key}&type=${typeLetter}`)
-  //   .on("error", (err) => {
-  //     toggleSnackWindow("Error", `${err}`);
-  //   })
-  //   .pipe(fs.createWriteStream(avatarPath));
-
-  // only profile and group will request in this way
   const updateDatebaseProfile = (tableName, key, onsuccess, onerror) => {
     const typeLetter = tableName === "profile" ? "U" : "G";
     request({
@@ -596,6 +587,23 @@ export default function Panel(props) {
       if (!err && response.statusCode === 200) {
         // do searching one more time after inserting
         let getProfile = JSON.parse(DRSA(response.body));
+        let avatarID = `${key}${typeLetter}`;
+        let avatarExtension = typeLetter === "U"
+          ? getProfile.avatarsuffix
+          : getProfile.groupavatarsuffix;
+        let avatarPath = path.join(
+          staticPath,
+          `static/avatar/avatar-${avatarID}.${avatarExtension}`
+        );
+        if (avatarExtension !== "") request
+          .get(`${globalSetting.proxy}image/avatars?userid=${key}&type=${typeLetter}`)
+          .on("error", (err) => {
+            toggleSnackWindow("error", `${err}`);
+          })
+          .on("response", (res) => {
+            updateInfoAvatar(avatarID, avatarExtension);
+          })
+          .pipe(fs.createWriteStream(avatarPath));
         asyncInsertTuple(encryptTuple(getProfile, tableName), tableName).then(() => {
           queryProfileByKey(tableName, key).then(onsuccess);
         }).catch((err) => onerror(err));
@@ -605,6 +613,39 @@ export default function Panel(props) {
       }
     });
   }
+  // FIX: why avatar?
+  const updateInfoAvatar = (avatarID, avatarExtension) => {
+    setPanelInfo((panelInfo) => ({
+      ...panelInfo,
+      record: panelInfo.record.map((item) => {
+        return item.accessInfo.id === avatarID
+          ? {
+            ...item,
+            accessInfo: {
+              ...item.accessInfo,
+              avatar: avatarExtension
+            },
+            log: item.log.map((value) => {
+              return value.senderID === avatarID
+                ? {
+                  ...value,
+                  senderAvatar: avatarExtension
+                } : value
+            })
+          } : item.accessInfo.id.search(/[0-9]+G/) !== -1
+          ? {
+            ...item,
+            log: item.log.map((value) => {
+              return value.senderID === avatarID
+                ? {
+                  ...value,
+                  senderAvatar: avatarExtension
+                } : value
+            })
+          } : item
+      })
+    }));
+  };
 
   const requestNewRecord = () => {
     // TODO: ask server for new record
@@ -713,9 +754,9 @@ export default function Panel(props) {
             rowsInfo,
             target,
             DAES(targetProfile.avatar.extension),
-            DAES(targetProfile.username)
+            DAES(targetProfile.username),
+            callback
           );
-          if (typeof callback === "function") callback();
         } else {
           let groupHolder = DAES(targetProfile.groupHolder);
           rowsInfo = [
@@ -739,9 +780,9 @@ export default function Panel(props) {
                   rowsInfo,
                   target,
                   DAES(targetProfile.avatar.extension),
-                  DAES(targetProfile.groupName)
+                  DAES(targetProfile.groupName),
+                  callback
                 );
-                if (typeof callback === "function") callback();
               })
               .catch((err) => {
                 toggleSnackWindow("error", `${err}`);
@@ -751,9 +792,9 @@ export default function Panel(props) {
               rowsInfo,
               target,
               DAES(targetProfile.avatar.extension),
-              DAES(targetProfile.groupName)
+              DAES(targetProfile.groupName),
+              callback
             );
-            if (typeof callback === "function") callback();
           }
         }
       })
@@ -761,7 +802,7 @@ export default function Panel(props) {
         toggleSnackWindow("error", `${err}`);
       });
   };
-  const handleMoreInfoRender = (rowsInfo, id, avatar, name) => {
+  const handleMoreInfoRender = (rowsInfo, id, avatar, name, callback) => {
     setPanelPopup((panelPopup) => ({
       ...panelPopup,
       profile: {
@@ -772,6 +813,7 @@ export default function Panel(props) {
         name: name
       }
     }));
+    if (typeof callback === "function") callback();
   };
   const handleMoreInfoClose = () => {
     setPanelPopup((panelPopup) => ({
@@ -925,8 +967,8 @@ export default function Panel(props) {
                   city: RSA(DAES(selfProfile.city)),
                   birth: RSA(DAES(selfProfile.birth)),
                   gender: RSA(DAES(selfProfile.gender)),
-                  avatarhash: RSA(DAES(CryptoJS.SHA256(new Date().toISOString()).toString())),
-                  avatarsuffix: RSA(DAES(extension)),
+                  avatarhash: RSA(DAES(selfProfile.avatar.hash)),
+                  avatarsuffix: RSA(DAES(selfProfile.avatar.extension)),
                   avatar: fs.createReadStream(srcPath)
                 },
                 timeout: 10000,
