@@ -37,11 +37,12 @@ const request = window.require("request");
 const electron = window.require("electron");
 const environ = electron.remote.getGlobal("environ");
 
-const staticPath = environ === "release"
-  ? "./resources/app/build/"
-  : environ === "build"
-  ? "./build/"
-  : "./";
+const staticPath =
+  environ === "release"
+    ? "./resources/app/build/"
+    : environ === "build"
+    ? "./build/"
+    : "./";
 const settingPath = path.join(staticPath, "./static/setting.json");
 let globalSetting = JSON.parse(fs.readFileSync(settingPath));
 

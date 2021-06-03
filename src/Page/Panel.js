@@ -73,11 +73,12 @@ const request = window.require("request");
 const dialog = electron.remote.dialog;
 const environ = electron.remote.getGlobal("environ");
 
-const staticPath = environ === "release"
-  ? "./resources/app/build/"
-  : environ === "build"
-  ? "./build/"
-  : "./";
+const staticPath =
+  environ === "release"
+    ? "./resources/app/build/"
+    : environ === "build"
+    ? "./build/"
+    : "./";
 const settingPath = path.join(staticPath, "./static/setting.json");
 const markdownOverride = {
   img: {
@@ -351,14 +352,16 @@ export default function Panel(props) {
 
   // check for access
   const checkURL = (callback) => {
-    request({
+    request(
+      {
         url: `${globalSetting.proxy}who`,
         timeout: 10000
-      }, (err, response) => {
+      },
+      (err, response) => {
         callback(err, response);
       }
     );
-  }
+  };
 
   // insert tuple to database, return promise
   const asyncInsertTuple = (item, tableName) => {
@@ -572,103 +575,124 @@ export default function Panel(props) {
       };
     });
   };
-  const updateDatebaseProfile = (tableName, key, reQuery, onsuccess, onerror) => {
+  const updateDatebaseProfile = (
+    tableName,
+    key,
+    reQuery,
+    onsuccess,
+    onerror
+  ) => {
     const typeLetter = tableName === "profile" ? "U" : "G";
-    request({
-      url: `${globalSetting.proxy}profile/get?userid=${selfUID}&getid=${key}&type=${typeLetter}`,
-      method: "GET",
-      json: true,
-      headers: {
-        "content-type": "text/plain",
+    request(
+      {
+        url: `${globalSetting.proxy}profile/get?userid=${selfUID}&getid=${key}&type=${typeLetter}`,
+        method: "GET",
+        json: true,
+        headers: {
+          "content-type": "text/plain"
+        },
+        timeout: 10000
       },
-      timeout: 10000,
-    }, (err, response) => {
-      if (!err && response.statusCode === 200) {
-        // do searching one more time after inserting
-        let getProfile = JSON.parse(DRSA(response.body));
-        let avatarID = `${key}${typeLetter}`;
-        let avatarExtension = typeLetter === "U"
-          ? getProfile.avatarsuffix
-          : getProfile.groupavatarsuffix;
-        let avatarPath = path.join(
-          staticPath,
-          `static/avatar/avatar-${avatarID}.${avatarExtension}`
-        );
-        if (avatarExtension !== "") request
-          .get(`${globalSetting.proxy}image/avatars?userid=${key}&type=${typeLetter}`)
-          .on("error", (err) => {
-            toggleSnackWindow("error", `${err}`);
-          })
-          .on("response", (res) => {
-            updateInfoPanel(
-              avatarID,
-              avatarExtension,
-              typeLetter === "U"
-                ? getProfile.nickname
-                : getProfile.groupname
-            );
-          })
-          .pipe(fs.createWriteStream(avatarPath));
-        asyncInsertTuple(encryptTuple(getProfile, tableName), tableName).then(() => {
-          if (reQuery)
-            queryProfileByKey(tableName, key).then(onsuccess);
-        }).catch((err) => onerror(err));
+      (err, response) => {
+        if (!err && response.statusCode === 200) {
+          // do searching one more time after inserting
+          let getProfile = JSON.parse(DRSA(response.body));
+          let avatarID = `${key}${typeLetter}`;
+          let avatarExtension =
+            typeLetter === "U"
+              ? getProfile.avatarsuffix
+              : getProfile.groupavatarsuffix;
+          let avatarPath = path.join(
+            staticPath,
+            `static/avatar/avatar-${avatarID}.${avatarExtension}`
+          );
+          if (avatarExtension !== "")
+            request
+              .get(
+                `${globalSetting.proxy}image/avatars?userid=${key}&type=${typeLetter}`
+              )
+              .on("error", (err) => {
+                toggleSnackWindow("error", `${err}`);
+              })
+              .on("response", (res) => {
+                updateInfoPanel(
+                  avatarID,
+                  avatarExtension,
+                  typeLetter === "U"
+                    ? getProfile.nickname
+                    : getProfile.groupname
+                );
+              })
+              .pipe(fs.createWriteStream(avatarPath));
+          asyncInsertTuple(encryptTuple(getProfile, tableName), tableName)
+            .then(() => {
+              if (reQuery) queryProfileByKey(tableName, key).then(onsuccess);
+            })
+            .catch((err) => onerror(err));
+        } else {
+          onerror(`${err ? err : `ServerError: ${response.body}`}`);
+        }
       }
-      else {
-        onerror(`${err ? err : `ServerError: ${response.body}`}`);
-      }
-    });
-  }
+    );
+  };
 
   const updateInfoPanel = (targetID, targetExtension, targetName) => {
     setPanelInfo((panelInfo) => ({
       ...panelInfo,
-      usrInfo: panelInfo.usrInfo.uid === targetID
-        ? {
-          ...panelInfo.usrInfo,
-          username: targetName,
-          avatar: targetExtension
-        }: panelInfo.usrInfo,
+      usrInfo:
+        panelInfo.usrInfo.uid === targetID
+          ? {
+              ...panelInfo.usrInfo,
+              username: targetName,
+              avatar: targetExtension
+            }
+          : panelInfo.usrInfo,
       record: panelInfo.record.map((item) => {
         return panelInfo.usrInfo.uid === targetID
           ? {
-            ...item,
-            log: item.log.map((value) => {
-              return value.senderID === targetID
-                ? {
-                  ...value,
-                  sender: targetName,
-                  senderAvatar: targetExtension
-                } : value
-            })
-          } : item.accessInfo.id === targetID
+              ...item,
+              log: item.log.map((value) => {
+                return value.senderID === targetID
+                  ? {
+                      ...value,
+                      sender: targetName,
+                      senderAvatar: targetExtension
+                    }
+                  : value;
+              })
+            }
+          : item.accessInfo.id === targetID
           ? {
-            ...item,
-            accessInfo: {
-              ...item.accessInfo,
-              name: targetName,
-              avatar: targetExtension
-            },
-            log: item.log.map((value) => {
-              return value.senderID === targetID
-                ? {
-                  ...value,
-                  sender: targetName,
-                  senderAvatar: targetExtension
-                } : value
-            })
-          } : item.accessInfo.id.search(/[0-9]+G/) !== -1
+              ...item,
+              accessInfo: {
+                ...item.accessInfo,
+                name: targetName,
+                avatar: targetExtension
+              },
+              log: item.log.map((value) => {
+                return value.senderID === targetID
+                  ? {
+                      ...value,
+                      sender: targetName,
+                      senderAvatar: targetExtension
+                    }
+                  : value;
+              })
+            }
+          : item.accessInfo.id.search(/[0-9]+G/) !== -1
           ? {
-            ...item,
-            log: item.log.map((value) => {
-              return value.senderID === targetID
-                ? {
-                  ...value,
-                  sender: targetName,
-                  senderAvatar: targetExtension
-                } : value
-            })
-          } : item
+              ...item,
+              log: item.log.map((value) => {
+                return value.senderID === targetID
+                  ? {
+                      ...value,
+                      sender: targetName,
+                      senderAvatar: targetExtension
+                    }
+                  : value;
+              })
+            }
+          : item;
       })
     }));
   };
@@ -769,7 +793,10 @@ export default function Panel(props) {
           rowsInfo = [
             ["UID", targetProfile.uid],
             ["E-mail", DAES(targetProfile.email)],
-            ["Birthday", new Date(DAES(targetProfile.birth)).format("yyyy-MM-dd")],
+            [
+              "Birthday",
+              new Date(DAES(targetProfile.birth)).format("yyyy-MM-dd")
+            ],
             ["Gender", gender]
           ];
           if (DAES(targetProfile.tel))
@@ -960,73 +987,91 @@ export default function Panel(props) {
   const handleMenuProfileAvatarChange = () => {
     checkURL((err, response) => {
       if (!err && response.statusCode === 200 && response.body === "utage") {
-        dialog.showOpenDialog({
-          title: "Choose an Avatar",
-          filters: [
-            { name: "Images", extensions: ["jpg", "png", "gif"] },
-            { name: "All Files", extensions: ["*"] }
-          ]
-        })
-        .then((result) => {
-          if (!result.canceled) {
-            toggleBackdrop();
-            let srcPath = result.filePaths[0];
-            let extension = path.extname(srcPath).slice(1);
-            let dstPath = path.join(staticPath, `static/avatar/avatar-${selfUID}U.${extension}`);
-            queryProfileByKey("profile", selfUID).then((selfProfile) => {
-              selfProfile.avatar = {
-                hash: AES(CryptoJS.SHA256(new Date().toISOString()).toString()),
-                extension: AES(extension)
-              }
-              request({
-                url: `${globalSetting.proxy}profile/set`,
-                method: "POST",
-                json: true,
-                headers: {
-                  "content-type": "multipart/form-data",
-                },
-                formData: {
-                  userid: selfUID,
-                  email: RSA(DAES(selfProfile.email)),
-                  nickname: RSA(DAES(selfProfile.username)),
-                  tel: RSA(DAES(selfProfile.tel)),
-                  city: RSA(DAES(selfProfile.city)),
-                  birth: RSA(DAES(selfProfile.birth)),
-                  gender: RSA(DAES(selfProfile.gender)),
-                  avatarhash: RSA(DAES(selfProfile.avatar.hash)),
-                  avatarsuffix: RSA(DAES(selfProfile.avatar.extension)),
-                  avatar: fs.createReadStream(srcPath)
-                },
-                timeout: 10000,
-              }, (err, response) => {
-                if (!err && response.statusCode === 200) {
-                  asyncInsertTuple(selfProfile, "profile").catch((err) => {
-                    toggleSnackWindow("error", `${err}`);
-                  });
-                  fs.copyFileSync(srcPath, dstPath);
-                  updateInfoPanel(
-                    panelInfo.usrInfo.uid,
-                    extension,
-                    panelInfo.usrInfo.username
-                  );
-                  setPanelPopup((panelPopup) => ({
-                    ...panelPopup,
-                    self: {
-                      ...panelPopup.self,
-                      avatar: extension
+        dialog
+          .showOpenDialog({
+            title: "Choose an Avatar",
+            filters: [
+              { name: "Images", extensions: ["jpg", "png", "gif"] },
+              { name: "All Files", extensions: ["*"] }
+            ]
+          })
+          .then((result) => {
+            if (!result.canceled) {
+              toggleBackdrop();
+              let srcPath = result.filePaths[0];
+              let extension = path.extname(srcPath).slice(1);
+              let dstPath = path.join(
+                staticPath,
+                `static/avatar/avatar-${selfUID}U.${extension}`
+              );
+              queryProfileByKey("profile", selfUID).then((selfProfile) => {
+                selfProfile.avatar = {
+                  hash: AES(
+                    CryptoJS.SHA256(new Date().toISOString()).toString()
+                  ),
+                  extension: AES(extension)
+                };
+                request(
+                  {
+                    url: `${globalSetting.proxy}profile/set`,
+                    method: "POST",
+                    json: true,
+                    headers: {
+                      "content-type": "multipart/form-data"
+                    },
+                    formData: {
+                      userid: selfUID,
+                      email: RSA(DAES(selfProfile.email)),
+                      nickname: RSA(DAES(selfProfile.username)),
+                      tel: RSA(DAES(selfProfile.tel)),
+                      city: RSA(DAES(selfProfile.city)),
+                      birth: RSA(DAES(selfProfile.birth)),
+                      gender: RSA(DAES(selfProfile.gender)),
+                      avatarhash: RSA(DAES(selfProfile.avatar.hash)),
+                      avatarsuffix: RSA(DAES(selfProfile.avatar.extension)),
+                      avatar: fs.createReadStream(srcPath)
+                    },
+                    timeout: 10000
+                  },
+                  (err, response) => {
+                    if (!err && response.statusCode === 200) {
+                      asyncInsertTuple(selfProfile, "profile").catch((err) => {
+                        toggleSnackWindow("error", `${err}`);
+                      });
+                      fs.copyFileSync(srcPath, dstPath);
+                      updateInfoPanel(
+                        panelInfo.usrInfo.uid,
+                        extension,
+                        panelInfo.usrInfo.username
+                      );
+                      setPanelPopup((panelPopup) => ({
+                        ...panelPopup,
+                        self: {
+                          ...panelPopup.self,
+                          avatar: extension
+                        }
+                      }));
+                      closeBackdrop();
+                      toggleSnackWindow(
+                        "success",
+                        "The avatar has been changed."
+                      );
+                    } else {
+                      toggleSnackWindow(
+                        "error",
+                        err ? `${err}` : `ServerError: ${response.body}.`
+                      );
                     }
-                  }));
-                  closeBackdrop();
-                  toggleSnackWindow("success", "The avatar has been changed.");
-                } else {
-                  toggleSnackWindow("error", err ? `${err}` : `ServerError: ${response.body}.`);
-                }
-              })
-            });
-          }
-        });
+                  }
+                );
+              });
+            }
+          });
       } else {
-        toggleSnackWindow("error", err ? `${err}` : `ServerError: ${response.body}.`);
+        toggleSnackWindow(
+          "error",
+          err ? `${err}` : `ServerError: ${response.body}.`
+        );
       }
     });
   };
@@ -1043,60 +1088,76 @@ export default function Panel(props) {
     checkURL((err, response) => {
       if (!err && response.statusCode === 200 && response.body === "utage") {
         let avatarHash = CryptoJS.SHA256(new Date().toISOString()).toString();
-        request({
-          url: `${globalSetting.proxy}profile/set`,
-          method: "POST",
-          json: true,
-          headers: {
-            "content-type": "multipart/form-data",
+        request(
+          {
+            url: `${globalSetting.proxy}profile/set`,
+            method: "POST",
+            json: true,
+            headers: {
+              "content-type": "multipart/form-data"
+            },
+            formData: {
+              userid: panelPopup.self.uid,
+              email: RSA(panelPopup.self.email),
+              nickname: RSA(panelPopup.self.username),
+              tel: RSA(panelPopup.self.tel),
+              city: RSA(panelPopup.self.city),
+              birth: RSA(panelPopup.self.birth),
+              gender: RSA(panelPopup.self.gender),
+              avatarhash: RSA(avatarHash),
+              avatarsuffix: RSA(panelPopup.self.avatar),
+              avatar:
+                panelPopup.self.avatar !== ""
+                  ? fs.createReadStream(
+                      path.join(
+                        staticPath,
+                        `static/avatar/avatar-${panelPopup.self.uid}U.${panelPopup.self.avatar}`
+                      )
+                    )
+                  : ""
+            },
+            timeout: 10000
           },
-          formData: {
-            userid: panelPopup.self.uid,
-            email: RSA(panelPopup.self.email),
-            nickname: RSA(panelPopup.self.username),
-            tel: RSA(panelPopup.self.tel),
-            city: RSA(panelPopup.self.city),
-            birth: RSA(panelPopup.self.birth),
-            gender: RSA(panelPopup.self.gender),
-            avatarhash: RSA(avatarHash),
-            avatarsuffix: RSA(panelPopup.self.avatar),
-            avatar: panelPopup.self.avatar !== ""
-              ? fs.createReadStream(path.join(
-                staticPath,
-                `static/avatar/avatar-${panelPopup.self.uid}U.${panelPopup.self.avatar}`
-              )) : ""
-          },
-          timeout: 10000,
-        }, (err, response) => {
-          if (!err && response.statusCode === 200) {
-            asyncInsertTuple({
-              uid: panelPopup.self.uid,
-              username: AES(panelPopup.self.username),
-              email: AES(panelPopup.self.email),
-              city: AES(panelPopup.self.city),
-              tel: AES(panelPopup.self.tel),
-              birth: AES(panelPopup.self.birth),
-              gender: AES(panelPopup.self.gender),
-              avatar: {
-                extension: AES(panelPopup.self.avatar),
-                hash: AES(avatarHash)
-              }
-            }, "profile").catch((err) => {
-              toggleSnackWindow("error", `${err}`);
-            });
-            updateInfoPanel(
-              panelInfo.usrInfo.uid,
-              panelInfo.usrInfo.avatar,
-              panelPopup.self.username
-            );
-            closeBackdrop();
-            toggleSnackWindow("success", "The profile has been changed.");
-          } else {
-            toggleSnackWindow("error", err ? `${err}` : `ServerError: ${response.body}.`);
+          (err, response) => {
+            if (!err && response.statusCode === 200) {
+              asyncInsertTuple(
+                {
+                  uid: panelPopup.self.uid,
+                  username: AES(panelPopup.self.username),
+                  email: AES(panelPopup.self.email),
+                  city: AES(panelPopup.self.city),
+                  tel: AES(panelPopup.self.tel),
+                  birth: AES(panelPopup.self.birth),
+                  gender: AES(panelPopup.self.gender),
+                  avatar: {
+                    extension: AES(panelPopup.self.avatar),
+                    hash: AES(avatarHash)
+                  }
+                },
+                "profile"
+              ).catch((err) => {
+                toggleSnackWindow("error", `${err}`);
+              });
+              updateInfoPanel(
+                panelInfo.usrInfo.uid,
+                panelInfo.usrInfo.avatar,
+                panelPopup.self.username
+              );
+              closeBackdrop();
+              toggleSnackWindow("success", "The profile has been changed.");
+            } else {
+              toggleSnackWindow(
+                "error",
+                err ? `${err}` : `ServerError: ${response.body}.`
+              );
+            }
           }
-        })
+        );
       } else {
-        toggleSnackWindow("error", err ? `${err}` : `ServerError: ${response.body}.`);
+        toggleSnackWindow(
+          "error",
+          err ? `${err}` : `ServerError: ${response.body}.`
+        );
       }
     });
   };
@@ -1195,7 +1256,9 @@ export default function Panel(props) {
       return;
     }
     handleMoreInfoClick(
-      `${panelPopup.newFriend.find.textInput}${panelPopup.newFriend.find.box === "0" ? "U" : "G"}`,
+      `${panelPopup.newFriend.find.textInput}${
+        panelPopup.newFriend.find.box === "0" ? "U" : "G"
+      }`,
       handleMenuNewClose
     );
   };
@@ -1449,7 +1512,7 @@ export default function Panel(props) {
     if (nowTextInput === "") return "The input panel is vacant.";
     while ((matcher = pattern.exec(nowTextInput)) !== null)
       if (!fs.existsSync(path.join(staticPath, matcher[2])))
-        return `The file ${matcher[2]} does not exist.`
+        return `The file ${matcher[2]} does not exist.`;
     return "";
   };
   const handleTextSend = (hasChecked) => {
