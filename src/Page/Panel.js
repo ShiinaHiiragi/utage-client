@@ -589,8 +589,7 @@ export default function Panel(props) {
                 application: tempApply
               }));
               console.log(deletingRecord);
-              // FIX: error in delete
-              // deletingRecord.forEach((item) => asyncDeleteApplication(item));
+              deletingRecord.forEach((item) => asyncDeleteApplication(item));
             });
           }
         };
@@ -608,15 +607,10 @@ export default function Panel(props) {
         eachTemp(item, resolve, reject))
     ), Promise.resolve());
 
-
-  const eachTempRecord = (item, onsuccess, onerror) => {
-
-  }
-
   // delete application in database
   const asyncDeleteApplication = (rid) => {
     let deleteRequest = props.DB.transaction(["record"], "readwrite")
-      .objectStore('person')
+      .objectStore("record")
       .delete(rid);
     deleteRequest.onerror = (event) => {
       toggleSnackWindow("error", `${event.target.error}`);
