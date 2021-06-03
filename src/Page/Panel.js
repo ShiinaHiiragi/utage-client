@@ -423,6 +423,7 @@ export default function Panel(props) {
     selfUID = panelInfo.usrInfo.uid;
     selfUID = selfUID.substr(0, selfUID.length - 1);
     let primaryProfile = {};
+    let deletingRecord = [];
     let objectStore = props.DB.transaction("profile").objectStore("profile");
     objectStore.openCursor().onsuccess = (event) => {
       let cursor = event.target.result;
@@ -497,32 +498,42 @@ export default function Panel(props) {
               if (targetObject !== undefined) {
                 targetObject.log.push(atomRecord);
               } else {
-                queryProfileByKey("group", tagID)
-                  .then((groupProfile) => {
-                    tempRecord.push({
-                      accessInfo: {
-                        id: `${tagID}G`,
-                        name: DAES(groupProfile.groupName),
-                        avatar: DAES(groupProfile.avatar.extension)
-                      },
-                      status: {
-                        unread: 0,
-                        all: true,
-                        textInput: "",
-                        img: []
-                      },
-                      log: [atomRecord]
-                    });
-                  })
-                  .catch((err) => {
-                    toggleSnackWindow("error", `${err}`);
-                  });
+                tempRecord.push({
+                  accessInfo: {
+                    id: `${tagID}G`,
+                    name: "",
+                    avatar: ""
+                  },
+                  status: {
+                    unread: 0,
+                    all: true,
+                    textInput: "",
+                    img: []
+                  },
+                  log: [atomRecord]
+                });
+                cursor.continue();
               }
+            } else if (type === "N") {
+              tempApply.push({
+                uid: cursor.value.src,
+                dst: [cursor.value.dst, ""],
+                username: "",
+                avatar: "",
+                varification: DAES(cursor.value.text)
+              });
+              deletingRecord.push(cursor.value.rid);
               cursor.continue();
             } else if (type === "A") {
-              // apply for friends
-            } else if (type === "N") {
-              // apply for join
+              tempApply.push({
+                uid: cursor.value.src,
+                dst: [""],
+                username: "",
+                avatar: "",
+                varification: DAES(cursor.value.text)
+              });
+              deletingRecord.push(cursor.value.rid);
+              cursor.continue();
             }
           } else {
             tempRecord.forEach((item) => {
@@ -539,14 +550,48 @@ export default function Panel(props) {
               let rightTime = right.log[right.log.length - 1].time;
               return leftTime > rightTime ? -1 : leftTime < rightTime ? 1 : 0;
             });
-            setPanelInfo((panelInfo) => ({
-              ...panelInfo,
-              record: tempRecord
-            }));
-            setPanelPopup((panelPopup) => ({
-              ...panelPopup,
-              application: tempApply
-            }));
+            fillTempRecord(tempRecord, (item, onsuccess, onerror) => {
+              if (item.accessInfo.id.search(/[0-9]+G/) !== -1) {
+                let gid = item.accessInfo.id.substr(0, item.accessInfo.id.length - 1);
+                queryProfileByKey("group", gid)
+                  .then((groupProfile) => {
+                    // !NOTE: the item here are reference
+                    item.accessInfo.name = DAES(groupProfile.groupName);
+                    item.accessInfo.avatar = DAES(groupProfile.avatar.extension);
+                    onsuccess();
+                  })
+                  .catch((err) => {
+                    onerror(`${err}`);
+                  });
+              } else onsuccess();
+            }).then(() => {
+              fillTempRecord(tempApply, (item, onsuccess, onerror) => {
+                if (item.dst[0] !== "") {
+                  let gid = item.dst[0];
+                  queryProfileByKey("group", gid)
+                  .then((groupProfile) => {
+                    // !NOTE: the item here are reference
+                    item.dst[1] = DAES(groupProfile.groupName);
+                    onsuccess();
+                  })
+                  .catch((err) => {
+                    onerror(`${err}`);
+                  });
+                } else onsuccess();
+              });
+            }).then(() => {
+              setPanelInfo((panelInfo) => ({
+                ...panelInfo,
+                record: tempRecord
+              }));
+              setPanelPopup((panelPopup) => ({
+                ...panelPopup,
+                application: tempApply
+              }));
+              console.log(deletingRecord);
+              // FIX: error in delete
+              // deletingRecord.forEach((item) => asyncDeleteApplication(item));
+            });
           }
         };
       }
@@ -555,6 +600,28 @@ export default function Panel(props) {
       clearInterval(serverClock);
     };
   }, []);
+
+  // sync version of foreach
+  const fillTempRecord = (arrayObject, eachTemp) =>
+    arrayObject.reduce((promiseChain, item) =>
+      promiseChain.then(() => new Promise((resolve, reject) =>
+        eachTemp(item, resolve, reject))
+    ), Promise.resolve());
+
+
+  const eachTempRecord = (item, onsuccess, onerror) => {
+
+  }
+
+  // delete application in database
+  const asyncDeleteApplication = (rid) => {
+    let deleteRequest = props.DB.transaction(["record"], "readwrite")
+      .objectStore('person')
+      .delete(rid);
+    deleteRequest.onerror = (event) => {
+      toggleSnackWindow("error", `${event.target.error}`);
+    }
+  };
 
   // only profile and group will request in this way
   const queryProfileByKey = (tableName, key) => {
