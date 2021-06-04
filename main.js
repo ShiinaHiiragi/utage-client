@@ -14,6 +14,12 @@ global.environ = electron.app.isPackaged
   : process.argv[2] === "--build"
   ? "build"
   : "dev";
+const staticPath =
+  global.environ === "release"
+    ? "./resources/app/build/"
+    : environ === "build"
+    ? "./build/"
+    : "./";
 
 function createWindow() {
   // Create the browser window.
@@ -23,20 +29,27 @@ function createWindow() {
     show: false,
     webPreferences: {
       nodeIntegration: true,
-      enableRemoteModule: true
+      enableRemoteModule: true,
+      partition: "persist:app"
     }
   });
 
-  if (!app.isPackaged) {
-    // open DevTools in the dev mode
+  console.log(path.join(staticPath, "index.html"));
+  if (global.environ === "release") {
+    mainWindow.loadURL(path.join(
+      __dirname,
+      path.join(staticPath, "index.html")
+    ));
+  } else if (global.environ === "build") {
+    mainWindow.loadURL(path.join(
+      __dirname,
+      path.join(staticPath, "index.html")
+    ));
     mainWindow.webContents.openDevTools();
-    if (process.argv[2] == "--dev" || process.argv[2] === undefined)
-      mainWindow.loadURL("http://localhost:3000/");
-    else if (process.argv[2] == "--build")
-      mainWindow.loadURL(path.join(__dirname, "./build/index.html"));
-    else console.log("ERR: Invalid descriptor assigned."), process.exit();
+  } else {
+    mainWindow.loadURL("http://localhost:3000/");
+    mainWindow.webContents.openDevTools();
   }
-  else mainWindow.loadURL(path.join(__dirname, "./build/index.html"));
 
   // this must be called after the loadURL()
   mainWindow.maximize();
