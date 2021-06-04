@@ -295,7 +295,6 @@ export default function SignIn(props) {
                     dbRequest.onerror = (event) => {
                       snackWindowToggle("error", `${event.target.error}`);
                     };
-                    // TEMP: delete this later
                     // serverRaw = JSON.parse(fs.readFileSync("static/res.json"));
                     dbRequest.onsuccess = () => {
                       db = dbRequest.result;

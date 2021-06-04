@@ -1184,15 +1184,7 @@ export default function Panel(props) {
               gender: RSA(panelPopup.self.gender),
               avatarhash: RSA(avatarHash),
               avatarsuffix: RSA(panelPopup.self.avatar),
-              avatar:
-                panelPopup.self.avatar !== ""
-                  ? fs.createReadStream(
-                      path.join(
-                        staticPath,
-                        `static/avatar/avatar-${panelPopup.self.uid}U.${panelPopup.self.avatar}`
-                      )
-                    )
-                  : ""
+              avatar: []
             },
             timeout: 10000
           },
@@ -1269,19 +1261,35 @@ export default function Panel(props) {
   // about friend or group of menu button
   const handleMenuNewClick = () => {
     handleMenuClose();
-    setPanelPopup((panelPopup) => ({
-      ...panelPopup,
-      newFriend: {
-        ...panelPopup.newFriend,
-        open: true,
-        option: 0,
-        find: {
-          textInput: "",
-          box: "0"
+
+
+    let tempApply = panelPopup.application;
+    console.log(tempApply);
+    fillTempRecord(tempApply, (item, onsuccess, onerror) => {
+      queryProfileByKey("profile", item.uid)
+        .then((srcProfile) => {
+          // !NOTE: the item here are reference
+          item.username = DAES(srcProfile.username);
+          item.avatar = DAES(srcProfile.avatar.extension);
+          onsuccess();
+        }).catch((err) => onerror(`${err}`));
+    }).then(() => {
+      console.log(tempApply);
+      setPanelPopup((panelPopup) => ({
+        ...panelPopup,
+        newFriend: {
+          ...panelPopup.newFriend,
+          open: true,
+          option: 0,
+          find: {
+            textInput: "",
+            box: "0"
+          },
+          createGroup: ""
         },
-        createGroup: ""
-      }
-    }));
+        application: tempApply
+      }));
+    });
   };
   const handleMenuNewClose = () => {
     handleMenuClose();
@@ -2196,7 +2204,7 @@ export default function Panel(props) {
               <List className={classes.applicationAll}>
                 {panelPopup.application.map((value) => {
                   return (
-                    <div className={classes.applicationCenter} key={value.uid}>
+                    <div className={classes.applicationCenter} key={`${value.uid}-${value.dst[0]}`}>
                       <ListItem>
                         <ListItemAvatar>
                           <Avatar
