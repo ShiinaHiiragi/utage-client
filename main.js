@@ -34,7 +34,6 @@ function createWindow() {
     }
   });
 
-  console.log(path.join(staticPath, "index.html"));
   if (global.environ === "release") {
     mainWindow.loadURL(path.join(
       __dirname,
