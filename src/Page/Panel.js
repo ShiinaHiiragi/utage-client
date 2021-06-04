@@ -373,7 +373,7 @@ export default function Panel(props) {
       insertRequest.onerror = (event) => reject(event.target.error);
     });
   };
-  const encryptTuple = (item, tableName) => {
+  const encryptRawTuple = (item, tableName) => {
     if (tableName === "profile")
       return {
         uid: item.userid.toString(),
@@ -408,7 +408,7 @@ export default function Panel(props) {
         src: item.userid.toString(),
         dst: item.receiverid.toString(),
         text: AES(item.text),
-        img: item.hash.map((value) => AES(value)),
+        img: JSON.parse(item.hash).map((value) => AES(value)),
         time: AES(item.time)
       };
   };
@@ -685,7 +685,7 @@ export default function Panel(props) {
                 );
               })
               .pipe(fs.createWriteStream(avatarPath));
-          asyncInsertTuple(encryptTuple(getProfile, tableName), tableName)
+          asyncInsertTuple(encryptRawTuple(getProfile, tableName), tableName)
             .then(() => {
               if (reQuery) queryProfileByKey(tableName, key).then(onsuccess);
             })
@@ -982,9 +982,28 @@ export default function Panel(props) {
       toggleSnackWindow("warning", "The varification message is vacant.");
       return;
     }
-
-    handleMoreInfoApplyClose();
-    // TODO: send application to target
+    let typeLetter = panelPopup.varification.id.search(/[0-9]+U/) !== -1 ? "A" : "N";
+    request({
+      url: `${globalSetting.proxy}friend/add`,
+      method: "POST",
+      json: true,
+      headers: {
+        "content-type": "application/json",
+      },
+      body: {
+        type: typeLetter,
+        userid: selfUID,
+        receiverid: panelPopup.varification.id.match(/[0-9]+/)[0],
+        text: RSA(panelPopup.varification.textInput),
+        time: RSA(new Date())
+      },
+      timeout: 10000,
+    }, (err, response) => {
+      if (!err && response.statusCode === 200) {
+        toggleSnackWindow("success", "Your application has been sent.");
+        handleMoreInfoApplyClose();
+      }
+    });
   };
 
   // about list item and more menu

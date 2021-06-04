@@ -381,7 +381,7 @@ export default function SignIn(props) {
         src: item.userid.toString(),
         dst: item.receiverid.toString(),
         text: AES(item.text),
-        img: item.hash.map((value) => AES(value)),
+        img: JSON.parse(item.hash).map((value) => AES(value)),
         time: AES(item.time)
       };
   };
