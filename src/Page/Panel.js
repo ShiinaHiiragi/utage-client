@@ -588,7 +588,6 @@ export default function Panel(props) {
                 ...panelPopup,
                 application: tempApply
               }));
-              console.log(deletingRecord);
               deletingRecord.forEach((item) => asyncDeleteApplication(item));
             });
           }
@@ -626,10 +625,29 @@ export default function Panel(props) {
         reject(`${event.target.error}`);
       };
       dbRequest.onsuccess = (event) => {
-        if (event.target.result) {
-          resolve(event.target.result);
-          // TODO: check hash for update
-          // request => update profile
+        let returnProfile = event.target.result;
+        let typeLetter = tableName === "profile" ? "U" : "G";
+        if (returnProfile) {
+          resolve(returnProfile);
+          // async request
+          request({
+            url: `${globalSetting.proxy}profile/hash?userid=${selfUID}&getid=${key}&type=${typeLetter}`,
+            method: "GET",
+            json: true,
+            headers: {
+              "content-type": "text/plain",
+            },
+            timeout: 10000,
+          }, (err, response) => {
+            if (!err && response.statusCode === 200) {
+              let avatarHash = JSON.parse(DRSA(response.body));
+              if (avatarHash !== DAES(returnProfile.avatar.hash))
+                updateDatebaseProfile(tableName, key, false, resolve, reject);
+            }
+            else {
+              toggleSnackWindow("error", err ? `${err}` : `ServerError: ${response.body}.`);
+            }
+          });
         } else {
           updateDatebaseProfile(tableName, key, true, resolve, reject);
         }
@@ -688,6 +706,7 @@ export default function Panel(props) {
           asyncInsertTuple(encryptRawTuple(getProfile, tableName), tableName)
             .then(() => {
               if (reQuery) queryProfileByKey(tableName, key).then(onsuccess);
+              else toggleSnackWindow("info", "The profile are updated. Reopen it to view the latest version.");
             })
             .catch((err) => onerror(err));
         } else {
@@ -1280,10 +1299,7 @@ export default function Panel(props) {
   // about friend or group of menu button
   const handleMenuNewClick = () => {
     handleMenuClose();
-
-
     let tempApply = panelPopup.application;
-    console.log(tempApply);
     fillTempRecord(tempApply, (item, onsuccess, onerror) => {
       queryProfileByKey("profile", item.uid)
         .then((srcProfile) => {
@@ -1293,7 +1309,6 @@ export default function Panel(props) {
           onsuccess();
         }).catch((err) => onerror(`${err}`));
     }).then(() => {
-      console.log(tempApply);
       setPanelPopup((panelPopup) => ({
         ...panelPopup,
         newFriend: {
