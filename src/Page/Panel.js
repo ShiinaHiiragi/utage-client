@@ -1660,7 +1660,7 @@ export default function Panel(props) {
       );
   };
   const handleTextItalic = () => {
-    if (panelInfo.state.focus) richTextMark("*", "*");
+    if (panelInfo.state.focus) richTextMark(" *", "* ");
     else
       toggleSnackWindow(
         "warning",
