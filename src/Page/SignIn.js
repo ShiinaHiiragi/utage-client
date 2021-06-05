@@ -85,10 +85,10 @@ const checkURL = (stringURL, callback) => {
   request(
     {
       url: `${stringURL}who`,
-      timeout: 10000,
+      // localPort: 55555
       forever: true,
-      pool: { maxSocket: Infinity }
-      // localPort: 55555,
+      pool: { maxSocket: Infinity },
+      timeout: 10000
     },
     (err, response) => {
       callback(err, response, stringURL);
@@ -312,7 +312,9 @@ export default function SignIn(props) {
                       db.createObjectStore("profile", { keyPath: "uid" });
                       db.createObjectStore("group", { keyPath: "gid" });
                       db.createObjectStore("record", { keyPath: "rid" });
-                      callback(passwords, selfUID, self, serverRaw);
+                      let transaction = event.target.transaction;
+                      transaction.oncomplete = () =>
+                        callback(passwords, selfUID, self, serverRaw);
                     };
                   } else {
                     backdropClose();
