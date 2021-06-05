@@ -116,12 +116,12 @@ export default function SignIn(props) {
     setProxyWindow(false);
   };
   const proxyWindowSubmit = (newValue) => {
+    setProxyWindow(false);
     backdropToggle();
     checkURL(newValue, (err, response, newString) => {
       if (!err && response.statusCode === 200 && response.body === "utage") {
         var proxyHasChanged = globalSetting.proxy !== newValue;
         backdropClose();
-        setProxyWindow(false);
         globalSetting.proxy = newString;
         saveProxySetting(proxyHasChanged);
       } else {
