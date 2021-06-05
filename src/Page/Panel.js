@@ -516,6 +516,7 @@ export default function Panel(props) {
               }
             } else if (type === "N") {
               tempApply.push({
+                rid: cursor.value.rid,
                 uid: cursor.value.src,
                 dst: [cursor.value.dst, ""],
                 username: "",
@@ -526,6 +527,7 @@ export default function Panel(props) {
               cursor.continue();
             } else if (type === "A") {
               tempApply.push({
+                rid: cursor.value.rid,
                 uid: cursor.value.src,
                 dst: [""],
                 username: "",
@@ -1395,12 +1397,49 @@ export default function Panel(props) {
       application: panelPopup.application
     }));
   };
-  const handleMenuNewApplicationRefuse = (uid, gid) => {
-    // TODO: refuse src's application
+  const handleMenuNewApplicationRefuse = (rid, uid, gid, username) => {
+    request({
+      url: `${globalSetting.proxy}friend/refuse?recordid=${rid}`,
+      method: "GET",
+      json: true,
+      headers: {
+        "content-type": "text/plain",
+      },
+      timeout: 10000,
+    }, (err, response) => {
+      if (!err && response.statusCode === 200) {
+        toggleSnackWindow("success", `You have refused ${username}.`);
+      }
+      else {
+        toggleSnackWindow("error", err ? `${err}` : `ServerError: ${response.body}.`);
+      }
+    });
     menuNewApplicationRemove(uid, gid);
   };
-  const handleMenuNewApplicationAccept = (uid, gid) => {
-    // TODO: accept src's application
+  const handleMenuNewApplicationAccept = (rid, uid, gid, username) => {
+    request({
+      url: `${globalSetting.proxy}friend/accept`,
+      method: "POST",
+      json: true,
+      headers: {
+        "content-type": "application/json",
+      },
+      body: {
+        type: gid === "" ? "U" : "G",
+        userid: selfUID,
+        recordid: rid,
+        senderid: uid,
+        receiverid: gid === "" ? selfUID : gid
+      },
+      timeout: 10000,
+    }, (err, response) => {
+      if (!err && response.statusCode === 200) {
+        toggleSnackWindow("success", `You have accepted ${username}.`);
+      }
+      else {
+        toggleSnackWindow("error", err ? `${err}` : `ServerError: ${response.body}.`);
+      }
+    });
     menuNewApplicationRemove(uid, gid);
   };
   const handleMenuNewCreateTextChange = (event) => {
@@ -2259,8 +2298,10 @@ export default function Panel(props) {
                         <IconButton
                           onClick={() => {
                             handleMenuNewApplicationRefuse(
+                              value.rid,
                               value.uid,
-                              value.dst[0]
+                              value.dst[0],
+                              value.username
                             );
                           }}
                         >
@@ -2271,8 +2312,10 @@ export default function Panel(props) {
                         <IconButton
                           onClick={() => {
                             handleMenuNewApplicationAccept(
+                              value.rid,
                               value.uid,
-                              value.dst[0]
+                              value.dst[0],
+                              value.username
                             );
                           }}
                         >
