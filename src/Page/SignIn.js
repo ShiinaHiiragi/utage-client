@@ -399,14 +399,17 @@ export default function SignIn(props) {
       .put(encryptTuple(item, tableName, keyAES));
     let universeID = tableName === "profile" ? item.userid : item.groupid;
     let typeLetter = tableName === "profile" ? "U" : "G";
-    let suffix = tableName === "profile" ? item.avatarsuffix : item.groupavatarsuffix;
+    let suffix =
+      tableName === "profile" ? item.avatarsuffix : item.groupavatarsuffix;
     if (tableName !== "record" && suffix !== "") {
       let avatarPath = path.join(
         staticPath,
         `static/avatar/avatar-${universeID}${typeLetter}.${suffix}`
       );
       request
-        .get(`${globalSetting.proxy}image/avatars?userid=${universeID}&type=${typeLetter}`)
+        .get(
+          `${globalSetting.proxy}image/avatars?userid=${universeID}&type=${typeLetter}`
+        )
         .on("error", (err) => snackWindowToggle("error", `${err}`))
         .pipe(fs.createWriteStream(avatarPath));
     }

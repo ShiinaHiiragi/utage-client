@@ -556,44 +556,51 @@ export default function Panel(props) {
             });
             fillTempRecord(tempRecord, (item, onsuccess, onerror) => {
               if (item.accessInfo.id.search(/[0-9]+G/) !== -1) {
-                let gid = item.accessInfo.id.substr(0, item.accessInfo.id.length - 1);
+                let gid = item.accessInfo.id.substr(
+                  0,
+                  item.accessInfo.id.length - 1
+                );
                 queryProfileByKey("group", gid)
                   .then((groupProfile) => {
                     // !NOTE: the item here are reference
                     item.accessInfo.name = DAES(groupProfile.groupName);
-                    item.accessInfo.avatar = DAES(groupProfile.avatar.extension);
+                    item.accessInfo.avatar = DAES(
+                      groupProfile.avatar.extension
+                    );
                     onsuccess();
                   })
                   .catch((err) => {
                     onerror(`${err}`);
                   });
               } else onsuccess();
-            }).then(() => {
-              fillTempRecord(tempApply, (item, onsuccess, onerror) => {
-                if (item.dst[0] !== "") {
-                  let gid = item.dst[0];
-                  queryProfileByKey("group", gid)
-                  .then((groupProfile) => {
-                    // !NOTE: the item here are reference
-                    item.dst[1] = DAES(groupProfile.groupName);
-                    onsuccess();
-                  })
-                  .catch((err) => {
-                    onerror(`${err}`);
-                  });
-                } else onsuccess();
+            })
+              .then(() => {
+                fillTempRecord(tempApply, (item, onsuccess, onerror) => {
+                  if (item.dst[0] !== "") {
+                    let gid = item.dst[0];
+                    queryProfileByKey("group", gid)
+                      .then((groupProfile) => {
+                        // !NOTE: the item here are reference
+                        item.dst[1] = DAES(groupProfile.groupName);
+                        onsuccess();
+                      })
+                      .catch((err) => {
+                        onerror(`${err}`);
+                      });
+                  } else onsuccess();
+                });
+              })
+              .then(() => {
+                setPanelInfo((panelInfo) => ({
+                  ...panelInfo,
+                  record: tempRecord
+                }));
+                setPanelPopup((panelPopup) => ({
+                  ...panelPopup,
+                  application: tempApply
+                }));
+                deletingRecord.forEach((item) => asyncDeleteApplication(item));
               });
-            }).then(() => {
-              setPanelInfo((panelInfo) => ({
-                ...panelInfo,
-                record: tempRecord
-              }));
-              setPanelPopup((panelPopup) => ({
-                ...panelPopup,
-                application: tempApply
-              }));
-              deletingRecord.forEach((item) => asyncDeleteApplication(item));
-            });
           }
         };
       }
@@ -605,10 +612,14 @@ export default function Panel(props) {
 
   // sync version of foreach
   const fillTempRecord = (arrayObject, eachTemp) =>
-    arrayObject.reduce((promiseChain, item) =>
-      promiseChain.then(() => new Promise((resolve, reject) =>
-        eachTemp(item, resolve, reject))
-    ), Promise.resolve());
+    arrayObject.reduce(
+      (promiseChain, item) =>
+        promiseChain.then(
+          () =>
+            new Promise((resolve, reject) => eachTemp(item, resolve, reject))
+        ),
+      Promise.resolve()
+    );
 
   // delete application in database
   const asyncDeleteApplication = (rid) => {
@@ -617,7 +628,7 @@ export default function Panel(props) {
       .delete(rid);
     deleteRequest.onerror = (event) => {
       toggleSnackWindow("error", `${event.target.error}`);
-    }
+    };
   };
 
   // only profile and group will request in this way
@@ -634,24 +645,29 @@ export default function Panel(props) {
         if (returnProfile) {
           resolve(returnProfile);
           // async request
-          request({
-            url: `${globalSetting.proxy}profile/hash?userid=${selfUID}&getid=${key}&type=${typeLetter}`,
-            method: "GET",
-            json: true,
-            headers: {
-              "content-type": "text/plain",
+          request(
+            {
+              url: `${globalSetting.proxy}profile/hash?userid=${selfUID}&getid=${key}&type=${typeLetter}`,
+              method: "GET",
+              json: true,
+              headers: {
+                "content-type": "text/plain"
+              },
+              timeout: 10000
             },
-            timeout: 10000,
-          }, (err, response) => {
-            if (!err && response.statusCode === 200) {
-              let avatarHash = JSON.parse(DRSA(response.body));
-              if (avatarHash !== DAES(returnProfile.avatar.hash))
-                updateDatebaseProfile(tableName, key, false, resolve, reject);
+            (err, response) => {
+              if (!err && response.statusCode === 200) {
+                let avatarHash = JSON.parse(DRSA(response.body));
+                if (avatarHash !== DAES(returnProfile.avatar.hash))
+                  updateDatebaseProfile(tableName, key, false, resolve, reject);
+              } else {
+                toggleSnackWindow(
+                  "error",
+                  err ? `${err}` : `ServerError: ${response.body}.`
+                );
+              }
             }
-            else {
-              toggleSnackWindow("error", err ? `${err}` : `ServerError: ${response.body}.`);
-            }
-          });
+          );
         } else {
           updateDatebaseProfile(tableName, key, true, resolve, reject);
         }
@@ -686,9 +702,7 @@ export default function Panel(props) {
               ? getProfile.avatarsuffix
               : getProfile.groupavatarsuffix;
           let profileName =
-            typeLetter === "U"
-              ? getProfile.nickname
-              : getProfile.groupname;
+            typeLetter === "U" ? getProfile.nickname : getProfile.groupname;
           let avatarPath = path.join(
             staticPath,
             `static/avatar/avatar-${avatarID}.${avatarExtension}`
@@ -711,7 +725,11 @@ export default function Panel(props) {
           asyncInsertTuple(encryptRawTuple(getProfile, tableName), tableName)
             .then(() => {
               if (reQuery) queryProfileByKey(tableName, key).then(onsuccess);
-              else toggleSnackWindow("info", "The profile are updated. Reopen it to view the latest version.");
+              else
+                toggleSnackWindow(
+                  "info",
+                  "The profile are updated. Reopen it to view the latest version."
+                );
             })
             .catch((err) => onerror(err));
         } else {
@@ -781,16 +799,17 @@ export default function Panel(props) {
       }),
       state: {
         ...panelInfo.state,
-        selectedName: panelInfo.state.selectedRecord === targetID
-          ? targetName
-          : panelInfo.state.selectedName
+        selectedName:
+          panelInfo.state.selectedRecord === targetID
+            ? targetName
+            : panelInfo.state.selectedName
       }
     }));
   };
   const forceUpdateInfoPanel = (targetID, targetExtension, targetName) => {
     updateInfoPanel(targetID, "", targetName);
     updateInfoPanel(targetID, targetExtension, targetName);
-  }
+  };
 
   const requestNewRecord = () => {
     // TODO: ask server for new record
@@ -911,7 +930,10 @@ export default function Panel(props) {
             ["GID", targetProfile.gid],
             ["UID of Group Holder", DAES(targetProfile.groupHolderID)],
             ["Group Holder", groupHolder],
-            ["Created Time", new Date(DAES(targetProfile.createTime)).format("yyyy-MM-dd")]
+            [
+              "Created Time",
+              new Date(DAES(targetProfile.createTime)).format("yyyy-MM-dd")
+            ]
           ];
           if (DAES(targetProfile.joinTime))
             rowsInfo.push([
@@ -1013,28 +1035,32 @@ export default function Panel(props) {
       toggleSnackWindow("warning", "The varification message is vacant.");
       return;
     }
-    let typeLetter = panelPopup.varification.id.search(/[0-9]+U/) !== -1 ? "A" : "N";
-    request({
-      url: `${globalSetting.proxy}friend/add`,
-      method: "POST",
-      json: true,
-      headers: {
-        "content-type": "application/json",
+    let typeLetter =
+      panelPopup.varification.id.search(/[0-9]+U/) !== -1 ? "A" : "N";
+    request(
+      {
+        url: `${globalSetting.proxy}friend/add`,
+        method: "POST",
+        json: true,
+        headers: {
+          "content-type": "application/json"
+        },
+        body: {
+          type: typeLetter,
+          userid: selfUID,
+          receiverid: panelPopup.varification.id.match(/[0-9]+/)[0],
+          text: RSA(panelPopup.varification.textInput),
+          time: RSA(new Date())
+        },
+        timeout: 10000
       },
-      body: {
-        type: typeLetter,
-        userid: selfUID,
-        receiverid: panelPopup.varification.id.match(/[0-9]+/)[0],
-        text: RSA(panelPopup.varification.textInput),
-        time: RSA(new Date())
-      },
-      timeout: 10000,
-    }, (err, response) => {
-      if (!err && response.statusCode === 200) {
-        toggleSnackWindow("success", "Your application has been sent.");
-        handleMoreInfoApplyClose();
+      (err, response) => {
+        if (!err && response.statusCode === 200) {
+          toggleSnackWindow("success", "Your application has been sent.");
+          handleMoreInfoApplyClose();
+        }
       }
-    });
+    );
   };
 
   // about list item and more menu
@@ -1143,7 +1169,9 @@ export default function Panel(props) {
                       nickname: RSA(DAES(selfProfile.username)),
                       tel: RSA(DAES(selfProfile.tel)),
                       city: RSA(DAES(selfProfile.city)),
-                      birth: RSA(new Date(DAES(selfProfile.birth)).format("yyyy-MM-dd")),
+                      birth: RSA(
+                        new Date(DAES(selfProfile.birth)).format("yyyy-MM-dd")
+                      ),
                       gender: RSA(DAES(selfProfile.gender)),
                       avatarhash: RSA(DAES(selfProfile.avatar.hash)),
                       avatarsuffix: RSA(DAES(selfProfile.avatar.extension)),
@@ -1202,7 +1230,7 @@ export default function Panel(props) {
         avatar: extension
       }
     }));
-  }
+  };
   const handleMenuProfileChange = (event, prop) => {
     setPanelPopup((panelPopup) => ({
       ...panelPopup,
@@ -1217,7 +1245,10 @@ export default function Panel(props) {
       toggleSnackWindow("warning", "The username contains illegal characters.");
       return;
     } else if (!/^[0-9]{0,11}$/.test(panelPopup.self.tel)) {
-      toggleSnackWindow("warning", "The phone number should be no more than 11 digits.");
+      toggleSnackWindow(
+        "warning",
+        "The phone number should be no more than 11 digits."
+      );
       return;
     }
     checkURL((err, response) => {
@@ -1326,7 +1357,8 @@ export default function Panel(props) {
           item.username = DAES(srcProfile.username);
           item.avatar = DAES(srcProfile.avatar.extension);
           onsuccess();
-        }).catch((err) => onerror(`${err}`));
+        })
+        .catch((err) => onerror(`${err}`));
     }).then(() => {
       setPanelPopup((panelPopup) => ({
         ...panelPopup,
@@ -1415,48 +1447,58 @@ export default function Panel(props) {
     }));
   };
   const handleMenuNewApplicationRefuse = (rid, uid, gid, username) => {
-    request({
-      url: `${globalSetting.proxy}friend/refuse?recordid=${rid}`,
-      method: "GET",
-      json: true,
-      headers: {
-        "content-type": "text/plain",
+    request(
+      {
+        url: `${globalSetting.proxy}friend/refuse?recordid=${rid}`,
+        method: "GET",
+        json: true,
+        headers: {
+          "content-type": "text/plain"
+        },
+        timeout: 10000
       },
-      timeout: 10000,
-    }, (err, response) => {
-      if (!err && response.statusCode === 200) {
-        toggleSnackWindow("success", `You have refused ${username}.`);
+      (err, response) => {
+        if (!err && response.statusCode === 200) {
+          toggleSnackWindow("success", `You have refused ${username}.`);
+        } else {
+          toggleSnackWindow(
+            "error",
+            err ? `${err}` : `ServerError: ${response.body}.`
+          );
+        }
       }
-      else {
-        toggleSnackWindow("error", err ? `${err}` : `ServerError: ${response.body}.`);
-      }
-    });
+    );
     menuNewApplicationRemove(uid, gid);
   };
   const handleMenuNewApplicationAccept = (rid, uid, gid, username) => {
-    request({
-      url: `${globalSetting.proxy}friend/accept`,
-      method: "POST",
-      json: true,
-      headers: {
-        "content-type": "application/json",
+    request(
+      {
+        url: `${globalSetting.proxy}friend/accept`,
+        method: "POST",
+        json: true,
+        headers: {
+          "content-type": "application/json"
+        },
+        body: {
+          type: gid === "" ? "U" : "G",
+          userid: selfUID,
+          recordid: rid,
+          senderid: uid,
+          receiverid: gid === "" ? selfUID : gid
+        },
+        timeout: 10000
       },
-      body: {
-        type: gid === "" ? "U" : "G",
-        userid: selfUID,
-        recordid: rid,
-        senderid: uid,
-        receiverid: gid === "" ? selfUID : gid
-      },
-      timeout: 10000,
-    }, (err, response) => {
-      if (!err && response.statusCode === 200) {
-        toggleSnackWindow("success", `You have accepted ${username}.`);
+      (err, response) => {
+        if (!err && response.statusCode === 200) {
+          toggleSnackWindow("success", `You have accepted ${username}.`);
+        } else {
+          toggleSnackWindow(
+            "error",
+            err ? `${err}` : `ServerError: ${response.body}.`
+          );
+        }
       }
-      else {
-        toggleSnackWindow("error", err ? `${err}` : `ServerError: ${response.body}.`);
-      }
-    });
+    );
     menuNewApplicationRemove(uid, gid);
   };
   const handleMenuNewCreateTextChange = (event) => {
@@ -1473,30 +1515,37 @@ export default function Panel(props) {
       toggleSnackWindow("warning", "The group name cannot be vacant.");
       return;
     }
-    request({
-      url: `${globalSetting.proxy}group/create`,
-      method: "POST",
-      json: true,
-      headers: {
-        "content-type": "application/json",
+    request(
+      {
+        url: `${globalSetting.proxy}group/create`,
+        method: "POST",
+        json: true,
+        headers: {
+          "content-type": "application/json"
+        },
+        body: {
+          userid: selfUID,
+          groupname: RSA(panelPopup.newFriend.createGroup)
+        },
+        timeout: 10000
       },
-      body: {
-        userid: selfUID,
-        groupname: RSA(panelPopup.newFriend.createGroup)
-      },
-      timeout: 10000,
-    }, (err, response) => {
-      if (!err && response.statusCode == 200) {
-        let newGroupProfile = JSON.parse(DRSA(response.body));
-        asyncInsertTuple(encryptRawTuple(newGroupProfile, "group"), "group")
-        .then(() => {
-          handleMenuNewClose();
-          toggleSnackWindow("success", "Your new group has been created.");
-        }).catch((err) => toggleSnackWindow("error", `${err}`));
-      } else {
-        toggleSnackWindow("error", err ? `${err}` : `ServerError: ${response.body}.`);
+      (err, response) => {
+        if (!err && response.statusCode == 200) {
+          let newGroupProfile = JSON.parse(DRSA(response.body));
+          asyncInsertTuple(encryptRawTuple(newGroupProfile, "group"), "group")
+            .then(() => {
+              handleMenuNewClose();
+              toggleSnackWindow("success", "Your new group has been created.");
+            })
+            .catch((err) => toggleSnackWindow("error", `${err}`));
+        } else {
+          toggleSnackWindow(
+            "error",
+            err ? `${err}` : `ServerError: ${response.body}.`
+          );
+        }
       }
-    });
+    );
   };
 
   // about text input
@@ -2316,7 +2365,10 @@ export default function Panel(props) {
               <List className={classes.applicationAll}>
                 {panelPopup.application.map((value) => {
                   return (
-                    <div className={classes.applicationCenter} key={`${value.uid}-${value.dst[0]}`}>
+                    <div
+                      className={classes.applicationCenter}
+                      key={`${value.uid}-${value.dst[0]}`}
+                    >
                       <ListItem>
                         <ListItemAvatar>
                           <Avatar
