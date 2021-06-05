@@ -461,6 +461,7 @@ export default function Panel(props) {
               };
               if (targetObject !== undefined) {
                 targetObject.log.push(atomRecord);
+                cursor.continue();
               } else {
                 tempRecord.push({
                   accessInfo: {
@@ -497,6 +498,7 @@ export default function Panel(props) {
               };
               if (targetObject !== undefined) {
                 targetObject.log.push(atomRecord);
+                cursor.continue();
               } else {
                 tempRecord.push({
                   accessInfo: {
@@ -909,9 +911,13 @@ export default function Panel(props) {
             ["GID", targetProfile.gid],
             ["UID of Group Holder", DAES(targetProfile.groupHolderID)],
             ["Group Holder", groupHolder],
-            ["Joining Time", formatSideTime(DAES(targetProfile.joinTime))],
-            ["Created Time", formatSideTime(DAES(targetProfile.createTime))]
+            ["Created Time", new Date(DAES(targetProfile.createTime)).format("yyyy-MM-dd")]
           ];
+          if (DAES(targetProfile.joinTime))
+            rowsInfo.push([
+              "Joining Time",
+              new Date(DAES(targetProfile.joinTime)).format("yyyy-MM-dd")
+            ]);
           if (!groupHolder) {
             queryProfileByKey("profile", DAES(targetProfile.groupHolderID))
               .then((holderProfile) => {
