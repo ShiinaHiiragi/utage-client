@@ -92,11 +92,8 @@ const markdownOverride = {
 
 // panelReading's record and log should be sorted chronologically
 let globalSetting = JSON.parse(fs.readFileSync(settingPath));
-let serverClock,
-  imageCounter,
-  tempRecord = [],
-  tempApply = [],
-  selfUID;
+let tempRecord = [], tempApply = [];
+let serverClock, imageCounter, selfUID;
 
 const drawerWidth = 300;
 const useStyles = makeStyles((theme) => ({
@@ -477,8 +474,8 @@ export default function Panel(props) {
                   },
                   log: [atomRecord]
                 });
+                cursor.continue();
               }
-              cursor.continue();
             } else if (type === "G") {
               tagID = cursor.value.dst;
               targetObject = tempRecord.find(
@@ -562,7 +559,7 @@ export default function Panel(props) {
                 );
                 queryProfileByKey("group", gid)
                   .then((groupProfile) => {
-                    // !NOTE: the item here are reference
+                    // IMPORTANT: the item here are reference
                     item.accessInfo.name = DAES(groupProfile.groupName);
                     item.accessInfo.avatar = DAES(
                       groupProfile.avatar.extension
@@ -580,7 +577,7 @@ export default function Panel(props) {
                     let gid = item.dst[0];
                     queryProfileByKey("group", gid)
                       .then((groupProfile) => {
-                        // !NOTE: the item here are reference
+                        // IMPORTANT: the item here are reference
                         item.dst[1] = DAES(groupProfile.groupName);
                         onsuccess();
                       })
@@ -1049,7 +1046,7 @@ export default function Panel(props) {
           userid: selfUID,
           receiverid: panelPopup.varification.id.match(/[0-9]+/)[0],
           text: RSA(panelPopup.varification.textInput),
-          time: RSA(new Date())
+          time: RSA(new Date().toISOString())
         },
         timeout: 10000
       },
@@ -1352,7 +1349,7 @@ export default function Panel(props) {
     fillTempRecord(tempApply, (item, onsuccess, onerror) => {
       queryProfileByKey("profile", item.uid)
         .then((srcProfile) => {
-          // !NOTE: the item here are reference
+          // IMPORTANT: the item here are reference
           item.username = DAES(srcProfile.username);
           item.avatar = DAES(srcProfile.avatar.extension);
           onsuccess();
@@ -1765,26 +1762,85 @@ export default function Panel(props) {
   const handleTextSend = (hasChecked) => {
     // IMPORTANT: DO NOT WRITE AS `!hasChecked`
     // because hasChecked is either `true` or a event Object
-    let nowTextInput = panelInfo.record.find(
+    let nowStatus = panelInfo.record.find(
       (value) => value.accessInfo.id === panelInfo.state.selectedRecord
-    ).status.textInput;
+    ).status;
+    let nowTextInput = nowStatus.textInput;
+    let nowImage = nowStatus.img;
     let checkInfo = hasChecked === true ? "" : preCheck();
     if (checkInfo !== "") {
       toggleSnackWindow("warning", checkInfo);
       return;
     }
     // preprocess of sending image
-    let imgSequence = [];
+    let imageSequence = [];
     nowTextInput = nowTextInput.replace(
       /!\[(.*?)\]\((.*?)\)/gm,
-      (_0, _1, _2) => {
-        imgSequence.push(_2);
+      (_, _1, _2) => {
+        imageSequence.push(_2);
         return `![${_1}](${path.extname(_2)})`;
       }
     );
+
     // TODO: send the text to the server
-    // post the image to server using the imgSequence array
+    // post the image to server using the imageSequence array
     // delete the temp image file using the status.img array
+    let typeLetter = panelInfo.state.selectedRecord.match(/(U|G)/)[0];
+    let dstID = panelInfo.state.selectedRecord.match(/[0-9]+/)[0];
+    let timeNow = new Date().toISOString();
+    request({
+      url: `${globalSetting.proxy}record/send`,
+      method: "POST",
+      json: true,
+      headers: {
+        "content-type": "multipart/form-data",
+      },
+      formData: {
+        type: typeLetter,
+        userid: selfUID,
+        receiverid: dstID,
+        text: RSA(nowTextInput),
+        hash: RSA(JSON.stringify([])),
+        pics: imageSequence.map(item =>
+          fs.createReadStream(path.join(staticPath, item))),
+        time: RSA(timeNow)
+      },
+      timeout: 10000,
+    }, (err, response) => {
+      if (!err && response.statusCode === 200) {
+        let messageRID = response.body.toString(), imageIndex = 0;
+        nowTextInput = nowTextInput.replace(
+          /!\[(.*?)\]\((.*?)\)/gm,
+          (_, _1, _2) => {
+            let newImageName = `static/img/${messageRID}-${imageIndex}${_2}`;
+            fs.copyFileSync(
+              path.join(staticPath, imageSequence[imageIndex++]),
+              path.join(staticPath, newImageName)
+            );
+            return `![${_1}](${newImageName})`;
+          }
+        );
+        asyncInsertTuple({
+          type: typeLetter,
+          rid: messageRID,
+          src: selfUID,
+          dst: dstID,
+          text: AES(nowTextInput),
+          img: AES(JSON.stringify([])),
+          time: AES(timeNow)
+        }, "record").then(() => {
+          nowImage.forEach((item) => {
+            if (fs.existsSync(path.join(staticPath, `static/temp/${item}`)))
+              fs.unlink(path.join(staticPath, `static/temp/${item}`));
+          });
+        }).catch((err) => {
+          toggleSnackWindow("error", `${err}`);
+        })
+      }
+      else {
+        toggleSnackWindow("error", err ? `${err}` : `ServerError: ${response.body}.`);
+      }
+    });
   };
 
   // about backdrop and snack window
@@ -2449,7 +2505,7 @@ export default function Panel(props) {
         onClose={handleMoreInfoApplyClose}
         className={classes.noneSelect}
       >
-        <DialogTitle>{"Varifying Identity"}</DialogTitle>
+        <DialogTitle>{"Verifying Identity"}</DialogTitle>
         <DialogContent>
           <DialogContentText>
             The message in plain text you write below will be sent to the{" "}
@@ -2460,7 +2516,7 @@ export default function Panel(props) {
             request.
           </DialogContentText>
           <TextField
-            label="Varifying Message"
+            label="Verifying Message"
             multiline
             rows={4}
             value={panelPopup.varification.textInput}
