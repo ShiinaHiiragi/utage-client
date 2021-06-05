@@ -1336,10 +1336,18 @@ export default function Panel(props) {
     toggleBackdrop();
     tempRecord = [];
     tempApply = [];
+    request({
+      url: `${globalSetting.proxy}sign/out?userid=${selfUID}`,
+      method: "GET",
+      json: true,
+      headers: {
+        "content-type": "text/plain",
+      }
+    }, () => {});
     setTimeout(() => {
       closeBackdrop();
       ReactDOM.render(<SignIn />, document.getElementById("root"));
-    }, 1000);
+    }, 750);
   };
 
   // about friend or group of menu button
