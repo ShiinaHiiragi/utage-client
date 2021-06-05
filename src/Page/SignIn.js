@@ -85,7 +85,10 @@ const checkURL = (stringURL, callback) => {
   request(
     {
       url: `${stringURL}who`,
-      timeout: 10000
+      timeout: 10000,
+      forever: true,
+      pool: { maxSocket: Infinity }
+      // localPort: 55555,
     },
     (err, response) => {
       callback(err, response, stringURL);
