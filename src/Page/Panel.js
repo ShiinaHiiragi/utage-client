@@ -1831,7 +1831,12 @@ export default function Panel(props) {
         }, "record").then(() => {
           nowImage.forEach((item) => {
             if (fs.existsSync(path.join(staticPath, `static/temp/${item}`)))
-              fs.unlink(path.join(staticPath, `static/temp/${item}`));
+              fs.unlink(
+                path.join(staticPath, `static/temp/${item}`),
+                (err) => {
+                  if (err) toggleSnackWindow("err", `${err}`);
+                }
+              );
           });
         }).catch((err) => {
           toggleSnackWindow("error", `${err}`);
