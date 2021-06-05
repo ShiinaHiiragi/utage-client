@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+process.env.UV_THREADPOOL_SIZE = 128;
 // Modules to control application life and create native browser window
 const path = require("path");
 const electron = require("electron");
