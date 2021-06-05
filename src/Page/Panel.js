@@ -683,6 +683,10 @@ export default function Panel(props) {
             typeLetter === "U"
               ? getProfile.avatarsuffix
               : getProfile.groupavatarsuffix;
+          let profileName =
+            typeLetter === "U"
+              ? getProfile.nickname
+              : getProfile.groupname;
           let avatarPath = path.join(
             staticPath,
             `static/avatar/avatar-${avatarID}.${avatarExtension}`
@@ -696,15 +700,12 @@ export default function Panel(props) {
                 toggleSnackWindow("error", `${err}`);
               })
               .on("response", (res) => {
-                forceUpdateInfoPanel(
-                  avatarID,
-                  avatarExtension,
-                  typeLetter === "U"
-                    ? getProfile.nickname
-                    : getProfile.groupname
-                );
+                forceUpdateInfoPanel(avatarID, avatarExtension, profileName);
               })
               .pipe(fs.createWriteStream(avatarPath));
+          else {
+            forceUpdateInfoPanel(avatarID, avatarExtension, profileName);
+          }
           asyncInsertTuple(encryptRawTuple(getProfile, tableName), tableName)
             .then(() => {
               if (reQuery) queryProfileByKey(tableName, key).then(onsuccess);
@@ -775,7 +776,13 @@ export default function Panel(props) {
               })
             }
           : item;
-      })
+      }),
+      state: {
+        ...panelInfo.state,
+        selectedName: panelInfo.state.selectedRecord === targetID
+          ? targetName
+          : panelInfo.state.selectedName
+      }
     }));
   };
   const forceUpdateInfoPanel = (targetID, targetExtension, targetName) => {
