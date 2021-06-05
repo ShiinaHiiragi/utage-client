@@ -555,7 +555,7 @@ export default function Panel(props) {
               return leftTime > rightTime ? -1 : leftTime < rightTime ? 1 : 0;
             });
             fillTempRecord(tempRecord, (item, onsuccess, onerror) => {
-              if (item.accessInfo.id.search(/[0-9]+G/) !== -1) {
+              if (/G/.test(item.accessInfo.id)) {
                 let gid = item.accessInfo.id.substr(
                   0,
                   item.accessInfo.id.length - 1
@@ -782,7 +782,7 @@ export default function Panel(props) {
                   : value;
               })
             }
-          : item.accessInfo.id.search(/[0-9]+G/) !== -1
+          : /G/.test(item.accessInfo.id)
           ? {
               ...item,
               log: item.log.map((value) => {
@@ -895,7 +895,7 @@ export default function Panel(props) {
   const createData = (props, value) => ({ props, value });
   const handleMoreInfoClick = (target, callback) => {
     let targetID = target.substr(0, target.length - 1);
-    let targetType = target.charAt(target.length - 1);
+    let targetType = target.match(/(U|G)/)[0];
     let rowsInfo = [];
     queryProfileByKey(targetType === "U" ? "profile" : "group", targetID)
       .then((targetProfile) => {
@@ -1035,8 +1035,7 @@ export default function Panel(props) {
       toggleSnackWindow("warning", "The varification message is vacant.");
       return;
     }
-    let typeLetter =
-      panelPopup.varification.id.search(/[0-9]+U/) !== -1 ? "A" : "N";
+    let typeLetter = /U/.test(panelPopup.varification.id) ? "A" : "N";
     request(
       {
         url: `${globalSetting.proxy}friend/add`,
@@ -1530,7 +1529,7 @@ export default function Panel(props) {
         timeout: 10000
       },
       (err, response) => {
-        if (!err && response.statusCode == 200) {
+        if (!err && response.statusCode === 200) {
           let newGroupProfile = JSON.parse(DRSA(response.body));
           asyncInsertTuple(encryptRawTuple(newGroupProfile, "group"), "group")
             .then(() => {
@@ -1963,9 +1962,7 @@ export default function Panel(props) {
                     <Avatar
                       src={`static/avatar/avatar-${value.accessInfo.id}.${value.accessInfo.avatar}`}
                     >
-                      {value.accessInfo.id.charAt(
-                        value.accessInfo.id.length - 1
-                      ) === "U" ? (
+                      {/U/.test(value.accessInfo.id) ? (
                         <PersonIcon />
                       ) : (
                         <GroupIcon />
@@ -2169,9 +2166,7 @@ export default function Panel(props) {
               src={`static/avatar/avatar-${panelPopup.profile.id}.${panelPopup.profile.avatar}`}
               className={classes.largeAvatar}
             >
-              {panelPopup.profile.id.charAt(
-                panelPopup.profile.id.length - 1
-              ) === "U" ? (
+              {/U/.test(panelPopup.profile.id) ? (
                 <PersonIcon className={classes.notLargeAvatar} />
               ) : (
                 <GroupIcon className={classes.notLargeAvatar} />
@@ -2458,9 +2453,7 @@ export default function Panel(props) {
         <DialogContent>
           <DialogContentText>
             The message in plain text you write below will be sent to the{" "}
-            {panelPopup.varification.id.charAt(
-              panelPopup.varification.id.length - 1
-            ) === "U"
+            {/U/.test(panelPopup.varification.id)
               ? ` user ${panelPopup.varification.name} `
               : ` holder of group ${panelPopup.varification.name} `}{" "}
             your want to access. You can access as long as it allows your
