@@ -1460,8 +1460,30 @@ export default function Panel(props) {
       toggleSnackWindow("warning", "The group name cannot be vacant.");
       return;
     }
-    handleMenuNewClose();
-    // TODO: create a new group
+    request({
+      url: `${globalSetting.proxy}group/create`,
+      method: "POST",
+      json: true,
+      headers: {
+        "content-type": "application/json",
+      },
+      body: {
+        userid: selfUID,
+        groupname: RSA(panelPopup.newFriend.createGroup)
+      },
+      timeout: 10000,
+    }, (err, response) => {
+      if (!err && response.statusCode == 200) {
+        let newGroupProfile = JSON.parse(DRSA(response.body));
+        asyncInsertTuple(encryptRawTuple(newGroupProfile, "group"), "group")
+        .then(() => {
+          handleMenuNewClose();
+          toggleSnackWindow("success", "Your new group has been created.");
+        }).catch((err) => toggleSnackWindow("error", `${err}`));
+      } else {
+        toggleSnackWindow("error", err ? `${err}` : `ServerError: ${response.body}.`);
+      }
+    });
   };
 
   // about text input
