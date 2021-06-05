@@ -1207,6 +1207,13 @@ export default function Panel(props) {
     }));
   };
   const handleMenuProfileApply = () => {
+    if (!/^[\x0-\x7F]*$/.test(panelPopup.self.username)) {
+      toggleSnackWindow("warning", "The username contains illegal characters.");
+      return;
+    } else if (!/^[0-9]{0,11}$/.test(panelPopup.self.tel)) {
+      toggleSnackWindow("warning", "The phone number should be no more than 11 digits.");
+      return;
+    }
     checkURL((err, response) => {
       if (!err && response.statusCode === 200 && response.body === "utage") {
         let avatarHash = CryptoJS.SHA256(new Date().toISOString()).toString();
