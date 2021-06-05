@@ -857,9 +857,6 @@ export default function Panel(props) {
     }));
   };
   const handleSideListItemClose = () => {
-    // TEMP: for debugging
-    console.log(panelInfo);
-    console.log(panelPopup);
     setPanelPopup((panelPopup) => ({
       ...panelPopup,
       sideListItem: false
