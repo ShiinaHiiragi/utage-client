@@ -70,8 +70,13 @@ const electron = window.require("electron");
 const fs = window.require("fs");
 const path = window.require("path");
 const request = window.require("request");
+const ipcRenderer = electron.ipcRenderer;
 const dialog = electron.remote.dialog;
 const environ = electron.remote.getGlobal("environ");
+
+ipcRenderer.on("sign-uid", () => {
+  ipcRenderer.send("uid", globalSetting.proxy, selfUID);
+});
 
 const staticPath =
   environ === "release"

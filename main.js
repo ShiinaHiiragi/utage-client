@@ -2,10 +2,12 @@
 process.env.UV_THREADPOOL_SIZE = 128;
 // Modules to control application life and create native browser window
 const path = require("path");
+const request = require("request");
 const electron = require("electron");
 const BrowserWindow = electron.BrowserWindow;
 const Menu = electron.Menu;
 const app = electron.app;
+const ipcMain = electron.ipcMain;
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
@@ -54,6 +56,12 @@ function createWindow() {
   // this must be called after the loadURL()
   mainWindow.maximize();
   mainWindow.show();
+  mainWindow.on("close", (err) =>
+  {
+    err.preventDefault();
+    err.preventDefault();
+    mainWindow.webContents.send("sign-uid");
+  });
 }
 
 function createAnotherWindow() {
@@ -87,6 +95,12 @@ function createAnotherWindow() {
   // this must be called after the loadURL()
   anotherWindow.maximize();
   anotherWindow.show();
+  secondWindow.on("close", (err) =>
+  {
+    err.preventDefault();
+    err.preventDefault();
+    secondWindow.webContents.send("sign-uid");
+  });
 }
 
 // This method will be called when Electron has finished
@@ -113,3 +127,16 @@ app.on("window-all-closed", function () {
 
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and require them here.
+ipcMain.on("uid", (event, proxy, uid) => {
+  console.log(uid, uid !== undefined);
+  if (uid !== undefined)
+    request({
+      url: `${proxy}sign/out?userid=${uid}`,
+      method: "GET",
+      json: true,
+      headers: {
+        "content-type": "text/plain",
+      }
+    }, () => {});
+  app.exit();
+})

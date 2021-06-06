@@ -35,6 +35,7 @@ const fs = window.require("fs");
 const path = window.require("path");
 const request = window.require("request");
 const electron = window.require("electron");
+const ipcRenderer = electron.ipcRenderer;
 const environ = electron.remote.getGlobal("environ");
 
 const staticPath =
@@ -45,6 +46,10 @@ const staticPath =
     : "./";
 const settingPath = path.join(staticPath, "./static/setting.json");
 let globalSetting = JSON.parse(fs.readFileSync(settingPath));
+
+ipcRenderer.on("sign-uid", () => {
+  ipcRenderer.send("uid");
+});
 
 const useStyles = makeStyles((theme) => ({
   noneSelect: {
