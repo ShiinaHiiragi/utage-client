@@ -78,6 +78,7 @@ ipcRenderer.on("sign-uid", () => {
   ipcRenderer.send("uid", globalSetting.proxy, selfUID);
 });
 
+const imageLag = 160;
 const staticPath =
   environ === "release"
     ? "./resources/app/build/"
@@ -715,7 +716,8 @@ export default function Panel(props) {
                 toggleSnackWindow("error", `${err}`);
               })
               .on("response", (res) => {
-                forceUpdateInfoPanel(avatarID, avatarExtension, profileName);
+                setTimeout(() =>
+                  forceUpdateInfoPanel(avatarID, avatarExtension, profileName), imageLag);
               })
               .pipe(fs.createWriteStream(avatarPath));
           else {
@@ -804,10 +806,18 @@ export default function Panel(props) {
             : panelInfo.state.selectedName
       }
     }));
+    setPanelPopup((panelPopup) => ({
+      ...panelPopup,
+      self: {
+        ...panelPopup.self,
+        avatar: targetExtension
+      }
+    }));
   };
   const forceUpdateInfoPanel = (targetID, targetExtension, targetName) => {
-    updateInfoPanel(targetID, "", targetName);
-    updateInfoPanel(targetID, targetExtension, targetName);
+    updateInfoPanel(targetID, "pic", targetName);
+    setTimeout(() =>
+      updateInfoPanel(targetID, targetExtension, targetName), imageLag);
   };
 
   const requestNewRecord = () => {
@@ -1242,16 +1252,15 @@ export default function Panel(props) {
                         toggleSnackWindow("error", `${err}`);
                       });
                       fs.copyFileSync(srcPath, dstPath);
-                      forceUpdateInfoPanel(
-                        panelInfo.usrInfo.uid,
-                        extension,
-                        panelInfo.usrInfo.username
-                      );
-                      forceUpdatePopupAvatar(extension);
                       closeBackdrop();
                       toggleSnackWindow(
                         "success",
                         "The avatar has been changed."
+                      );
+                      forceUpdateInfoPanel(
+                        panelInfo.usrInfo.uid,
+                        extension,
+                        panelInfo.usrInfo.username
                       );
                     } else {
                       toggleSnackWindow(
@@ -1271,22 +1280,6 @@ export default function Panel(props) {
         );
       }
     });
-  };
-  const forceUpdatePopupAvatar = (extension) => {
-    setPanelPopup((panelPopup) => ({
-      ...panelPopup,
-      self: {
-        ...panelPopup.self,
-        avatar: ""
-      }
-    }));
-    setPanelPopup((panelPopup) => ({
-      ...panelPopup,
-      self: {
-        ...panelPopup.self,
-        avatar: extension
-      }
-    }));
   };
   const handleMenuProfileChange = (event, prop) => {
     setPanelPopup((panelPopup) => ({
@@ -2012,7 +2005,7 @@ export default function Panel(props) {
               <Avatar
                 src={`static/avatar/avatar-${panelInfo.usrInfo.uid}.${panelInfo.usrInfo.avatar}`}
               >
-                <PersonIcon />
+                {/* <PersonIcon /> */}
               </Avatar>
             </ListItemAvatar>
             <ListItemText
