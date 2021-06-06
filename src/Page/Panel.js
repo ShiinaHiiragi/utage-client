@@ -422,8 +422,7 @@ export default function Panel(props) {
     globalSetting = JSON.parse(fs.readFileSync(settingPath));
 
     // temp of profile object
-    selfUID = panelInfo.usrInfo.uid;
-    selfUID = selfUID.substr(0, selfUID.length - 1);
+    selfUID = panelInfo.usrInfo.uid.match(/[0-9]+/)[0];
     let primaryProfile = {};
     let deletingRecord = [];
     let objectStore = props.DB.transaction("profile").objectStore("profile");
@@ -511,6 +510,7 @@ export default function Panel(props) {
                   status: {
                     unread: 0,
                     all: true,
+                    init: false,
                     textInput: "",
                     img: []
                   },
@@ -556,12 +556,9 @@ export default function Panel(props) {
               let rightTime = right.log[right.log.length - 1].time;
               return leftTime > rightTime ? -1 : leftTime < rightTime ? 1 : 0;
             });
-            fillTempRecord(tempRecord, (item, onsuccess, onerror) => {
+            syncFillRecord(tempRecord, (item, onsuccess, onerror) => {
               if (/G/.test(item.accessInfo.id)) {
-                let gid = item.accessInfo.id.substr(
-                  0,
-                  item.accessInfo.id.length - 1
-                );
+                let gid = item.accessInfo.id.match(/[0-9]+/)[0];
                 queryProfileByKey("group", gid)
                   .then((groupProfile) => {
                     // IMPORTANT: the item here are reference
@@ -577,7 +574,7 @@ export default function Panel(props) {
               } else onsuccess();
             })
               .then(() => {
-                fillTempRecord(tempApply, (item, onsuccess, onerror) => {
+                syncFillRecord(tempApply, (item, onsuccess, onerror) => {
                   if (item.dst[0] !== "") {
                     let gid = item.dst[0];
                     queryProfileByKey("group", gid)
@@ -613,7 +610,7 @@ export default function Panel(props) {
   }, []);
 
   // sync version of foreach
-  const fillTempRecord = (arrayObject, eachTemp) =>
+  const syncFillRecord = (arrayObject, eachTemp) =>
     arrayObject.reduce(
       (promiseChain, item) =>
         promiseChain.then(
@@ -896,7 +893,7 @@ export default function Panel(props) {
   // about more info in app bar
   const createData = (props, value) => ({ props, value });
   const handleMoreInfoClick = (target, callback) => {
-    let targetID = target.substr(0, target.length - 1);
+    let targetID = target.match(/[0-9]+/)[0];
     let targetType = target.match(/(U|G)/)[0];
     let rowsInfo = [];
     queryProfileByKey(targetType === "U" ? "profile" : "group", targetID)
@@ -1066,6 +1063,60 @@ export default function Panel(props) {
 
   // about list item and more menu
   const handleListItemClick = (event, comb, name) => {
+    const selectedItem = panelInfo.record.find((item) => item.accessInfo.id === comb);
+    if (selectedItem.status.init === true) {
+      loadLog(comb, name);
+    } else {
+      const downloadImage = (piece, onsuccess, onerror) => {
+        let imageMatch = piece.text.match(/!\[(.*?)\]\((.*?)\)/g);
+        if (imageMatch) {
+          let rid = piece.rid;
+          let requireImage = imageMatch.map(item => item.replace(/!\[(.*?)\]\((.*?)\)/g, "$2"));
+          requireImage.forEach((imagePath, imageIndex) => {
+            let extent = path.extname(imagePath).toString();
+            let filePath = path.join(staticPath, `static/img/${rid}-${imageIndex}${extent}`);
+            if (!fs.existsSync(filePath)) {
+              request
+                .get(`${globalSetting.proxy}image/images?recordid=${rid}&index=${imageIndex}&suffix=${extent.substr(1)}`)
+                .on("error", (err) => onerror(err))
+                .pipe(fs.createWriteStream(filePath));
+            }
+          });
+          onsuccess();
+        } else onsuccess();
+      };
+      syncFillRecord(selectedItem.log, (piece, onsuccess, onerror) => {
+        if (piece.sender === "") {
+          queryProfileByKey(piece.senderID.match(/[0-9]+/)[0])
+            .then((memberProfile) => {
+              piece.sender = DAES(memberProfile.username);
+              piece.senderAvatar = DAES(memberProfile.avatar.extension);
+              downloadImage(piece, onsuccess, onerror);
+            })
+            .catch((err) => onerror(err));
+        } else {
+          downloadImage(piece, onsuccess, onerror);
+        }
+      }).then(() => {
+        setPanelInfo((panelInfo) => ({
+          ...panelInfo,
+          record: panelInfo.record.map((value) =>
+          value.accessInfo.id === comb
+            ? {
+                ...value,
+                status: {
+                  ...value.status,
+                  init: true
+                },
+                record: selectedItem.log
+            } : value
+          )
+        }));
+        loadLog(comb, name);
+      });
+    }
+  };
+  const loadLog = (comb, name) => {
     setPanelInfo((panelInfo) => ({
       ...panelInfo,
       state: {
@@ -1077,11 +1128,16 @@ export default function Panel(props) {
       },
       record: panelInfo.record.map((value) =>
         value.accessInfo.id === comb
-          ? { ...value, status: { ...value.status, unread: 0 } }
-          : value
+          ? {
+              ...value,
+              status: {
+                ...value.status,
+                unread: 0
+              }
+          } : value
       )
     }));
-  };
+  }
   const handleMenuClick = (event) => {
     setPanelPopup((panelPopup) => ({
       ...panelPopup,
@@ -1359,7 +1415,7 @@ export default function Panel(props) {
   const handleMenuNewClick = () => {
     handleMenuClose();
     let tempApply = panelPopup.application;
-    fillTempRecord(tempApply, (item, onsuccess, onerror) => {
+    syncFillRecord(tempApply, (item, onsuccess, onerror) => {
       queryProfileByKey("profile", item.uid)
         .then((srcProfile) => {
           // IMPORTANT: the item here are reference
