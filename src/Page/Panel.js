@@ -837,6 +837,7 @@ export default function Panel(props) {
       justSignIn: true,
       selectedRecord: "",
       selectedName: "Utage",
+      adjustScroll: 0,
       textIndex: [0, 0]
     }
   }));
@@ -903,6 +904,28 @@ export default function Panel(props) {
       else scrollField.current.scrollTop = nowRecord.status.scrollTop;
     }
   }, [panelInfo.state.selectedRecord]);
+
+  // adjust the scrollbar after send or receive
+  React.useEffect(() => {
+    const clearAdjustment = () => {
+      setPanelInfo((panelInfo) => ({
+        ...panelInfo,
+        state: {
+          ...panelInfo.state,
+          adjustScroll: 0
+        }
+      }))
+    }
+    if (panelInfo.state.adjustScroll !== 0) {
+      let scrollHeight = scrollField.current.scrollHeight,
+        clientHeight = scrollField.current.clientHeight,
+        maxScrollTop = scrollHeight - clientHeight;
+      if (panelInfo.state.adjustScroll === 1) {
+        scrollField.current.scrollTop = maxScrollTop > 0 ? maxScrollTop : 0;
+      }
+      clearAdjustment();
+    }
+  }, [panelInfo.state.adjustScroll]);
 
   // about list item
   const handleSideListItemToggle = () => {
@@ -1949,7 +1972,11 @@ export default function Panel(props) {
                 ]
               },
               ...panelInfo.record
-            ]
+            ],
+            state: {
+              ...panelInfo.state,
+              adjustScroll: 1
+            }
           }));
           nowImage.forEach((item) => {
             if (fs.existsSync(path.join(staticPath, `static/temp/${item}`)))
