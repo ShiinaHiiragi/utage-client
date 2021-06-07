@@ -99,9 +99,9 @@ const markdownOverride = {
 // panelReading's record and log should be sorted chronologically
 let globalSetting = JSON.parse(fs.readFileSync(settingPath));
 let tempRecord = [], tempApply = [];
-let serverClock, imageCounter, selfUID;
+let imageCounter, selfUID;
 
-const drawerWidth = 300;
+const drawerWidth = 300, serverInitClock = 2500, serverInterval = 1000;
 const useStyles = makeStyles((theme) => ({
   root: {
     display: "flex"
@@ -420,7 +420,7 @@ export default function Panel(props) {
   // equals to componentDidmount
   React.useEffect(() => {
     imageCounter = 0;
-    serverClock = setInterval(requestNewRecord, 2500);
+    setTimeout(requestNewRecord, serverInitClock);
     globalSetting = JSON.parse(fs.readFileSync(settingPath));
 
     // temp of profile object
@@ -608,9 +608,6 @@ export default function Panel(props) {
           }
         };
       }
-    };
-    return () => {
-      clearInterval(serverClock);
     };
   }, []);
 
@@ -825,8 +822,139 @@ export default function Panel(props) {
   };
 
   const requestNewRecord = () => {
-    // TODO: ask server for new record
+    request({
+      url: `${globalSetting.proxy}record/new`,
+      method: "POST",
+      json: true,
+      headers: {
+        "content-type": "application/json",
+      },
+      body: {
+        userid: selfUID,
+        time: RSA(new Date().toISOString())
+      },
+      timeout: 10000
+    }, (err, response) => {
+      if (!err && response.statusCode == 200) {
+        if (response.body.record.length != 0) {
+          console.log(response.body.record.map(item => JSON.parse(DRSA(item))));
+          modifyPanel(response.body.record, () =>
+            setTimeout(requestNewRecord, serverInterval))
+        } else setTimeout(requestNewRecord, serverInterval);
+      } else {
+        toggleSnackWindow("error", err ? `${err}` : `ServerError: ${response.body}.`);
+        recheckConnect();
+      }
+    });
   };
+
+  const modifyPanel = (newRecord, callback) => {
+    let firstIn = true, containDialog = false, containApply = false;
+    let tempApply, tempDialog;
+    syncFillRecord(newRecord, (piece, onsuccess, onerror) => {
+      piece = JSON.parse(DRSA(piece));
+      if (firstIn) {
+        tempApply = panelPopup.application;
+        tempDialog = panelInfo.record;
+        firstIn = false;
+      }
+      if (piece.type === "A" || piece.type === "N") {
+        containApply = true;
+        tempApply.unshift({
+          rid: piece.recordid.toString(),
+          uid: piece.userid.toString(),
+          dst: piece.type === "A" ? [""] : [piece.receiverid.toString(), ""],
+          username: "",
+          avatar: "",
+          varification: piece.text
+        });
+        onsuccess();
+      } else {
+        let atomRecord, targetObject;
+        let tagID = piece.userid.toString();
+        console.log(JSON.stringify(tempDialog));
+        targetObject = tempDialog.find((item) => item.accessInfo.id == `${tagID}U`);
+        containDialog = true;
+        asyncInsertTuple(encryptRawTuple(piece, "record"), "record");
+        queryProfileByKey("profile", tagID).then((dialogProfile) => {
+          atomRecord = {
+            rid: piece.recordid.toString(),
+            senderID: `${tagID}U`,
+            sender: DAES(dialogProfile.username),
+            senderAvatar: DAES(dialogProfile.avatar.extension),
+            text: piece.text,
+            time: piece.time
+          };
+          if (targetObject !== undefined) {
+            targetObject.log.push(atomRecord);
+            onsuccess();
+          } else {
+            tempDialog.push({
+              accessInfo: {
+                id: `${tagID}U`,
+                name: DAES(dialogProfile.username),
+                avatar: DAES(dialogProfile.avatar.extension)
+              },
+              status: {
+                unread: 0,
+                all: true,
+                init: false,
+                textInput: "",
+                scrollTop: -1,
+                img: []
+              },
+              log: [atomRecord]
+            });
+            downloadImage(piece, () => onsuccess(), (err) => onerror(err));
+            onsuccess();
+          }
+        }).catch((err) => onerror(err));
+      }
+    }).then(() => {
+      if (containDialog) {
+        tempDialog.forEach((item) => {
+          item.log.sort((left, right) => {
+            return left.time < right.time
+              ? -1
+              : left.time > right.time
+              ? 1
+              : 0;
+          });
+        });
+        tempDialog.sort((left, right) => {
+          let leftTime = left.log[left.log.length - 1].time;
+          let rightTime = right.log[right.log.length - 1].time;
+          return leftTime > rightTime ? -1 : leftTime < rightTime ? 1 : 0;
+        });
+        setPanelInfo((panelInfo) => ({
+          ...panelInfo,
+          record: tempDialog
+        }))
+      }
+      if (containApply) {
+        setPanelPopup((panelPopup) => ({
+          ...panelPopup,
+          application: tempApply
+        }))
+      }
+      callback();
+    }).catch((err) => {
+      toggleSnackWindow("error", `${err}`);
+    });
+  }
+
+  const recheckConnect = () => {
+    request({
+      url: `${globalSetting.proxy}who`,
+      timeout: 10000
+    }, (err, response) => {
+      if (!err && response.statusCode === 200 && response.body === "utage") {
+        requestNewRecord();
+      } else {
+        setTimeout(recheckConnect, serverInterval);
+      }
+    });
+  }
 
   // the state info need by user interface
   const [panelInfo, setPanelInfo] = React.useState(() => ({
@@ -1114,29 +1242,29 @@ export default function Panel(props) {
   };
 
   // about list item and more menu
+  const downloadImage = (piece, onsuccess, onerror) => {
+    let imageMatch = piece.text.match(/!\[(.*?)\]\((.*?)\)/g);
+    if (imageMatch) {
+      let rid = piece.rid;
+      let requireImage = imageMatch.map(item => item.replace(/!\[(.*?)\]\((.*?)\)/g, "$2"));
+      requireImage.forEach((imagePath, imageIndex) => {
+        let extent = path.extname(imagePath).toString();
+        let filePath = path.join(staticPath, `static/img/${rid}-${imageIndex}${extent}`);
+        if (!fs.existsSync(filePath)) {
+          request
+            .get(`${globalSetting.proxy}image/images?recordid=${rid}&index=${imageIndex}&suffix=${extent.substr(1)}`)
+            .on("error", (err) => onerror(err))
+            .pipe(fs.createWriteStream(filePath));
+        }
+      });
+      onsuccess();
+    } else onsuccess();
+  };
   const handleListItemClick = (event, comb, name) => {
     const selectedItem = panelInfo.record.find((item) => item.accessInfo.id === comb);
     if (selectedItem.status.init === true) {
       loadLog(comb, name);
     } else {
-      const downloadImage = (piece, onsuccess, onerror) => {
-        let imageMatch = piece.text.match(/!\[(.*?)\]\((.*?)\)/g);
-        if (imageMatch) {
-          let rid = piece.rid;
-          let requireImage = imageMatch.map(item => item.replace(/!\[(.*?)\]\((.*?)\)/g, "$2"));
-          requireImage.forEach((imagePath, imageIndex) => {
-            let extent = path.extname(imagePath).toString();
-            let filePath = path.join(staticPath, `static/img/${rid}-${imageIndex}${extent}`);
-            if (!fs.existsSync(filePath)) {
-              request
-                .get(`${globalSetting.proxy}image/images?recordid=${rid}&index=${imageIndex}&suffix=${extent.substr(1)}`)
-                .on("error", (err) => onerror(err))
-                .pipe(fs.createWriteStream(filePath));
-            }
-          });
-          onsuccess();
-        } else onsuccess();
-      };
       syncFillRecord(selectedItem.log, (piece, onsuccess, onerror) => {
         if (piece.sender === "") {
           queryProfileByKey(piece.senderID.match(/[0-9]+/)[0])
