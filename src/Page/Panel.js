@@ -1118,7 +1118,7 @@ export default function Panel(props) {
                   ...value.status,
                   init: true
                 },
-                record: selectedItem.log
+                log: selectedItem.log
             } : value
           )
         }));
@@ -1844,11 +1844,11 @@ export default function Panel(props) {
       }
     );
 
-    // TODO: send the text to the server
     // post the image to server using the imageSequence array
     // delete the temp image file using the status.img array
-    let typeLetter = panelInfo.state.selectedRecord.match(/(U|G)/)[0];
-    let dstID = panelInfo.state.selectedRecord.match(/[0-9]+/)[0];
+    let selectedThen = panelInfo.state.selectedRecord;
+    let typeLetter = selectedThen.match(/(U|G)/)[0];
+    let dstID = selectedThen.match(/[0-9]+/)[0];
     let timeNow = new Date().toISOString();
     request({
       url: `${globalSetting.proxy}record/send`,
@@ -1891,6 +1891,37 @@ export default function Panel(props) {
           img: AES(JSON.stringify([])),
           time: AES(timeNow)
         }, "record").then(() => {
+          let optionedIndex = panelInfo.record.findIndex((value) =>
+            value.accessInfo.id === selectedThen);
+          let optioned = panelInfo.record[optionedIndex]
+          console.log(optionedIndex);
+          console.log(optioned);
+          panelInfo.record.splice(optionedIndex, 1);
+          setPanelInfo((panelInfo) => ({
+            ...panelInfo,
+            record: [
+              {
+                ...optioned,
+                status: {
+                  ...optioned.status,
+                  textInput: "",
+                  img: []
+                },
+                log: [
+                  ...optioned.log,
+                  {
+                    rid: messageRID,
+                    sender: panelInfo.usrInfo.username,
+                    senderID: panelInfo.usrInfo.uid,
+                    senderAvatar: panelInfo.usrInfo.avatar,
+                    text: nowTextInput,
+                    time: timeNow
+                  }
+                ]
+              },
+              ...panelInfo.record
+            ]
+          }));
           nowImage.forEach((item) => {
             if (fs.existsSync(path.join(staticPath, `static/temp/${item}`)))
               fs.unlink(
