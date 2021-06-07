@@ -342,6 +342,7 @@ function Alert(props) {
 
 export default function Panel(props) {
   const classes = useStyles();
+  const scrollField = React.useRef();
 
   // encrypt and decrypt
   const AES = (value) =>
@@ -474,7 +475,9 @@ export default function Panel(props) {
                   status: {
                     unread: 0,
                     all: true,
+                    init: false,
                     textInput: "",
+                    scrollTop: -1,
                     img: []
                   },
                   log: [atomRecord]
@@ -513,6 +516,7 @@ export default function Panel(props) {
                     all: true,
                     init: false,
                     textInput: "",
+                    scrollTop: -1,
                     img: []
                   },
                   log: [atomRecord]
@@ -886,6 +890,20 @@ export default function Panel(props) {
     application: []
   });
 
+  // used for scrollbar
+  React.useEffect(() => {
+    let scrollHeight = scrollField.current.scrollHeight,
+      clientHeight = scrollField.current.clientHeight,
+      maxScrollTop = scrollHeight - clientHeight;
+    let nowRecord = panelInfo.record.find((item) =>
+      item.accessInfo.id === panelInfo.state.selectedRecord);
+    if (nowRecord) {
+      if (nowRecord.status.scrollTop === -1)
+        scrollField.current.scrollTop = maxScrollTop > 0 ? maxScrollTop : 0;
+      else scrollField.current.scrollTop = nowRecord.status.scrollTop;
+    }
+  }, [panelInfo.state.selectedRecord]);
+
   // about list item
   const handleSideListItemToggle = () => {
     setPanelPopup((panelPopup) => ({
@@ -894,6 +912,7 @@ export default function Panel(props) {
     }));
   };
   const handleSideListItemClose = () => {
+    console.log(panelInfo);
     setPanelPopup((panelPopup) => ({
       ...panelPopup,
       sideListItem: false
@@ -1110,8 +1129,7 @@ export default function Panel(props) {
       }).then(() => {
         setPanelInfo((panelInfo) => ({
           ...panelInfo,
-          record: panelInfo.record.map((value) =>
-          value.accessInfo.id === comb
+          record: panelInfo.record.map((value) => value.accessInfo.id === comb
             ? {
                 ...value,
                 status: {
@@ -1127,6 +1145,19 @@ export default function Panel(props) {
     }
   };
   const loadLog = (comb, name) => {
+    let topSaved = scrollField.current.scrollTop;
+    setPanelInfo((panelInfo) => ({
+      ...panelInfo,
+      record: panelInfo.record.map((value) =>
+        value.accessInfo.id === panelInfo.state.selectedRecord
+        ? {
+          ...value,
+          status: {
+            ...value.status,
+            scrollTop: topSaved
+          }
+        } : value)
+    }));
     setPanelInfo((panelInfo) => ({
       ...panelInfo,
       state: {
@@ -1894,8 +1925,6 @@ export default function Panel(props) {
           let optionedIndex = panelInfo.record.findIndex((value) =>
             value.accessInfo.id === selectedThen);
           let optioned = panelInfo.record[optionedIndex]
-          console.log(optionedIndex);
-          console.log(optioned);
           panelInfo.record.splice(optionedIndex, 1);
           setPanelInfo((panelInfo) => ({
             ...panelInfo,
@@ -2144,7 +2173,7 @@ export default function Panel(props) {
         })}
       >
         <div className={classes.drawerHeader} />
-        <div className={classes.recordField} variant="outlined">
+        <div className={classes.recordField} variant="outlined" ref={scrollField}>
           {!panelInfo.state.justSignIn &&
             panelInfo.record
               .find(
