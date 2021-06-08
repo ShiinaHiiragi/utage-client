@@ -30,7 +30,7 @@ function createStaticFile(fileName) {
   if (!fs.existsSync(path.join(staticPath, fileName)))
     fs.mkdirSync(path.join(staticPath, fileName));
 }
-createStaticFile("static/image");
+createStaticFile("static/img");
 createStaticFile("static/avatar");
 createStaticFile("static/temp");
 
