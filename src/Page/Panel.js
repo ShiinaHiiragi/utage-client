@@ -2166,35 +2166,36 @@ export default function Panel(props) {
             "record"
           )
             .then(() => {
-              let optionedIndex = panelInfo.record.findIndex(
+              let optionedIndex = tempRecord.findIndex(
                 (value) => value.accessInfo.id === selectedThen
               );
-              let optioned = panelInfo.record[optionedIndex];
-              panelInfo.record.splice(optionedIndex, 1);
+              let optioned = tempRecord[optionedIndex];
+              tempRecord.splice(optionedIndex, 1);
+              tempRecord = [
+                {
+                  ...optioned,
+                  status: {
+                    ...optioned.status,
+                    textInput: "",
+                    img: []
+                  },
+                  log: [
+                    ...optioned.log,
+                    {
+                      rid: messageRID,
+                      sender: panelInfo.usrInfo.username,
+                      senderID: panelInfo.usrInfo.uid,
+                      senderAvatar: panelInfo.usrInfo.avatar,
+                      text: nowTextInput,
+                      time: timeNow
+                    }
+                  ]
+                },
+                ...tempRecord
+              ]
               setPanelInfo((panelInfo) => ({
                 ...panelInfo,
-                record: [
-                  {
-                    ...optioned,
-                    status: {
-                      ...optioned.status,
-                      textInput: "",
-                      img: []
-                    },
-                    log: [
-                      ...optioned.log,
-                      {
-                        rid: messageRID,
-                        sender: panelInfo.usrInfo.username,
-                        senderID: panelInfo.usrInfo.uid,
-                        senderAvatar: panelInfo.usrInfo.avatar,
-                        text: nowTextInput,
-                        time: timeNow
-                      }
-                    ]
-                  },
-                  ...panelInfo.record
-                ],
+                record: tempRecord,
                 state: {
                   ...panelInfo.state,
                   adjustScroll: -1
