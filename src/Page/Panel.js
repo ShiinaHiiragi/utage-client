@@ -900,7 +900,7 @@ export default function Panel(props) {
         let src = piece.userid.toString(),
           dst = piece.receiverid.toString();
         containDialog = true;
-        tagID = typeLetter === "U" && tagID !== src ? src : dst;
+        tagID = (typeLetter === "U" && src !== selfUID) ? src : dst;
         targetObject = tempRecord.find(
           (item) => item.accessInfo.id === `${tagID}${typeLetter}`
         );
