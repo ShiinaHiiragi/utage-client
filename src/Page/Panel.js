@@ -875,44 +875,59 @@ export default function Panel(props) {
         });
         onsuccess();
       } else {
-        let atomRecord, targetObject;
-        let tagID = piece.userid.toString();
+        let atomRecord, targetObject, tagID;
+        let typeLetter = piece.type;
+        let src = piece.userid.toString(), dst = piece.receiverid.toString();
         containDialog = true;
-        targetObject = tempRecord.find((item) => item.accessInfo.id == `${tagID}U`);
-        console.log(targetObject);
+        tagID = typeLetter === "U" && tagID !== src ? src : dst;
+        targetObject = tempRecord.find((item) => item.accessInfo.id == `${tagID}${typeLetter}`);
         asyncInsertTuple(encryptRawTuple(piece, "record"), "record");
-        queryProfileByKey("profile", tagID).then((dialogProfile) => {
-          atomRecord = {
-            rid: piece.recordid.toString(),
-            senderID: `${tagID}U`,
-            sender: DAES(dialogProfile.username),
-            senderAvatar: DAES(dialogProfile.avatar.extension),
-            text: piece.text,
-            time: piece.time
-          };
-          if (targetObject !== undefined) {
-            targetObject.log.push(atomRecord);
-            onsuccess();
-          } else {
-            tempRecord.push({
-              accessInfo: {
-                id: `${tagID}U`,
-                name: DAES(dialogProfile.username),
-                avatar: DAES(dialogProfile.avatar.extension)
-              },
-              status: {
-                unread: 0,
-                all: true,
-                init: false,
-                textInput: "",
-                scrollTop: -1,
-                img: []
-              },
-              log: [atomRecord]
-            });
-            downloadImage(piece, () => onsuccess(), (err) => onerror(err));
-            onsuccess();
-          }
+        queryProfileByKey(
+          typeLetter === "U" ? "profile" : "group",
+          dst
+        ).then((dialogProfile) => {
+          queryProfileByKey("profile", src).then((sourceProfile) => {
+            atomRecord = {
+              rid: piece.recordid.toString(),
+              senderID: `${src}U`,
+              sender: DAES(sourceProfile.username),
+              senderAvatar: DAES(sourceProfile.avatar.extension),
+              text: piece.text,
+              time: piece.time
+            };
+            if (targetObject !== undefined) {
+              targetObject.log.push(atomRecord);
+              onsuccess();
+            } else {
+              let fillName, fillAvatar;
+              if (typeLetter === "U") {
+                fillName = DAES(src === selfUID ? dialogProfile.username : sourceProfile.username);
+                fillAvatar = DAES(src === selfUID
+                  ? dialogProfile.avatar.extension
+                  : sourceProfile.avatar.extension);
+              } else {
+                fillName = DAES(dialogProfile.groupName);
+                fillAvatar = DAES(dialogProfile.avatar.extension);
+              }
+              tempRecord.push({
+                accessInfo: {
+                  id: typeLetter === "U" ? `${tagID}U` : `${dst}G`,
+                  name: fillName,
+                  avatar: fillAvatar
+                },
+                status: {
+                  unread: 0,
+                  all: true,
+                  init: false,
+                  textInput: "",
+                  scrollTop: -1,
+                  img: []
+                },
+                log: [atomRecord]
+              });
+              downloadImage(piece, onsuccess, (err) => onerror(err));
+            }
+          }).catch((err) => onerror(err));
         }).catch((err) => onerror(err));
       }
     }).then(() => {
