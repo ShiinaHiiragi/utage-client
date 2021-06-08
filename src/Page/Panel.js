@@ -893,7 +893,13 @@ export default function Panel(props) {
           avatar: "",
           varification: piece.text
         });
-        onsuccess();
+        if (piece.type === "N")
+          queryProfileByKey("group", piece.receiverid.toString())
+            .then((groupProfile) => {
+              tempApply[0].dst[1] = DAES(groupProfile.groupName);
+              onsuccess();
+            })
+        else onsuccess();
       } else {
         let atomRecord, targetObject, tagID;
         let typeLetter = piece.type;
@@ -1302,6 +1308,8 @@ export default function Panel(props) {
         if (!err && response.statusCode === 200) {
           toggleSnackWindow("success", "Your application has been sent.");
           handleMoreInfoApplyClose();
+        } else {
+          toggleSnackWindow("error", err ? `${err}` : `${response.body}`);
         }
       }
     );
@@ -1676,7 +1684,7 @@ export default function Panel(props) {
   // about friend or group of menu button
   const handleMenuNewClick = () => {
     handleMenuClose();
-    let tempApply = panelPopup.application;
+    // let tempApply = panelPopup.application;
     syncFillRecord(tempApply, (item, onsuccess, onerror) => {
       queryProfileByKey("profile", item.uid)
         .then((srcProfile) => {
@@ -2816,7 +2824,7 @@ export default function Panel(props) {
                         <ListItemText
                           primary={
                             value.username +
-                            (value.dst[0] && ` want to join ${value.dst[1]}`)
+                            (value.dst[0] && ` wants to join ${value.dst[1]}`)
                           }
                           secondary={value.varification}
                         />
