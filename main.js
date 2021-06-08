@@ -8,7 +8,6 @@ const electron = require("electron");
 const BrowserWindow = electron.BrowserWindow;
 const Menu = electron.Menu;
 const app = electron.app;
-
 const ipcMain = electron.ipcMain;
 
 // Keep a global reference of the window object, if you don't, the window will

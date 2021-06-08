@@ -73,6 +73,7 @@ const request = window.require("request");
 const ipcRenderer = electron.ipcRenderer;
 const dialog = electron.remote.dialog;
 const environ = electron.remote.getGlobal("environ");
+const shell = electron.remote.shell;
 
 ipcRenderer.on("sign-uid", () => {
   ipcRenderer.send("uid", globalSetting.proxy, selfUID);
@@ -339,6 +340,16 @@ let emojiList = new Array(69)
   .map((item, index) =>
     String.fromCodePoint(`0x${(128512 + index).toString(16)}`)
   );
+
+const monitorLink = (links) => {
+  links.forEach(link => {
+    link.addEventListener('click', e => {
+      const url = link.getAttribute('href');
+      e.preventDefault();
+      shell.openExternal(url);
+    });
+  });
+}
 
 function Alert(props) {
   return <MuiAlert elevation={6} variant="filled" {...props} />;
@@ -1126,6 +1137,10 @@ export default function Panel(props) {
       clearAdjustment();
     }
   }, [panelInfo.state.adjustScroll]);
+
+  React.useEffect(() => {
+    monitorLink(document.querySelectorAll("a[href]"));
+  }, [panelInfo.record, panelInfo.state])
 
   // about list item
   const handleSideListItemToggle = () => {
