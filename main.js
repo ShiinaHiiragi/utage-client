@@ -2,11 +2,13 @@
 process.env.UV_THREADPOOL_SIZE = 128;
 // Modules to control application life and create native browser window
 const path = require("path");
+const fs = require("fs");
 const request = require("request");
 const electron = require("electron");
 const BrowserWindow = electron.BrowserWindow;
 const Menu = electron.Menu;
 const app = electron.app;
+
 const ipcMain = electron.ipcMain;
 
 // Keep a global reference of the window object, if you don't, the window will
@@ -24,6 +26,14 @@ const staticPath =
     : environ === "build"
     ? "./build/"
     : "./";
+
+function createStaticFile(fileName) {
+  if (!fs.existsSync(path.join(staticPath, fileName)))
+    fs.mkdirSync(path.join(staticPath, fileName));
+}
+createStaticFile("static/image");
+createStaticFile("static/avatar");
+createStaticFile("static/temp");
 
 function createWindow() {
   // Create the browser window.
