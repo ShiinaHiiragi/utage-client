@@ -856,8 +856,8 @@ export default function Panel(props) {
         timeout: 10000
       },
       (err, response) => {
-        if (!err && response.statusCode == 200) {
-          if (response.body.record.length != 0) {
+        if (!err && response.statusCode === 200) {
+          if (response.body.record.length !== 0) {
             console.log(
               response.body.record.map((item) => JSON.parse(DRSA(item)))
             );
@@ -902,7 +902,7 @@ export default function Panel(props) {
         containDialog = true;
         tagID = typeLetter === "U" && tagID !== src ? src : dst;
         targetObject = tempRecord.find(
-          (item) => item.accessInfo.id == `${tagID}${typeLetter}`
+          (item) => item.accessInfo.id === `${tagID}${typeLetter}`
         );
         asyncInsertTuple(encryptRawTuple(piece, "record"), "record");
         queryProfileByKey(typeLetter === "U" ? "profile" : "group", dst)
@@ -977,9 +977,17 @@ export default function Panel(props) {
             let rightTime = right.log[right.log.length - 1].time;
             return leftTime > rightTime ? -1 : leftTime < rightTime ? 1 : 0;
           });
+
+          let scrollHeight = scrollField.current.scrollHeight,
+            clientHeight = scrollField.current.clientHeight,
+            scrollBefore = scrollHeight - clientHeight - scrollField.current.scrollTop;
           setPanelInfo((panelInfo) => ({
             ...panelInfo,
-            record: tempRecord
+            record: tempRecord,
+            state: {
+              ...panelInfo.state,
+              adjustScroll: scrollBefore
+            }
           }));
         }
         if (containApply) {
@@ -1092,20 +1100,21 @@ export default function Panel(props) {
 
   // adjust the scrollbar after send or receive
   React.useEffect(() => {
+    const noAdjust = null;
     const clearAdjustment = () => {
       setPanelInfo((panelInfo) => ({
         ...panelInfo,
         state: {
           ...panelInfo.state,
-          adjustScroll: 0
+          adjustScroll: noAdjust
         }
       }));
     };
-    if (panelInfo.state.adjustScroll !== 0) {
+    if (panelInfo.state.adjustScroll !== noAdjust) {
       let scrollHeight = scrollField.current.scrollHeight,
         clientHeight = scrollField.current.clientHeight,
         maxScrollTop = scrollHeight - clientHeight;
-      if (panelInfo.state.adjustScroll === 1) {
+      if (panelInfo.state.adjustScroll <= 0) {
         scrollField.current.scrollTop = maxScrollTop > 0 ? maxScrollTop : 0;
       }
       clearAdjustment();
@@ -2188,7 +2197,7 @@ export default function Panel(props) {
                 ],
                 state: {
                   ...panelInfo.state,
-                  adjustScroll: 1
+                  adjustScroll: -1
                 }
               }));
               nowImage.forEach((item) => {
