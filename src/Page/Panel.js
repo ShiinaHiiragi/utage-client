@@ -7,6 +7,7 @@ import CssBaseline from "@material-ui/core/CssBaseline";
 import Drawer from "@material-ui/core/Drawer";
 import AppBar from "@material-ui/core/AppBar";
 import Toolbar from "@material-ui/core/Toolbar";
+import Link from '@material-ui/core/Link';
 import List from "@material-ui/core/List";
 import ListItem from "@material-ui/core/ListItem";
 import ListItemText from "@material-ui/core/ListItemText";
@@ -72,8 +73,8 @@ const path = window.require("path");
 const request = window.require("request");
 const ipcRenderer = electron.ipcRenderer;
 const dialog = electron.remote.dialog;
-const environ = electron.remote.getGlobal("environ");
 const shell = electron.remote.shell;
+const environ = electron.remote.getGlobal("environ");
 
 ipcRenderer.on("sign-uid", () => {
   ipcRenderer.send("uid", globalSetting.proxy, selfUID);
@@ -87,6 +88,7 @@ const staticPath =
     ? "./build/"
     : "./";
 const settingPath = path.join(staticPath, "./static/setting.json");
+const UserLink = ({ children, ...props }) => <Link {...props}> {children} </Link>;
 const markdownOverride = {
   img: {
     props: {
@@ -94,6 +96,9 @@ const markdownOverride = {
         maxWidth: "100%"
       }
     }
+  },
+  a: {
+    component: UserLink
   }
 };
 
