@@ -100,8 +100,10 @@ const markdownOverride = {
 let globalSetting = JSON.parse(fs.readFileSync(settingPath));
 let tempRecord = [], tempApply = [];
 let imageCounter, selfUID;
+let requestTimeout, checkTimeout;
 
-const drawerWidth = 300, serverInitClock = 2500, serverInterval = 1000;
+const serverInitClock = 2500, serverInterval = 1000;
+const drawerWidth = 300;
 const useStyles = makeStyles((theme) => ({
   root: {
     display: "flex"
@@ -420,7 +422,7 @@ export default function Panel(props) {
   // equals to componentDidmount
   React.useEffect(() => {
     imageCounter = 0;
-    setTimeout(requestNewRecord, serverInitClock);
+    requestTimeout = setTimeout(requestNewRecord, serverInitClock);
     globalSetting = JSON.parse(fs.readFileSync(settingPath));
 
     // temp of profile object
@@ -609,6 +611,13 @@ export default function Panel(props) {
         };
       }
     };
+    
+    return () => {
+      if (requestTimeout !== null)
+        clearTimeout(requestTimeout);
+      if (checkTimeout !== null)
+        clearTimeout(checkTimeout);
+    }
   }, []);
 
   // sync version of foreach
@@ -822,6 +831,7 @@ export default function Panel(props) {
   };
 
   const requestNewRecord = () => {
+    requestTimeout = null;
     request({
       url: `${globalSetting.proxy}record/new`,
       method: "POST",
@@ -839,25 +849,20 @@ export default function Panel(props) {
         if (response.body.record.length != 0) {
           console.log(response.body.record.map(item => JSON.parse(DRSA(item))));
           modifyPanel(response.body.record, () =>
-            setTimeout(requestNewRecord, serverInterval))
-        } else setTimeout(requestNewRecord, serverInterval);
+            requestTimeout = setTimeout(requestNewRecord, serverInterval))
+        } else
+          requestTimeout = setTimeout(requestNewRecord, serverInterval);
       } else {
         toggleSnackWindow("error", err ? `${err}` : `ServerError: ${response.body}.`);
-        recheckConnect();
+        setTimeout(recheckConnect, serverInterval);
       }
     });
   };
 
   const modifyPanel = (newRecord, callback) => {
-    let firstIn = true, containDialog = false, containApply = false;
-    let tempApply, tempDialog;
+    let containDialog = false, containApply = false;
     syncFillRecord(newRecord, (piece, onsuccess, onerror) => {
       piece = JSON.parse(DRSA(piece));
-      if (firstIn) {
-        tempApply = panelPopup.application;
-        tempDialog = panelInfo.record;
-        firstIn = false;
-      }
       if (piece.type === "A" || piece.type === "N") {
         containApply = true;
         tempApply.unshift({
@@ -872,9 +877,9 @@ export default function Panel(props) {
       } else {
         let atomRecord, targetObject;
         let tagID = piece.userid.toString();
-        console.log(JSON.stringify(tempDialog));
-        targetObject = tempDialog.find((item) => item.accessInfo.id == `${tagID}U`);
         containDialog = true;
+        targetObject = tempRecord.find((item) => item.accessInfo.id == `${tagID}U`);
+        console.log(targetObject);
         asyncInsertTuple(encryptRawTuple(piece, "record"), "record");
         queryProfileByKey("profile", tagID).then((dialogProfile) => {
           atomRecord = {
@@ -889,7 +894,7 @@ export default function Panel(props) {
             targetObject.log.push(atomRecord);
             onsuccess();
           } else {
-            tempDialog.push({
+            tempRecord.push({
               accessInfo: {
                 id: `${tagID}U`,
                 name: DAES(dialogProfile.username),
@@ -912,7 +917,7 @@ export default function Panel(props) {
       }
     }).then(() => {
       if (containDialog) {
-        tempDialog.forEach((item) => {
+        tempRecord.forEach((item) => {
           item.log.sort((left, right) => {
             return left.time < right.time
               ? -1
@@ -921,14 +926,14 @@ export default function Panel(props) {
               : 0;
           });
         });
-        tempDialog.sort((left, right) => {
+        tempRecord.sort((left, right) => {
           let leftTime = left.log[left.log.length - 1].time;
           let rightTime = right.log[right.log.length - 1].time;
           return leftTime > rightTime ? -1 : leftTime < rightTime ? 1 : 0;
         });
         setPanelInfo((panelInfo) => ({
           ...panelInfo,
-          record: tempDialog
+          record: tempRecord
         }))
       }
       if (containApply) {
@@ -944,14 +949,15 @@ export default function Panel(props) {
   }
 
   const recheckConnect = () => {
+    checkTimeout = null;
     request({
       url: `${globalSetting.proxy}who`,
       timeout: 10000
     }, (err, response) => {
       if (!err && response.statusCode === 200 && response.body === "utage") {
-        requestNewRecord();
+        requestTimeout = setTimeout(requestNewRecord, serverInterval);
       } else {
-        setTimeout(recheckConnect, serverInterval);
+        checkTimeout = setTimeout(recheckConnect, serverInterval);
       }
     });
   }
@@ -1675,15 +1681,15 @@ export default function Panel(props) {
     );
   };
   const menuNewApplicationRemove = (uid, gid) => {
-    panelPopup.application.splice(
-      panelPopup.application.findIndex(
+    tempApply.splice(
+      tempApply.findIndex(
         (item) => item.uid === uid && item.dst[0] === gid
       ),
       1
     );
     setPanelPopup((panelPopup) => ({
       ...panelPopup,
-      application: panelPopup.application
+      application: tempApply
     }));
   };
   const handleMenuNewApplicationRefuse = (rid, uid, gid, username) => {
