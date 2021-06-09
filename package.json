@@ -17,7 +17,7 @@
     "build-copy": "ROBOCOPY ./static ./build/static /e",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "package": "npm run build && electron-packager . UtageClient --electron-version=11.2.0 --icon='public/icon.ico' --platform=win32 --overwrite --ignore=^/\\.gitignore --ignore=^/README.md"
+    "package": "electron-packager . UtageClient --electron-version=11.2.0 --icon='public/icon.ico' --platform=win32 --overwrite --ignore=^/\\.gitignore --ignore=^/README.md"
   },
   "eslintConfig": {
     "extends": [
