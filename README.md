@@ -24,12 +24,15 @@
 
     ```
     npm run build
+    npm run build-copy
     electron . --build
     ```
     
 4. 打包，在打包文件中找到 exe 文件并运行。
 
     ```shell
+    npm run build
+    npm run build-copy
     npm run package
     ```
 
