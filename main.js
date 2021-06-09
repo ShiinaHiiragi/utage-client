@@ -48,7 +48,7 @@ function createWindow() {
   if (global.environ === "release") {
     mainWindow.loadURL(path.join(
       __dirname,
-      path.join(staticPath, "index.html")
+      "build/index.html"
     ));
   } else if (global.environ === "build") {
     mainWindow.loadURL(path.join(
