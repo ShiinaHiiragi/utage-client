@@ -6,6 +6,8 @@ import ButtonGroup from "@material-ui/core/ButtonGroup";
 import CssBaseline from "@material-ui/core/CssBaseline";
 import TextField from "@material-ui/core/TextField";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
+import Menu from '@material-ui/core/Menu';
+import MenuItem from '@material-ui/core/MenuItem';
 import Checkbox from "@material-ui/core/Checkbox";
 import Link from "@material-ui/core/Link";
 import Grid from "@material-ui/core/Grid";
@@ -33,6 +35,8 @@ const request = window.require("request");
 const nodeRSA = window.require("node-rsa");
 const electron = window.require("electron");
 const ipcRenderer = electron.ipcRenderer;
+const app = electron.remote.app;
+const getCurrentWindow = electron.remote.getCurrentWindow;
 const environ = electron.remote.getGlobal("environ");
 const staticPath =
   environ === "release"
@@ -51,6 +55,10 @@ ipcRenderer.on("sign-uid", () => {
 const useStyles = makeStyles((theme) => ({
   noneSelect: {
     userSelect: "none"
+  },
+  global: {
+    width: "100%",
+    height: "100%"
   },
   paper: {
     marginTop: theme.spacing(8),
@@ -448,180 +456,233 @@ export default function SignIn(props) {
     ReactDOM.render(<SignUp />, document.getElementById("root"));
   };
 
-  return (
-    <Container component="main" maxWidth="xs" className={styleClass.noneSelect}>
-      <CssBaseline />
-      <div className={styleClass.paper}>
-        <Avatar className={styleClass.avatar}>
-          <DvrIcon />
-        </Avatar>
-        <Typography component="h1" variant="h5">
-          Sign in to Utage
-        </Typography>
-        <form className={styleClass.form} noValidate>
-          <TextField
-            variant="outlined"
-            margin="normal"
-            fullWidth
-            id="email"
-            label="E-mail Address"
-            name="email"
-            autoComplete="email"
-            autoFocus
-            defaultValue={email}
-            onChange={emailInput}
-          />
-          <TextField
-            variant="outlined"
-            margin="normal"
-            fullWidth
-            name="password"
-            label="Password"
-            type="password"
-            id="password"
-            autoComplete="current-password"
-            defaultValue={password}
-            onChange={passwordInput}
-          />
-          <FormControlLabel
-            control={
-              <Checkbox
-                checked={rememberAccount}
-                color="primary"
-                onChange={rememberAccountChange}
-              />
-            }
-            label="Remember my E-mail Address"
-          />
-          <Grid container>
-            <ButtonGroup
-              fullWidth
-              className={styleClass.buttonGroup}
-              variant="contained"
-              color="primary"
-            >
-              <Button onClick={proxyWindowToggle}>Switch Server</Button>
-              <Button onClick={signInClick}>Sign In</Button>
-            </ButtonGroup>
-            <Dialog
-              className={styleClass.noneSelect}
-              open={proxyWindow}
-              onClose={proxyWindowCancel}
-            >
-              <DialogTitle id="form-dialog-title">Switch Server</DialogTitle>
-              <DialogContent>
-                <DialogContentText>
-                  To connect to our server, please enter the domain or IP of the
-                  server. The defualt value of the IP is http://localhost:8080/.
-                </DialogContentText>
-                <TextField
-                  autoFocus
-                  defaultValue={globalSetting.proxy}
-                  onChange={proxyUpdateInput}
-                  margin="dense"
-                  id="name"
-                  label="Server Domain/IP"
-                  type="url"
-                  fullWidth
-                />
-              </DialogContent>
-              <DialogActions>
-                <Button
-                  onClick={() => proxyWindowSubmit(proxyInput)}
-                  color="secondary"
-                  type="submit"
-                >
-                  Set
-                </Button>
-                <Button onClick={proxyWindowCancel} color="primary">
-                  Back
-                </Button>
-              </DialogActions>
-            </Dialog>
-            <Snackbar
-              open={snackWindow}
-              anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-              autoHideDuration={globalSetting.snackWindowDuration}
-              onClose={snackWindowClose}
-              className={styleClass.snack}
-            >
-              <Alert onClose={snackWindowClose} severity={snackWindowType}>
-                {snackWindowMessage}
-              </Alert>
-            </Snackbar>
-          </Grid>
-          <Grid container>
-            <Grid item xs>
-              {/* <Link href="#" variant="body2">{"Forgot password?"}</Link> */}
-            </Grid>
-            <Grid item>
-              <Link href="#!" onClick={handleSignUp} variant="body2">
-                {"Don't have an account? Sign Up"}
-              </Link>
-            </Grid>
-          </Grid>
-        </form>
-      </div>
-      <Box mt={8}>
-        <Typography variant="body2" color="textSecondary" align="center">
-          {"Copyright © "}
-          <Link color="inherit" href="#!" onClick={copyrightInfoToggle}>
-            Utage
-          </Link>
-          {" " + new Date().getFullYear() + "."}
-        </Typography>
+  // the dev tools in mouse menu
+  const [mouseState, setMouseState] = React.useState({
+    mouseX: null,
+    mouseY: null
+  });
+  const handleMouseMenuClick = (event) => {
+    event.preventDefault();
+    setMouseState({
+      mouseX: event.clientX - 2,
+      mouseY: event.clientY - 4,
+    });
+  };
+  const handleMouseMenuClose = () => {
+    setMouseState({
+      mouseX: null,
+      mouseY: null
+    });
+  };
+  const handleMouseMenuNewWindow = () => {
+    handleMouseMenuClose();
+    ipcRenderer.send("new-window");
+  }
+  const handleMouseMenuReload = () => {
+    handleMouseMenuClose();
+    getCurrentWindow().reload();
+  }
+  const handleMouseMenuDevTools = () => {
+    handleMouseMenuClose();
+    getCurrentWindow().webContents.openDevTools();
+  }
+  const handleMouseMenuForcrExit = () => {
+    handleMouseMenuClose();
+    app.exit();
+  }
 
-        <Dialog
-          open={copyrightInfoWindow}
-          onClose={copyrightInfoClose}
-          className={styleClass.noneSelect}
-        >
-          <DialogTitle id="alert-dialog-title">{`MIT License\nCopyright ${new Date().getFullYear()} Utage`}</DialogTitle>
-          <DialogContent>
-            <DialogContentText id="alert-dialog-description">
-              Permission is hereby granted, free of charge, to any person
-              obtaining a copy of this software and associated documentation
-              files (the "Software"), to deal in the Software without
-              restriction, including without limitation the rights to use, copy,
-              modify, merge, publish, distribute, sublicense, and/or sell copies
-              of the Software, and to permit persons to whom the Software is
-              furnished to do so, subject to the following conditions:
-              <br />
-              <br />
-              The above copyright notice and this permission notice shall be
-              included in all copies or substantial portions of the Software.
-              <br />
-              <br />
-              THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-              EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-              MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-              NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
-              HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
-              WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-              OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-              DEALINGS IN THE SOFTWARE.
-            </DialogContentText>
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={copyrightInfoClose} color="primary">
-              Back
-            </Button>
-          </DialogActions>
-        </Dialog>
-        <Snackbar
-          open={specialSnack}
-          anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-          autoHideDuration={globalSetting.snackWindowDuration}
-          onClose={handleSpecialSnackClose}
-        >
-          <Alert onClose={snackWindowClose} severity="success">
-            {"Your account has been created successfully. You can sign in now."}
-          </Alert>
-        </Snackbar>
-        <Backdrop className={styleClass.backdrop} open={backdrop}>
-          <CircularProgress color="inherit" size={56} />
-        </Backdrop>
-      </Box>
-    </Container>
+  return (
+    <div onContextMenu={handleMouseMenuClick} className={styleClass.global}>
+      <Menu
+        keepMounted
+        open={mouseState.mouseY !== null}
+        onClose={handleMouseMenuClose}
+        anchorReference="anchorPosition"
+        anchorPosition={
+          mouseState.mouseY !== null && mouseState.mouseX !== null
+            ? { top: mouseState.mouseY, left: mouseState.mouseX }
+            : undefined
+        }
+      >
+        <MenuItem onClick={handleMouseMenuNewWindow}>New Window</MenuItem>
+        <MenuItem onClick={handleMouseMenuReload}>Reload Renderer</MenuItem>
+        <MenuItem onClick={handleMouseMenuDevTools}>Open DevTool</MenuItem>
+        <MenuItem onClick={handleMouseMenuForcrExit}>Force to Quit</MenuItem>
+      </Menu>
+      <Container component="main" maxWidth="xs" className={styleClass.noneSelect}>
+        <CssBaseline />
+        <div className={styleClass.paper}>
+          <Avatar className={styleClass.avatar}>
+            <DvrIcon />
+          </Avatar>
+          <Typography component="h1" variant="h5">
+            Sign in to Utage
+          </Typography>
+          <form className={styleClass.form} noValidate>
+            <TextField
+              variant="outlined"
+              margin="normal"
+              fullWidth
+              id="email"
+              label="E-mail Address"
+              name="email"
+              autoComplete="email"
+              autoFocus
+              defaultValue={email}
+              onChange={emailInput}
+            />
+            <TextField
+              variant="outlined"
+              margin="normal"
+              fullWidth
+              name="password"
+              label="Password"
+              type="password"
+              id="password"
+              autoComplete="current-password"
+              defaultValue={password}
+              onChange={passwordInput}
+            />
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={rememberAccount}
+                  color="primary"
+                  onChange={rememberAccountChange}
+                />
+              }
+              label="Remember my E-mail Address"
+            />
+            <Grid container>
+              <ButtonGroup
+                fullWidth
+                className={styleClass.buttonGroup}
+                variant="contained"
+                color="primary"
+              >
+                <Button onClick={proxyWindowToggle}>Switch Server</Button>
+                <Button onClick={signInClick}>Sign In</Button>
+              </ButtonGroup>
+              <Dialog
+                className={styleClass.noneSelect}
+                open={proxyWindow}
+                onClose={proxyWindowCancel}
+              >
+                <DialogTitle id="form-dialog-title">Switch Server</DialogTitle>
+                <DialogContent>
+                  <DialogContentText>
+                    To connect to our server, please enter the domain or IP of the
+                    server. The defualt value of the IP is http://localhost:8080/.
+                  </DialogContentText>
+                  <TextField
+                    autoFocus
+                    defaultValue={globalSetting.proxy}
+                    onChange={proxyUpdateInput}
+                    margin="dense"
+                    id="name"
+                    label="Server Domain/IP"
+                    type="url"
+                    fullWidth
+                  />
+                </DialogContent>
+                <DialogActions>
+                  <Button
+                    onClick={() => proxyWindowSubmit(proxyInput)}
+                    color="secondary"
+                    type="submit"
+                  >
+                    Set
+                  </Button>
+                  <Button onClick={proxyWindowCancel} color="primary">
+                    Back
+                  </Button>
+                </DialogActions>
+              </Dialog>
+              <Snackbar
+                open={snackWindow}
+                anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+                autoHideDuration={globalSetting.snackWindowDuration}
+                onClose={snackWindowClose}
+                className={styleClass.snack}
+              >
+                <Alert onClose={snackWindowClose} severity={snackWindowType}>
+                  {snackWindowMessage}
+                </Alert>
+              </Snackbar>
+            </Grid>
+            <Grid container>
+              <Grid item xs>
+                {/* <Link href="#" variant="body2">{"Forgot password?"}</Link> */}
+              </Grid>
+              <Grid item>
+                <Link href="#!" onClick={handleSignUp} variant="body2">
+                  {"Don't have an account? Sign Up"}
+                </Link>
+              </Grid>
+            </Grid>
+          </form>
+        </div>
+        <Box mt={8}>
+          <Typography variant="body2" color="textSecondary" align="center">
+            {"Copyright © "}
+            <Link color="inherit" href="#!" onClick={copyrightInfoToggle}>
+              Utage
+            </Link>
+            {" " + new Date().getFullYear() + "."}
+          </Typography>
+
+          <Dialog
+            open={copyrightInfoWindow}
+            onClose={copyrightInfoClose}
+            className={styleClass.noneSelect}
+          >
+            <DialogTitle id="alert-dialog-title">{`MIT License\nCopyright ${new Date().getFullYear()} Utage`}</DialogTitle>
+            <DialogContent>
+              <DialogContentText id="alert-dialog-description">
+                Permission is hereby granted, free of charge, to any person
+                obtaining a copy of this software and associated documentation
+                files (the "Software"), to deal in the Software without
+                restriction, including without limitation the rights to use, copy,
+                modify, merge, publish, distribute, sublicense, and/or sell copies
+                of the Software, and to permit persons to whom the Software is
+                furnished to do so, subject to the following conditions:
+                <br />
+                <br />
+                The above copyright notice and this permission notice shall be
+                included in all copies or substantial portions of the Software.
+                <br />
+                <br />
+                THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+                EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+                MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+                NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+                HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+                WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+                OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+                DEALINGS IN THE SOFTWARE.
+              </DialogContentText>
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={copyrightInfoClose} color="primary">
+                Back
+              </Button>
+            </DialogActions>
+          </Dialog>
+          <Snackbar
+            open={specialSnack}
+            anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+            autoHideDuration={globalSetting.snackWindowDuration}
+            onClose={handleSpecialSnackClose}
+          >
+            <Alert onClose={snackWindowClose} severity="success">
+              {"Your account has been created successfully. You can sign in now."}
+            </Alert>
+          </Snackbar>
+          <Backdrop className={styleClass.backdrop} open={backdrop}>
+            <CircularProgress color="inherit" size={56} />
+          </Backdrop>
+        </Box>
+      </Container>
+    </div>
   );
 }

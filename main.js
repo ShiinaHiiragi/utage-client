@@ -12,7 +12,6 @@ const ipcMain = electron.ipcMain;
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
-let mainWindow, anotherWindow;
 Menu.setApplicationMenu(null);
 global.environ = electron.app.isPackaged
   ? "release"
@@ -36,7 +35,7 @@ createStaticFile("static/temp");
 
 function createWindow() {
   // Create the browser window.
-  mainWindow = new BrowserWindow({
+  let mainWindow = new BrowserWindow({
     width: 1600,
     height: 900,
     show: false,
@@ -73,51 +72,11 @@ function createWindow() {
   });
 }
 
-function createAnotherWindow() {
-  // Create the browser window.
-  anotherWindow = new BrowserWindow({
-    width: 1600,
-    height: 900,
-    show: false,
-    webPreferences: {
-      nodeIntegration: true,
-      enableRemoteModule: true,
-    }
-  });
-
-  if (global.environ === "release") {
-    anotherWindow.loadURL(path.join(
-      __dirname,
-      path.join(staticPath, "index.html")
-    ));
-  } else if (global.environ === "build") {
-    anotherWindow.loadURL(path.join(
-      __dirname,
-      path.join(staticPath, "index.html")
-    ));
-    anotherWindow.webContents.openDevTools();
-  } else {
-    anotherWindow.loadURL("http://localhost:3000/");
-    anotherWindow.webContents.openDevTools();
-  }
-
-  // this must be called after the loadURL()
-  anotherWindow.maximize();
-  anotherWindow.show();
-  secondWindow.on("close", (err) =>
-  {
-    err.preventDefault();
-    err.preventDefault();
-    secondWindow.webContents.send("sign-uid");
-  });
-}
-
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.whenReady().then(() => {
   createWindow();
-  createAnotherWindow();
 
   app.on("activate", function () {
     // On macOS it's common to re-create a window in the app when the
@@ -147,4 +106,8 @@ ipcMain.on("uid", (event, proxy, uid) => {
       }
     }, () => {});
   app.exit();
+})
+
+ipcMain.on("new-window", () => {
+  createWindow();
 })
