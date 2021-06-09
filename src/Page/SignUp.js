@@ -19,6 +19,8 @@ import IconButton from "@material-ui/core/IconButton";
 import OutlinedInput from "@material-ui/core/OutlinedInput";
 import InputLabel from "@material-ui/core/InputLabel";
 import FormControl from "@material-ui/core/FormControl";
+import Menu from '@material-ui/core/Menu';
+import MenuItem from '@material-ui/core/MenuItem';
 import Dialog from "@material-ui/core/Dialog";
 import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
@@ -35,6 +37,8 @@ const fs = window.require("fs");
 const path = window.require("path");
 const request = window.require("request");
 const electron = window.require("electron");
+const app = electron.remote.app;
+const getCurrentWindow = electron.remote.getCurrentWindow;
 const ipcRenderer = electron.ipcRenderer;
 const environ = electron.remote.getGlobal("environ");
 
@@ -68,6 +72,10 @@ const useStyles = makeStyles((theme) => ({
   form: {
     width: "100%", // Fix IE 11 issue.
     marginTop: theme.spacing(3)
+  },
+  global: {
+    width: "100%",
+    height: "100%"
   },
   submit: {
     margin: theme.spacing(3, 0, 2)
@@ -252,156 +260,209 @@ export default function SignUp() {
     setCopyrightInfoWindow(false);
   };
 
-  return (
-    <Container component="main" maxWidth="xs" className={classes.noneSelect}>
-      <CssBaseline />
-      <div className={classes.paper}>
-        <Avatar className={classes.avatar}>
-          <OpenInBrowserIcon />
-        </Avatar>
-        <Typography component="h1" variant="h5">
-          Sign up to Utage
-        </Typography>
-        <form className={classes.form} noValidate>
-          <Grid container spacing={2}>
-            <Grid item xs={12}>
-              <TextField
-                variant="outlined"
-                fullWidth
-                onChange={handleEmailInput}
-                label="Email Address"
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <FormControl variant="outlined" fullWidth>
-                <InputLabel>Username</InputLabel>
-                <OutlinedInput
-                  id="username"
-                  onChange={handleUsernameInput}
-                  fullWidth
-                  labelWidth={70}
-                />
-                <FormHelperText id="outlined-weight-helper-text">
-                  We only support ASCII characters in usernames no more than 16
-                  characters.
-                </FormHelperText>
-              </FormControl>
-            </Grid>
-            <Grid item xs={12}>
-              <FormControl variant="outlined" fullWidth>
-                <InputLabel htmlFor="outlined-adornment-password">
-                  Password
-                </InputLabel>
-                <OutlinedInput
-                  id="outlined-adornment-password"
-                  type={showPassword ? "text" : "password"}
-                  value={formContent.password}
-                  onChange={handlePasswordInput}
-                  fullWidth
-                  endAdornment={
-                    <InputAdornment position="end">
-                      <IconButton
-                        onClick={handleClickShowPassword}
-                        onMouseDown={handleMouseDownPassword}
-                        edge="end"
-                      >
-                        {showPassword ? <Visibility /> : <VisibilityOff />}
-                      </IconButton>
-                    </InputAdornment>
-                  }
-                  labelWidth={70}
-                />
-                <FormHelperText id="outlined-weight-helper-text">
-                  The password should contain at least eight characters.
-                </FormHelperText>
-              </FormControl>
-            </Grid>
-          </Grid>
-          <Button
-            fullWidth
-            variant="contained"
-            color="primary"
-            className={classes.submit}
-            onClick={handleButtonClick}
-          >
-            Sign Up
-          </Button>
-          <Grid container justify="flex-end">
-            <Grid item>
-              <Link
-                href="#!"
-                onClick={() => {
-                  ReactDOM.render(<SignIn />, document.getElementById("root"));
-                }}
-                variant="body2"
-              >
-                Already have an account? Sign in
-              </Link>
-            </Grid>
-          </Grid>
-        </form>
-      </div>
-      <Box mt={8}>
-        <Typography variant="body2" color="textSecondary" align="center">
-          {"Copyright © "}
-          <Link color="inherit" href="#!" onClick={copyrightInfoToggle}>
-            Utage
-          </Link>
-          {" " + new Date().getFullYear() + "."}
-        </Typography>
+  // the dev tools in mouse menu
+  const [mouseState, setMouseState] = React.useState({
+    mouseX: null,
+    mouseY: null
+  });
+  const handleMouseMenuClick = (event) => {
+    event.preventDefault();
+    setMouseState({
+      mouseX: event.clientX - 2,
+      mouseY: event.clientY - 4,
+    });
+  };
+  const handleMouseMenuClose = () => {
+    setMouseState({
+      mouseX: null,
+      mouseY: null
+    });
+  };
+  const handleMouseMenuNewWindow = () => {
+    handleMouseMenuClose();
+    ipcRenderer.send("new-window");
+  }
+  const handleMouseMenuReload = () => {
+    handleMouseMenuClose();
+    getCurrentWindow().reload();
+  }
+  const handleMouseMenuDevTools = () => {
+    handleMouseMenuClose();
+    getCurrentWindow().webContents.openDevTools();
+  }
+  const handleMouseMenuForcrExit = () => {
+    handleMouseMenuClose();
+    app.exit();
+  }
 
-        <Dialog
-          open={copyrightInfoWindow}
-          onClose={copyrightInfoClose}
-          className={classes.noneSelect}
-        >
-          <DialogTitle id="alert-dialog-title">{`MIT License\nCopyright ${new Date().getFullYear()} Utage`}</DialogTitle>
-          <DialogContent>
-            <DialogContentText id="alert-dialog-description">
-              Permission is hereby granted, free of charge, to any person
-              obtaining a copy of this software and associated documentation
-              files (the "Software"), to deal in the Software without
-              restriction, including without limitation the rights to use, copy,
-              modify, merge, publish, distribute, sublicense, and/or sell copies
-              of the Software, and to permit persons to whom the Software is
-              furnished to do so, subject to the following conditions:
-              <br />
-              <br />
-              The above copyright notice and this permission notice shall be
-              included in all copies or substantial portions of the Software.
-              <br />
-              <br />
-              THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-              EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-              MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-              NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
-              HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
-              WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-              OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-              DEALINGS IN THE SOFTWARE.
-            </DialogContentText>
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={copyrightInfoClose} color="primary">
-              Back
-            </Button>
-          </DialogActions>
-        </Dialog>
-      </Box>
-      <Snackbar
-        open={snackWindow}
-        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-        autoHideDuration={globalSetting.snackWindowDuration}
-        onClose={snackWindowClose}
-        className={classes.snack}
+  return (
+    <div onContextMenu={handleMouseMenuClick} className={classes.global}>
+      <Menu
+        keepMounted
+        open={mouseState.mouseY !== null}
+        onClose={handleMouseMenuClose}
+        anchorReference="anchorPosition"
+        anchorPosition={
+          mouseState.mouseY !== null && mouseState.mouseX !== null
+            ? { top: mouseState.mouseY, left: mouseState.mouseX }
+            : undefined
+        }
       >
-        <Alert onClose={snackWindowClose} severity={snackWindowType}>
-          {snackWindowMessage}
-        </Alert>
-      </Snackbar>
-      <Backdrop className={classes.backdrop} open={backdrop}>
-        <CircularProgress color="inherit" size={56} />
-      </Backdrop>
-    </Container>
+        <MenuItem onClick={handleMouseMenuNewWindow}>New Window</MenuItem>
+        <MenuItem onClick={handleMouseMenuReload}>Reload Renderer</MenuItem>
+        <MenuItem onClick={handleMouseMenuDevTools}>Open DevTool</MenuItem>
+        <MenuItem onClick={handleMouseMenuForcrExit}>Force to Quit</MenuItem>
+      </Menu>
+      <Container component="main" maxWidth="xs" className={classes.noneSelect}>
+        <CssBaseline />
+        <div className={classes.paper}>
+          <Avatar className={classes.avatar}>
+            <OpenInBrowserIcon />
+          </Avatar>
+          <Typography component="h1" variant="h5">
+            Sign up to Utage
+          </Typography>
+          <form className={classes.form} noValidate>
+            <Grid container spacing={2}>
+              <Grid item xs={12}>
+                <TextField
+                  variant="outlined"
+                  fullWidth
+                  onChange={handleEmailInput}
+                  label="Email Address"
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <FormControl variant="outlined" fullWidth>
+                  <InputLabel>Username</InputLabel>
+                  <OutlinedInput
+                    id="username"
+                    onChange={handleUsernameInput}
+                    fullWidth
+                    labelWidth={70}
+                  />
+                  <FormHelperText id="outlined-weight-helper-text">
+                    We only support ASCII characters in usernames no more than 16
+                    characters.
+                  </FormHelperText>
+                </FormControl>
+              </Grid>
+              <Grid item xs={12}>
+                <FormControl variant="outlined" fullWidth>
+                  <InputLabel htmlFor="outlined-adornment-password">
+                    Password
+                  </InputLabel>
+                  <OutlinedInput
+                    id="outlined-adornment-password"
+                    type={showPassword ? "text" : "password"}
+                    value={formContent.password}
+                    onChange={handlePasswordInput}
+                    fullWidth
+                    endAdornment={
+                      <InputAdornment position="end">
+                        <IconButton
+                          onClick={handleClickShowPassword}
+                          onMouseDown={handleMouseDownPassword}
+                          edge="end"
+                        >
+                          {showPassword ? <Visibility /> : <VisibilityOff />}
+                        </IconButton>
+                      </InputAdornment>
+                    }
+                    labelWidth={70}
+                  />
+                  <FormHelperText id="outlined-weight-helper-text">
+                    The password should contain at least eight characters.
+                  </FormHelperText>
+                </FormControl>
+              </Grid>
+            </Grid>
+            <Button
+              fullWidth
+              variant="contained"
+              color="primary"
+              className={classes.submit}
+              onClick={handleButtonClick}
+            >
+              Sign Up
+            </Button>
+            <Grid container justify="flex-end">
+              <Grid item>
+                <Link
+                  href="#!"
+                  onClick={() => {
+                    ReactDOM.render(<SignIn />, document.getElementById("root"));
+                  }}
+                  variant="body2"
+                >
+                  Already have an account? Sign in
+                </Link>
+              </Grid>
+            </Grid>
+          </form>
+        </div>
+        <Box mt={8}>
+          <Typography variant="body2" color="textSecondary" align="center">
+            {"Copyright © "}
+            <Link color="inherit" href="#!" onClick={copyrightInfoToggle}>
+              Utage
+            </Link>
+            {" " + new Date().getFullYear() + "."}
+          </Typography>
+
+          <Dialog
+            open={copyrightInfoWindow}
+            onClose={copyrightInfoClose}
+            className={classes.noneSelect}
+          >
+            <DialogTitle id="alert-dialog-title">{`MIT License\nCopyright ${new Date().getFullYear()} Utage`}</DialogTitle>
+            <DialogContent>
+              <DialogContentText id="alert-dialog-description">
+                Permission is hereby granted, free of charge, to any person
+                obtaining a copy of this software and associated documentation
+                files (the "Software"), to deal in the Software without
+                restriction, including without limitation the rights to use, copy,
+                modify, merge, publish, distribute, sublicense, and/or sell copies
+                of the Software, and to permit persons to whom the Software is
+                furnished to do so, subject to the following conditions:
+                <br />
+                <br />
+                The above copyright notice and this permission notice shall be
+                included in all copies or substantial portions of the Software.
+                <br />
+                <br />
+                THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+                EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+                MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+                NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+                HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+                WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+                OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+                DEALINGS IN THE SOFTWARE.
+              </DialogContentText>
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={copyrightInfoClose} color="primary">
+                Back
+              </Button>
+            </DialogActions>
+          </Dialog>
+        </Box>
+        <Snackbar
+          open={snackWindow}
+          anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+          autoHideDuration={globalSetting.snackWindowDuration}
+          onClose={snackWindowClose}
+          className={classes.snack}
+        >
+          <Alert onClose={snackWindowClose} severity={snackWindowType}>
+            {snackWindowMessage}
+          </Alert>
+        </Snackbar>
+        <Backdrop className={classes.backdrop} open={backdrop}>
+          <CircularProgress color="inherit" size={56} />
+        </Backdrop>
+      </Container>
+    </div>
   );
 }

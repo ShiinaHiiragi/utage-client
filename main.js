@@ -55,10 +55,8 @@ function createWindow() {
       __dirname,
       path.join(staticPath, "index.html")
     ));
-    mainWindow.webContents.openDevTools();
   } else {
     mainWindow.loadURL("http://localhost:3000/");
-    mainWindow.webContents.openDevTools();
   }
 
   // this must be called after the loadURL()

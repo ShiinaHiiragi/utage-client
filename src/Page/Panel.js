@@ -74,6 +74,8 @@ const request = window.require("request");
 const ipcRenderer = electron.ipcRenderer;
 const dialog = electron.remote.dialog;
 const shell = electron.remote.shell;
+const app = electron.remote.app;
+const getCurrentWindow = electron.remote.getCurrentWindow;
 const environ = electron.remote.getGlobal("environ");
 
 ipcRenderer.on("sign-uid", () => {
@@ -98,7 +100,10 @@ const markdownOverride = {
     }
   },
   a: {
-    component: UserLink
+    component: UserLink,
+    props: {
+      color: "secondary"
+    }
   }
 };
 
@@ -114,7 +119,9 @@ const serverInitClock = 2500,
 const drawerWidth = 300;
 const useStyles = makeStyles((theme) => ({
   root: {
-    display: "flex"
+    display: "flex",
+    width: "100%",
+    height: "100%"
   },
   noneSelect: {
     userSelect: "none"
@@ -2285,8 +2292,59 @@ export default function Panel(props) {
     }));
   };
 
+  // the dev tools in mouse menu
+  const [mouseState, setMouseState] = React.useState({
+    mouseX: null,
+    mouseY: null
+  });
+  const handleMouseMenuClick = (event) => {
+    event.preventDefault();
+    setMouseState({
+      mouseX: event.clientX - 2,
+      mouseY: event.clientY - 4,
+    });
+  };
+  const handleMouseMenuClose = () => {
+    setMouseState({
+      mouseX: null,
+      mouseY: null
+    });
+  };
+  const handleMouseMenuNewWindow = () => {
+    handleMouseMenuClose();
+    ipcRenderer.send("new-window");
+  }
+  const handleMouseMenuReload = () => {
+    handleMouseMenuClose();
+    getCurrentWindow().reload();
+  }
+  const handleMouseMenuDevTools = () => {
+    handleMouseMenuClose();
+    getCurrentWindow().webContents.openDevTools();
+  }
+  const handleMouseMenuForcrExit = () => {
+    handleMouseMenuClose();
+    app.exit();
+  }
+
   return (
-    <div className={classes.root}>
+    <div className={classes.root} onContextMenu={handleMouseMenuClick}>
+      <Menu
+        keepMounted
+        open={mouseState.mouseY !== null}
+        onClose={handleMouseMenuClose}
+        anchorReference="anchorPosition"
+        anchorPosition={
+          mouseState.mouseY !== null && mouseState.mouseX !== null
+            ? { top: mouseState.mouseY, left: mouseState.mouseX }
+            : undefined
+        }
+      >
+        <MenuItem onClick={handleMouseMenuNewWindow}>New Window</MenuItem>
+        <MenuItem onClick={handleMouseMenuReload}>Reload Renderer</MenuItem>
+        <MenuItem onClick={handleMouseMenuDevTools}>Open DevTool</MenuItem>
+        <MenuItem onClick={handleMouseMenuForcrExit}>Force to Quit</MenuItem>
+      </Menu>
       <CssBaseline />
       <AppBar
         position="fixed"
