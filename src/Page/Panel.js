@@ -1691,6 +1691,8 @@ export default function Panel(props) {
     toggleBackdrop();
     tempRecord = [];
     tempApply = [];
+    if (requestTimeout !== null) clearTimeout(requestTimeout);
+    if (checkTimeout !== null) clearTimeout(checkTimeout);
     request(
       {
         url: `${globalSetting.proxy}sign/out?userid=${selfUID}`,
