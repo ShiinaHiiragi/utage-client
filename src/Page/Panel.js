@@ -855,11 +855,7 @@ export default function Panel(props) {
     }));
   };
   const forceUpdateInfoPanel = (targetID, targetExtension, targetName) => {
-    updateInfoPanel(targetID, "pic", targetName);
-    setTimeout(
-      () => updateInfoPanel(targetID, targetExtension, targetName),
-      imageLag
-    );
+    updateInfoPanel(targetID, `${targetExtension}?t=${CryptoJS.SHA1(new Date().toISOString()).toString()}`, targetName);
   };
 
   const requestNewRecord = () => {
